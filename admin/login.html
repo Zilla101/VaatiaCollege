@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaatia Admin | Secure Portal</title>
+    <link rel="stylesheet" href="styles/admin.css">
+    <!-- Feather Icons for professional SVGs -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../Media Content/Favicon.png">
+</head>
+
+<body>
+
+    <div class="liquid-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="premium-login-container">
+        <div class="premium-card">
+            <div class="card-shine"></div>
+
+            <div class="login-header" style="text-align: center; margin-bottom: 20px;">
+                <img src="../Media Content/vcm-logo.png" alt="Vaatia Logo"
+                    style="height: 60px; margin-bottom: 15px; filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));">
+                <h1 class="text-gradient"
+                    style="font-size: 2.2rem; margin-bottom: 5px; font-weight: 900; letter-spacing: -0.05em;">Admin
+                    Portal</h1>
+                <p
+                    style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.75rem; font-weight: 800; opacity: 0.8;">
+                    COMMAND CENTRE</p>
+            </div>
+
+            <div id="auth-error"
+                style="display: none; margin-bottom: 25px; padding: 15px 20px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #f87171; font-size: 0.9rem; text-align: center; animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;">
+                <i data-feather="alert-octagon"
+                    style="width: 18px; height: 18px; vertical-align: middle; margin-right: 8px;"></i>
+                Invalid Access Credentials
+            </div>
+
+            <form id="login-form">
+                <!-- Username Input -->
+                <div class="premium-input-group">
+                    <div class="premium-input-wrapper">
+                        <div class="premium-input-inner">
+                            <i data-feather="terminal" class="premium-icon"></i>
+                            <input type="text" id="user-id" class="premium-input-field" placeholder=" " required
+                                autofocus>
+                            <label for="user-id" class="premium-label">Access Identity</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Input -->
+                <div class="premium-input-group" style="margin-bottom: 25px;">
+                    <div class="premium-input-wrapper">
+                        <div class="premium-input-inner">
+                            <i data-feather="shield" class="premium-icon"></i>
+                            <input type="password" id="pass-key" class="premium-input-field" placeholder=" " required>
+                            <label for="pass-key" class="premium-label">Encryption Key</label>
+                            <button type="button" id="toggle-password" class="peek-btn">
+                                <i data-feather="eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-billion">
+                    LOGIN
+                </button>
+            </form>
+
+            <div class="login-footer" style="margin-top: 25px; text-align: center;">
+                <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; opacity: 0.5;">
+                    <div style="width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--accent-blue);">
+                    </div>
+                    <div style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent-purple);"></div>
+                    <div style="width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--accent-blue);">
+                    </div>
+                </div>
+                <p
+                    style="color: var(--text-secondary); font-size: 0.65rem; opacity: 0.4; letter-spacing: 0.2em; font-weight: 700;">
+                    SECURE PROTOCOL VERSION 2.0.4</p>
+                <div class="footer-bottom">
+                    &copy; 2026 Darellmax Adima . All rights reserved.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Use defer or load event for Feather
+        window.addEventListener('load', () => {
+            feather.replace();
+        });
+    </script>
+    <script src="scripts/admin.js"></script>
+</body>
+
+</html>

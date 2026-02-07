@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaatia Admin | Elite Dashboard</title>
+    <link rel="stylesheet" href="styles/admin.css">
+    <!-- Feather Icons for professional SVGs -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../Media Content/Favicon.png">
+</head>
+
+<body class="admin-body">
+
+    <div class="liquid-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <button class="mobile-nav-toggle" id="mobile-toggle">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="dashboard-sidebar">
+            <div class="sidebar-logo">
+                <img src="../Media Content/vcm-logo.png" alt="Logo">
+                <span>Admin</span>
+            </div>
+
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-tab="overview">
+                        <i data-feather="grid"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="media">
+                        <i data-feather="image"></i>
+                        <span>Media Manager</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="pages">
+                        <i data-feather="file-text"></i>
+                        <span>Page Manager</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: auto;">
+                    <a href="javascript:void(0)" class="nav-link" onclick="openLogoutModal()">
+                        <i data-feather="log-out"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="content-area">
+
+            <!-- Tab: Overview -->
+            <section id="overview" class="tab-content active">
+                <header class="section-header">
+                    <div class="hero-header-content">
+                        <h1 class="text-gradient">Command Strategy</h1>
+                        <p
+                            style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.8rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-top: 10px;">
+                            Vaatia College Elite Access</p>
+                    </div>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="glass-card">
+                        <div
+                            style="color: var(--text-secondary); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
+                            Blueprint Assets</div>
+                        <div class="stat-val" id="stat-pages">--</div>
+                    </div>
+                    <div class="glass-card">
+                        <div
+                            style="color: var(--text-secondary); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
+                            Central Media Bank</div>
+                        <div class="stat-val" id="stat-media">--</div>
+                    </div>
+                    <div class="glass-card">
+                        <div
+                            style="color: var(--text-secondary); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
+                            Protocol Status</div>
+                        <div class="stat-val protocol-status" style="color: var(--accent-blue); margin-top: 25px;">
+                            SECURE ACTIVE</div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-top: 20px;">
+                    <h2 style="margin-bottom: 25px; font-weight: 800;" class="text-gradient directives-title">Quick
+                        Directives</h2>
+                    <div class="directives-wrapper">
+                        <button class="btn-premium" onclick="switchTab('pages')">Modify Blueprint</button>
+                        <button class="btn-edit" onclick="switchTab('media')">Sync New Media</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Media Manager -->
+            <section id="media" class="tab-content">
+                <header class="section-header center-aligned">
+                    <div>
+                        <h1 class="text-gradient">Media Manager</h1>
+                        <p
+                            style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.8rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-top: 10px;">
+                            Global College Assets</p>
+                    </div>
+                    <button class="btn-premium btn-compact">+ UPLOAD ASSET</button>
+                </header>
+                <div class="image-grid" id="main-media-grid">
+                    <!-- Dynamic Alignment -->
+                </div>
+            </section>
+
+            <!-- Tab: Page Manager -->
+            <section id="pages" class="tab-content">
+                <header class="section-header center-aligned">
+                    <div>
+                        <h1 class="text-gradient">Page Manager</h1>
+                        <p
+                            style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.8rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-top: 10px;">
+                            Structural Management</p>
+                    </div>
+                </header>
+                <div class="page-list" id="main-page-list">
+                    <!-- Dynamic Alignment: Buttons will link to actual project files -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Elite Edit Modal -->
+    <div id="edit-modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); z-index: 3000; align-items: center; justify-content: center;">
+        <div class="glass-card">
+            <h2 id="modal-title" class="text-gradient" style="font-size: 2.5rem; font-weight: 900;">Elite Editor</h2>
+            <div id="modal-body" style="margin-top: 35px;">
+                <!-- Internal Editor UI -->
+            </div>
+            <div style="margin-top: 45px; display: flex; justify-content: flex-end; gap: 20px;">
+                <button class="btn-edit" onclick="closeModal()">CANCEL PROMPT</button>
+                <button class="btn-premium" id="save-btn">EXECUTE CHANGES</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lucid Liquid Glass Logout Modal -->
+    <div id="logout-modal" class="modal-overlay" style="display: none;">
+        <div class="glass-card logout-card">
+            <div class="card-shine"></div>
+            <div style="text-align: center;">
+                <i data-feather="log-out"
+                    style="width: 48px; height: 48px; color: var(--accent-blue); margin-bottom: 20px;"></i>
+                <h2 class="text-gradient" style="font-size: 2rem; font-weight: 800; margin-bottom: 10px;">Terminate
+                    Session?</h2>
+                <p style="color: var(--text-secondary); opacity: 0.7; margin-bottom: 35px; letter-spacing: 0.05em;">Are
+                    you sure you want to exit the Command Centre?</p>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <button class="btn-premium" onclick="confirmLogout()">EXECUTE LOGOUT</button>
+                    <button class="btn-edit" onclick="closeLogoutModal()">REMAIN IN COMMAND</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/admin.js"></script>
+    <script>
+        feather.replace();
+    </script>
+</body>
+
+</html>

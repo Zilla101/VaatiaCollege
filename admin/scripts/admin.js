@@ -64,8 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.style.opacity = '0.7';
                 errorMsg.style.display = 'none';
 
-                // Trigger Security Alert via Netlify Function
-                fetch('/.netlify/functions/admin-login', {
+                // Trigger Security Alert via Vercel API (Migrated from Netlify)
+                fetch('/api/admin-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

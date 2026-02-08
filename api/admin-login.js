@@ -1,8 +1,8 @@
 const https = require('https');
 
-exports.handler = async (event) => {
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
+export default async function handler(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
     try {
@@ -12,12 +12,11 @@ exports.handler = async (event) => {
 
         if (!resendKey && !sendGridKey) {
             console.error('No Email API Key set');
-            return { statusCode: 500, body: 'Email service unconfigured. Please add RESEND_API_KEY or SENDGRID_API_KEY to Netlify.' };
+            return res.status(500).json({ message: 'Email service unconfigured. Please add RESEND_API_KEY or SENDGRID_API_KEY to Vercel Environment Variables.' });
         }
 
-        const data = JSON.parse(event.body);
-        const { user, device, resolution, time, url } = data;
-        const ip = event.headers['x-nf-client-connection-ip'] || 'Unknown';
+        const { user, device, resolution, time, url } = req.body;
+        const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'Unknown';
 
         const emailSubject = '🚨 ADMIN PORTAL ACCESS ALERT: Vaatia College';
         const emailBody = `
@@ -58,21 +57,20 @@ If this was not an authorized access, please investigate immediately.
             };
 
             const resendRes = await new Promise((resolve) => {
-                const req = https.request(resendOptions, (res) => {
+                const request = https.request(resendOptions, (response) => {
                     let chunks = '';
-                    res.on('data', (c) => chunks += c);
-                    res.on('end', () => resolve({ status: res.statusCode, body: chunks }));
+                    response.on('data', (c) => chunks += c);
+                    response.on('end', () => resolve({ status: response.statusCode, body: chunks }));
                 });
-                req.on('error', (e) => resolve({ status: 500, body: e.message }));
-                req.write(resendData);
-                req.end();
+                request.on('error', (e) => resolve({ status: 500, body: e.message }));
+                request.write(resendData);
+                request.end();
             });
 
             if (resendRes.status >= 200 && resendRes.status < 300) {
-                return { statusCode: 200, body: JSON.stringify({ success: true, provider: 'Resend' }) };
+                return res.status(200).json({ success: true, provider: 'Resend' });
             }
             console.error('Resend Failed:', resendRes.body);
-            // Fallthrough to SendGrid if Resend fails but SendGrid is set
         }
 
         // 2. TRY SENDGRID
@@ -98,48 +96,27 @@ If this was not an authorized access, please investigate immediately.
                 }
             };
 
-            return new Promise((resolve) => {
-                const req = https.request(sgOptions, (res) => {
+            const sgRes = await new Promise((resolve) => {
+                const request = https.request(sgOptions, (response) => {
                     let chunks = '';
-                    res.on('data', (chunk) => chunks += chunk);
-                    res.on('end', () => {
-                        if (res.statusCode >= 200 && res.statusCode < 300) {
-                            resolve({
-                                statusCode: 200,
-                                body: JSON.stringify({ success: true, message: 'Security alert dispatched via SendGrid.' })
-                            });
-                        } else {
-                            // CRITICAL: Log exact SendGrid error for the user to debug verification issues
-                            console.error(`--- SENDGRID ERROR [${res.statusCode}] ---`);
-                            console.error('Response Body:', chunks);
-                            console.error('HINT: Check if noreply@vaatiacollege.com.ng is a Verified Sender in your SendGrid dashboard.');
-
-                            resolve({
-                                statusCode: res.statusCode,
-                                body: JSON.stringify({
-                                    success: false,
-                                    error: 'Email delivery failed via SendGrid',
-                                    details: chunks
-                                })
-                            });
-                        }
-                    });
+                    response.on('data', (chunk) => chunks += chunk);
+                    response.on('end', () => resolve({ status: response.statusCode, body: chunks }));
                 });
-
-                req.on('error', (e) => {
-                    console.error('SendGrid Request error:', e);
-                    resolve({ statusCode: 500, body: 'Internal Error during SendGrid email dispatch' });
-                });
-
-                req.write(sgData);
-                req.end();
+                request.on('error', (e) => resolve({ status: 500, body: e.message }));
+                request.write(sgData);
+                request.end();
             });
+
+            if (sgRes.status >= 200 && sgRes.status < 300) {
+                return res.status(200).json({ success: true, provider: 'SendGrid' });
+            }
+            console.error('SendGrid Failed:', sgRes.body);
         }
 
-        return { statusCode: 500, body: 'All email providers failed or unconfigured.' };
+        return res.status(500).json({ message: 'All email providers failed or unconfigured.' });
 
     } catch (err) {
         console.error('Function error:', err);
-        return { statusCode: 500, body: 'Internal Server Error' };
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
-};
+}

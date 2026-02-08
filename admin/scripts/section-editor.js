@@ -263,12 +263,18 @@ window.saveSectionChanges = async (sectionName) => {
                         clearInterval(timer);
                         activeBtn.innerHTML = '<i data-feather="check"></i> SITE IS LIVE';
                         activeBtn.style.background = 'linear-gradient(135deg, #00f2fe, #4facfe)';
+
+                        // Nudge user to hard refresh to see changes
                         setTimeout(() => {
+                            if (confirm("Deployment complete! Changes are now live on the server.\n\nWould you like to reload the page to verify?")) {
+                                window.open('../' + pageName, '_blank');
+                            }
+
                             activeBtn.innerHTML = originalContent;
                             activeBtn.style.background = '';
                             activeBtn.disabled = false;
                             if (typeof feather !== 'undefined') feather.replace();
-                        }, 3000);
+                        }, 2000);
                     }
                 }, 1000);
             } else {

@@ -24,7 +24,11 @@ exports.handler = async (event) => {
                 ],
                 subject: '🚨 ADMIN PORTAL ACCESS ALERT: Vaatia College'
             }],
-            from: { email: 'noreply@vaatiacollege.com.ng', name: 'Vaatia Security Engine' },
+            // Use SENDGRID_SENDER from environment, or fallback to a default that MUST be verified in SendGrid
+            from: {
+                email: process.env.SENDGRID_SENDER || 'adima.darellmax@gmail.com',
+                name: 'Vaatia Security Engine'
+            },
             content: [{
                 type: 'text/plain',
                 value: `

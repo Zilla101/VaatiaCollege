@@ -209,7 +209,12 @@ window.saveSectionChanges = async (sectionName) => {
 
             if (!getRes.ok) throw new Error('File not found in repository');
             const fileData = await getRes.json();
-            const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
+
+            // Robust UTF-8 Decoding
+            const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
             const sha = fileData.sha;
 
             // 2. Parse and Update locally (using same logic as server.js)
@@ -229,25 +234,43 @@ window.saveSectionChanges = async (sectionName) => {
 
             // 3. Commit back to GitHub
             activeBtn.innerHTML = '<span class="loader-mini"></span> COMMITTING...';
+
+            // Robust UTF-8 Encoding
+            const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+                return String.fromCharCode('0x' + p1);
+            }));
+
             const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pageName}`, {
                 method: 'PUT',
                 headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: `admin: update section [${sectionName}] on [${pageName}]`,
-                    content: btoa(unescape(encodeURIComponent(updatedHTML))),
+                    content: encodedContent,
                     sha: sha
                 })
             });
 
             if (putRes.ok) {
-                activeBtn.innerHTML = '<i data-feather="check"></i> CLOUD SAVED';
-                activeBtn.style.background = 'linear-gradient(135deg, #00f2fe, #4facfe)';
-                setTimeout(() => {
-                    activeBtn.innerHTML = originalContent;
-                    activeBtn.style.background = '';
-                    activeBtn.disabled = false;
-                    if (typeof feather !== 'undefined') feather.replace();
-                }, 3000);
+                activeBtn.innerHTML = '<i data-feather="loader"></i> DEPLOYING (30s)...';
+                activeBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+
+                let countdown = 30;
+                const timer = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        activeBtn.innerHTML = `<i data-feather="loader"></i> LIVE IN ${countdown}s`;
+                    } else {
+                        clearInterval(timer);
+                        activeBtn.innerHTML = '<i data-feather="check"></i> SITE IS LIVE';
+                        activeBtn.style.background = 'linear-gradient(135deg, #00f2fe, #4facfe)';
+                        setTimeout(() => {
+                            activeBtn.innerHTML = originalContent;
+                            activeBtn.style.background = '';
+                            activeBtn.disabled = false;
+                            if (typeof feather !== 'undefined') feather.replace();
+                        }, 3000);
+                    }
+                }, 1000);
             } else {
                 throw new Error('Cloud commit rejected');
             }

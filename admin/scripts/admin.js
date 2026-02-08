@@ -596,3 +596,32 @@ function confirmLogout() {
         }, 800);
     }
 }
+
+// --- Global Connection Settings ---
+window.setupGlobalCommand = () => {
+    const mode = confirm("Activate Direct Cloud Sync?\n\nOK = Worldwide Access (GitHub Login)\nCancel = Local Command Mode Only");
+
+    if (mode) {
+        const token = prompt("Enter your GitHub Personal Access Token:");
+        if (token) {
+            localStorage.setItem('VAATIA_GH_TOKEN', token);
+            localStorage.removeItem('VAATIA_PUBLIC_API');
+            alert("WORLDWIDE SYNC: ACTIVE. Reloading...");
+            location.reload();
+        }
+    } else {
+        const url = prompt("Enter Public API URL (e.g. Render/Railway) or leave blank to reset to Local:");
+        if (url !== null) {
+            if (url.trim() === "") {
+                localStorage.removeItem('VAATIA_PUBLIC_API');
+                localStorage.removeItem('VAATIA_GH_TOKEN');
+                alert("Settings Cleared. Using Local CMS.");
+            } else {
+                localStorage.setItem('VAATIA_PUBLIC_API', url);
+                localStorage.removeItem('VAATIA_GH_TOKEN');
+                alert("Remote Connection Updated.");
+            }
+            location.reload();
+        }
+    }
+};

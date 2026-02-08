@@ -186,10 +186,6 @@ window.saveSectionChanges = async (sectionName) => {
     if (ghToken) API_BASE = 'GITHUB_SYNC';
     else if (globalApi) API_BASE = globalApi;
 
-    // Check for Global Override
-    const globalApi = localStorage.getItem('VAATIA_PUBLIC_API');
-    if (globalApi) API_BASE = globalApi;
-
     if (!API_BASE) {
         alert('Protocol Interrupted: Command server unreachable. Link your GitHub Token for Worldwide access or use Local Command Mode.');
         activeBtn.innerHTML = originalContent;

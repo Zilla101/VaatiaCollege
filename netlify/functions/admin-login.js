@@ -68,8 +68,19 @@ If this was not an authorized access, please investigate immediately.
                             body: JSON.stringify({ success: true, message: 'Security alert dispatched.' })
                         });
                     } else {
-                        console.error('SendGrid error:', chunks);
-                        resolve({ statusCode: res.statusCode, body: 'Failed to send email via SendGrid' });
+                        // CRITICAL: Log exact SendGrid error for the user to debug verification issues
+                        console.error(`--- SENDGRID ERROR [${res.statusCode}] ---`);
+                        console.error('Response Body:', chunks);
+                        console.error('HINT: Check if noreply@vaatiacollege.com.ng is a Verified Sender in your SendGrid dashboard.');
+
+                        resolve({
+                            statusCode: res.statusCode,
+                            body: JSON.stringify({
+                                success: false,
+                                error: 'Email delivery failed',
+                                details: chunks
+                            })
+                        });
                     }
                 });
             });

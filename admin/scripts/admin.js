@@ -8,14 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
             hostname.startsWith('10.') ||
             (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
 
-        // Check for public API override (Global Command Mode)
+        // Priority 1: GitHub Global Sync (If token exists)
+        const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
+        if (ghToken) return 'GITHUB_SYNC';
+
+        // Priority 2: Public API Override
         const publicApi = localStorage.getItem('VAATIA_PUBLIC_API');
         if (publicApi) return publicApi;
 
-        if (!isLocal) return null; // Disable API on production (Netlify)
-        if (window.location.port === '3000') return '';
-        const host = hostname || 'localhost';
-        return `http://${host}:3000`;
+        // Priority 3: Local Command Engine
+        if (isLocal) {
+            if (window.location.port === '3000') return '';
+            return `http://${hostname}:3000`;
+        }
+
+        return null;
     };
     const API_BASE = getApiBase();
     window.API_BASE = API_BASE;

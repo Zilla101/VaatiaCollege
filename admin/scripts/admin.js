@@ -18,7 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return `http://${host}:3000`;
     };
     const API_BASE = getApiBase();
-    window.isLocalEnv = !!API_BASE;
+    window.API_BASE = API_BASE;
+    window.isLocalEnv = !!API_BASE && API_BASE !== 'GITHUB_SYNC';
 
     // 0. Authentication Logic
     const loginForm = document.getElementById('login-form');

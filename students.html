@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Students | Vaatia College</title>
-    <meta name="description"
-        content="Our student-centered approach focuses on health, safety, welfare, and pastoral care to ensure every child thrives mentally and physically.">
+    <meta name="description" content="Our student-centered approach focuses on health, safety, welfare, and pastoral care to ensure every child thrives mentally and physically.">
 
     <!-- Design System -->
     <link rel="stylesheet" href="styles/main.css?v=60">
@@ -37,13 +33,13 @@
                         <a href="skillsacquisition.html">Skills Acquisition</a>
                         <a href="club.html">Clubs</a>
                         <a href="sports.html">Sports</a>
-                        <a href="excursions.html">Excursions & School Trips</a>
+                        <a href="excursions.html">Excursions &amp; School Trips</a>
                     </div>
                 </div>
             </div>
-            <div class="logo">
+            <div class="logo" id="live-logo-container">
                 <a href="index.html">
-                    <img src="Media Content/vcm-logo.png" alt="Vaatia College Logo">
+                    <img src="Media Content/vcm-logo.png" alt="Vaatia College Logo" id="live-logo-img">
                 </a>
             </div>
             <div class="menu menu-right desktop-only">
@@ -74,7 +70,7 @@
                         <a href="skillsacquisition.html">Skills Acquisition</a>
                         <a href="club.html">Clubs</a>
                         <a href="sports.html">Sports</a>
-                        <a href="excursions.html">Excursions & Trips</a>
+                        <a href="excursions.html">Excursions &amp; Trips</a>
                     </div>
                 </div>
                 <div class="mobile-dropdown">
@@ -94,17 +90,16 @@
     <!-- Main Content -->
     <main>
         <!-- Hero Section -->
-        <section class="hero secondary-hero"
-            style="background-image: url('Media Content/corevalues.jpg'); background-size: cover; background-position: center;">
+        <section class="hero secondary-hero" style="background-image: url('Media Content/corevalues.jpg'); background-size: cover; background-position: center;">
             <div class="hero-overlay"></div>
             <div class="container hero-content">
-                <h1 class="text-gradient animate-on-scroll">Student Welfare <br> & Pastoral Care</h1>
-                <p class="animate-on-scroll">Nurturing every student's potential through a safe, supportive, and
-                    structured environment where health and safety are paramount.</p>
+                <h1 class="text-gradient animate-on-scroll" id="live-header-title">Redefining Excellence  at Vaatia College Makurdi</h1>
+                <p class="animate-on-scroll" id="live-header-description">Where innovation meets tradition. Empowering the next generation of global leaders with world-class
+                    education.</p>
                 <div class="btn-group animate-on-scroll">
-                    <a href="#health-safety" class="btn btn-primary">Health & Safety</a>
-                    <a href="#academic-facilities" class="btn btn-secondary">Facilities & Tech</a>
-                    <a href="#culture" class="btn btn-secondary">Life & Culture</a>
+                    <a href="#health-safety" class="btn btn-primary">Health &amp; Safety</a>
+                    <a href="#academic-facilities" class="btn btn-secondary">Facilities &amp; Tech</a>
+                    <a href="#culture" class="btn btn-secondary">Life &amp; Culture</a>
                 </div>
             </div>
         </section>
@@ -115,9 +110,11 @@
                 <div class="split-layout">
                     <div class="split-content animate-on-scroll">
                         <h2 class="section-title text-gradient">Health, Safety and Welfare</h2>
-                        <p>At Vaatia College, the physical and mental well-being of our students is our highest
+                        <p id="live-students-info">At Vaatia College, the physical and mental well-being of our students
+                            is our highest
                             priority.
                             We maintain a robust infrastructure designed to ensure a safe learning environment.</p>
+                        <p id="live-students-activities" style="display: none;"></p>
                         <ul class="liquid-list">
                             <li><strong>Medical Services:</strong> A fully equipped sickbay managed by professional
                                 medical staff available 24/7.</li>
@@ -127,7 +124,7 @@
                                 the college premises.</li>
                             <li><strong>Controlled Access:</strong> Restricted access to the college from outsiders to
                                 maintain a secure environment.</li>
-                            <li><strong>Nutrition & Wellness:</strong> Balanced meals prepared under strict hygienic
+                            <li><strong>Nutrition &amp; Wellness:</strong> Balanced meals prepared under strict hygienic
                                 conditions to support physical growth.</li>
                         </ul>
                         <div class="alert liquid-glass mt-3">
@@ -137,8 +134,7 @@
                     </div>
                     <div class="split-image animate-on-scroll" style="transition-delay: 0.2s;">
                         <div class="glass-frame">
-                            <img src="Media Content/boarding/817A1697.jpg" alt="Student Health and Safety"
-                                class="rounded-lg">
+                            <img src="Media Content/boarding/817A1697.jpg" alt="Student Health and Safety" class="rounded-lg">
                         </div>
                     </div>
                 </div>
@@ -175,7 +171,7 @@
         <!-- Academic Facilities & Digital Innovation -->
         <section id="academic-facilities" class="section">
             <div class="container text-center">
-                <h2 class="section-title text-gradient animate-on-scroll">Academic Facilities & Innovation</h2>
+                <h2 class="section-title text-gradient animate-on-scroll">Academic Facilities &amp; Innovation</h2>
                 <p class="section-subtitle animate-on-scroll">Equipping students with modern tools and world-class
                     environments for holistic learning.</p>
                 <div class="cards-grid mt-4">
@@ -187,7 +183,7 @@
                     </div>
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.1s;">
                         <i class="fas fa-laptop-code fa-2x mb-3 text-gradient"></i>
-                        <h3>ICT & Coding Rooms</h3>
+                        <h3>ICT &amp; Coding Rooms</h3>
                         <p>Modern computer suites with high-speed internet, where students master digital literacy and
                             programming.</p>
                     </div>
@@ -217,7 +213,7 @@
                         </div>
                     </div>
                     <div class="split-content animate-on-scroll" style="transition-delay: 0.2s;">
-                        <h2 class="section-title text-gradient">Learning & Cultural Vitality</h2>
+                        <h2 class="section-title text-gradient">Learning &amp; Cultural Vitality</h2>
                         <p>Education at Vaatia goes beyond the classroom, fostering collaboration and celebrating the
                             rich diversity of our students.</p>
 
@@ -230,7 +226,8 @@
                             </div>
                             <div class="compact-requirement">
                                 <span class="step-num">02</span>
-                                <p><strong>Social & Cultural Week:</strong> An annual celebration where students exhibit
+                                <p><strong>Social &amp; Cultural Week:</strong> An annual celebration where students
+                                    exhibit
                                     their unique ethnic backgrounds through traditional attire and interactive sessions.
                                 </p>
                             </div>
@@ -250,7 +247,7 @@
             <div class="container">
                 <div class="split-layout">
                     <div class="split-content animate-on-scroll">
-                        <h2 class="section-title text-gradient">Student Voice & Leadership</h2>
+                        <h2 class="section-title text-gradient">Student Voice &amp; Leadership</h2>
                         <p>At Vaatia College, we believe in empowering students to lead and contribute to the growth of
                             our community.</p>
                         <div class="glass-card mt-4">
@@ -262,8 +259,7 @@
                     </div>
                     <div class="split-image animate-on-scroll" style="transition-delay: 0.2s;">
                         <div class="glass-frame">
-                            <img src="Media Content/students/leadership.jpg" alt="Student Parliament"
-                                class="rounded-lg">
+                            <img src="Media Content/students/leadership.jpg" alt="Student Parliament" class="rounded-lg">
                         </div>
                     </div>
                 </div>
@@ -314,7 +310,8 @@
             <div class="footer-grid">
                 <div class="footer-brand">
                     <h2 class="text-gradient">Vaatia College</h2>
-                    <p>Vaatia College is a privately owned school established in 2004. A small class size of 30 students
+                    <p id="live-footer-about">Vaatia College is a privately owned school established in 2004. A small
+                        class size of 30 students
                         per class and a student/teacher ratio of 7:1 encourages an effective student-teacher
                         relationship.</p>
                 </div>
@@ -328,38 +325,38 @@
                         <li><a href="tuition.html">Payment Guide</a></li>
                         <li><a href="https://portal.vaatiacollege.com.ng/studentsview/login.aspx">Student Portal</a>
                         </li>
+                        <li><a href="admin/login.html" style="color: var(--accent-blue); font-weight: bold;">Admin
+                                Panel</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
                     <ul>
-                        <li><a href="mailto:info@vaatiacollege.com.ng">info@vaatiacollege.com.ng</a></li>
-                        <li><a href="tel:+2348094358825">+234 (0) 8094 35 8825</a></li>
-                        <li>Off Sen. George Akume Way, Makurdi - Benue State</li>
+                        <li><a href="mailto:info@vaatiacollege.com.ng" id="live-footer-email">info@vaatiacollege.com.ng</a></li>
+                        <li><a href="tel:+23408094358825" id="live-footer-phone">+234 (0) 8094 35 8825</a></li>
+                        <li id="live-footer-address">Off Sen. George Akume Way, Makurdi</li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Socials</h4>
                     <div class="social-links">
-                        <a href="https://www.instagram.com/vaatiacollegemakurdi/" class="social-icon" target="_blank"
-                            aria-label="Instagram">
+                        <a href="https://www.instagram.com/vaatiacollegemakurdi/" class="social-icon" target="_blank" aria-label="Instagram">
                             <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44c-.795 0-1.44-.645-1.44-1.44s.645-1.44 1.44-1.44z" />
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44c-.795 0-1.44-.645-1.44-1.44s.645-1.44 1.44-1.44z">
+                                </path>
                             </svg>
                         </a>
-                        <a href="https://www.facebook.com/vaatiacollegemakurdi" class="social-icon" target="_blank"
-                            aria-label="Facebook">
+                        <a href="https://www.facebook.com/vaatiacollegemakurdi" class="social-icon" target="_blank" aria-label="Facebook">
                             <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z">
+                                </path>
                             </svg>
                         </a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; 2026 Darellmax Adima . All rights reserved.
+                © 2026 Darellmax Adima . All rights reserved.
             </div>
         </div>
     </footer>
@@ -395,6 +392,9 @@
 
     <!-- Scripts -->
     <script src="scripts/main.js?v=7"></script>
-</body>
 
-</html>
+
+
+
+
+</body></html>

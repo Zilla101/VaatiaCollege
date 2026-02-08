@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vaatia College | Knowledge & Service</title>
-    <meta name="description"
-        content="Vaatia College: Shaping the future of global leaders through innovative education and creative excellence.">
+    <title>Vaatia College | Knowledge &amp; Service</title>
+    <meta name="description" content="Vaatia College: Shaping the future of global leaders through innovative education and creative excellence.">
 
     <!-- Design System -->
     <link rel="stylesheet" href="styles/main.css?v=60">
@@ -37,12 +33,12 @@
                         <a href="skillsacquisition.html">Skills Acquisition</a>
                         <a href="club.html">Clubs</a>
                         <a href="sports.html">Sports</a>
-                        <a href="excursions.html">Excursions & School Trips</a>
+                        <a href="excursions.html">Excursions &amp; School Trips</a>
                     </div>
                 </div>
             </div>
-            <div class="logo">
-                <img src="Media Content/vcm-logo.png" alt="Vaatia College Logo">
+            <div class="logo" id="live-logo-container">
+                <img src="Media Content/vcm-logo.png" alt="Vaatia College Logo" id="live-logo-img">
             </div>
             <div class="menu menu-right desktop-only">
                 <div class="dropdown">
@@ -72,7 +68,7 @@
                         <a href="skillsacquisition.html">Skills Acquisition</a>
                         <a href="club.html">Clubs</a>
                         <a href="sports.html">Sports</a>
-                        <a href="excursions.html">Excursions & Trips</a>
+                        <a href="excursions.html">Excursions &amp; Trips</a>
                     </div>
                 </div>
                 <div class="mobile-dropdown">
@@ -93,25 +89,26 @@
     <main>
         <!-- Hero Section -->
         <section class="hero">
-            <div class="hero-overlay"></div>
+            <div class="hero-overlay" id="live-hero-image"></div>
             <div class="container hero-content">
-                <h1 class="text-gradient">
-                    Redefining Excellence <br> at Vaatia College Makurdi
-                </h1>
-                <div class="btn-group">
-                    <a href="admissions.html" class="btn btn-primary">Admission</a>
-                    <a href="tuition.html" class="btn btn-secondary">Tuition</a>
-                    <a href="#academics" class="btn btn-secondary">Curriculum</a>
-                    <a href="boarding.html" class="btn btn-secondary">Boarding</a>
-                    <a href="students.html" class="btn btn-secondary">Students</a>
-                    <a href="https://portal.vaatiacollege.com.ng/studentsview/login.aspx"
-                        class="btn btn-secondary portal-redir" data-portal-redir="Portal Login">Check Results</a>
-                    <a href="#" class="btn btn-secondary" id="prospectus-btn">E-Prospectus</a>
+                <h1 class="text-gradient" id="live-hero-heading" style="line-height: 1.1; margin-bottom: 2rem;">Redefining Excellence  at Vaatia College Makurdi</h1>
+
+                <div class="btn-group" style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 2rem;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                        <a href="admissions.html" class="btn btn-primary">ADMISSION</a>
+                        <a href="tuition.html" class="btn btn-secondary">TUITION</a>
+                        <a href="#academics" class="btn btn-secondary">CURRICULUM</a>
+                        <a href="boarding.html" class="btn btn-secondary">BOARDING</a>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                        <a href="students.html" class="btn btn-secondary">STUDENTS</a>
+                        <a href="https://portal.vaatiacollege.com.ng/studentsview/login.aspx" class="btn btn-secondary portal-redir" data-portal-redir="Portal Login">CHECK RESULTS</a>
+                        <a href="#" class="btn btn-secondary" id="prospectus-btn">E-PROSPECTUS</a>
+                    </div>
                 </div>
-                <p>
-                    Where innovation meets tradition. Empowering the next generation of global leaders with world-class
-                    education.
-                </p>
+
+                <p class="animate-on-scroll" id="live-hero-subheading" style="max-width: 800px; margin: 0 auto; font-weight: 500;">Where innovation meets tradition. Empowering the next generation of global leaders with world-class
+                    education.</p>
             </div>
         </section>
 
@@ -121,21 +118,24 @@
                 <h2 class="section-title text-gradient animate-on-scroll">Our Philosophy</h2>
                 <div class="cards-grid">
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.1s;">
-                        <img src="Media Content/mission.jpg" alt="Mission">
-                        <h3>Our Mission</h3>
-                        <p>The College is established to provide world class education & to promote a culture of
-                            excellence & to promote a culture of excellence & lifelong learning.</p>
+                        <img src="Media Content/mission.jpg" alt="Mission" id="live-mission-img">
+                        <h3 id="live-mission-title">Our Mission</h3>
+                        <p id="live-mission-text">The College is established to provide world class education &amp; to
+                            promote a culture of
+                            excellence &amp; to promote a culture of excellence &amp; lifelong learning.</p>
                     </div>
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.2s;">
-                        <img src="Media Content/vision.jpg" alt="Vision">
-                        <h3>Our Vision</h3>
-                        <p>The vision of the College is that of students equipped with competitive skills, positive
-                            attitudes & strong moral values.</p>
+                        <img src="Media Content/vision.jpg" alt="Vision" id="live-vision-img">
+                        <h3 id="live-vision-title">Our Vision</h3>
+                        <p id="live-vision-text">The vision of the College is that of students equipped with competitive
+                            skills, positive
+                            attitudes &amp; strong moral values.</p>
                     </div>
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.3s;">
-                        <img src="Media Content/corevalues.jpg" alt="Vision">
-                        <h3>Core Values</h3>
-                        <p>Integrity, Excellence, Innovation, and Service. We build character that lasts a lifetime.</p>
+                        <img src="Media Content/corevalues.jpg" alt="Vision" id="live-core-values-img">
+                        <h3 id="live-core-values-title">Core Values</h3>
+                        <p id="live-core-values-text">Integrity, Excellence, Innovation, and Service. We build character
+                            that lasts a lifetime.</p>
                     </div>
                 </div>
 
@@ -158,10 +158,8 @@
                     <div class="stats-grid-circular">
                         <div class="stat-circle animate-on-scroll">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#00f2fe" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="98">0</h2>
@@ -171,10 +169,8 @@
                         </div>
                         <div class="stat-circle animate-on-scroll" style="transition-delay: 0.1s;">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#00f2fe" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="85">0</h2>
@@ -184,10 +180,8 @@
                         </div>
                         <div class="stat-circle animate-on-scroll" style="transition-delay: 0.2s;">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#00f2fe" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#00f2fe" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="92">0</h2>
@@ -204,10 +198,8 @@
                     <div class="stats-grid-circular">
                         <div class="stat-circle animate-on-scroll">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#845ef7" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#845ef7" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="100">0</h2>
@@ -217,10 +209,8 @@
                         </div>
                         <div class="stat-circle animate-on-scroll" style="transition-delay: 0.1s;">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#845ef7" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#845ef7" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="15">0</h2>
@@ -230,10 +220,8 @@
                         </div>
                         <div class="stat-circle animate-on-scroll" style="transition-delay: 0.2s;">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#845ef7" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#845ef7" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="50">0</h2>
@@ -250,10 +238,8 @@
                     <div class="stats-grid-circular">
                         <div class="stat-circle animate-on-scroll">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#3b82f6" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#3b82f6" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="7">0</h2>
@@ -263,10 +249,8 @@
                         </div>
                         <div class="stat-circle animate-on-scroll" style="transition-delay: 0.1s;">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#3b82f6" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#3b82f6" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="30">0</h2>
@@ -275,10 +259,8 @@
                         </div>
                         <div class="stat-circle animate-on-scroll">
                             <svg class="progress-ring" viewBox="0 0 210 210">
-                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)"
-                                    stroke-width="10" fill="transparent" r="98" cx="105" cy="105" />
-                                <circle class="progress-ring__circle" stroke="#3b82f6" stroke-width="10"
-                                    stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105" />
+                                <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="10" fill="transparent" r="98" cx="105" cy="105"></circle>
+                                <circle class="progress-ring__circle" stroke="#3b82f6" stroke-width="10" stroke-linecap="round" fill="transparent" r="98" cx="105" cy="105"></circle>
                             </svg>
                             <div class="stat-circle-content">
                                 <h2 class="stat-number" data-target="100">0</h2>
@@ -330,21 +312,21 @@
                 <h2 class="section-title text-gradient animate-on-scroll">Life at Vaatia College</h2>
                 <div class="bento-grid">
                     <!-- Large Feature: Academics -->
-                    <div class="bento-item span-2 row-2 animate-on-scroll bento-slideshow" data-type="academics"
-                        data-interval="4000">
+                    <div class="bento-item span-2 row-2 animate-on-scroll bento-slideshow" data-type="academics" data-interval="4000">
                         <div class="slideshow-inner"></div>
                         <div class="bento-content">
                             <h3>Academics</h3>
-                            <p>State-of-the-art laboratories and robotics centers designed to spark innovation.</p>
+                            <p id="live-bento-academics-desc">State-of-the-art laboratories and robotics centers
+                                designed to spark innovation.</p>
                         </div>
                     </div>
                     <!-- Standard Feature: Skills Acquisition -->
-                    <div class="bento-item span-2 animate-on-scroll bento-slideshow" data-type="skills"
-                        data-interval="4500">
+                    <div class="bento-item span-2 animate-on-scroll bento-slideshow" data-type="skills" data-interval="4500">
                         <div class="slideshow-inner"></div>
                         <div class="bento-content">
                             <h3>Skills Acquisition</h3>
-                            <p>Our Technical and Vocational Education Training programs ensure learners are empowered
+                            <p id="live-bento-skills-desc">Our Technical and Vocational Education Training programs
+                                ensure learners are empowered
                                 and self-reliant.</p>
                         </div>
                     </div>
@@ -353,7 +335,8 @@
                         <div class="slideshow-inner"></div>
                         <div class="bento-content">
                             <h3>Sports</h3>
-                            <p>The College believes that sports is important and therefore students are encouraged to
+                            <p id="live-bento-sports-desc">The College believes that sports is important and therefore
+                                students are encouraged to
                                 participate in sports and establish healthy lifestyles at an early age.</p>
                         </div>
                     </div>
@@ -362,7 +345,8 @@
                         <div class="slideshow-inner"></div>
                         <div class="bento-content">
                             <h3>Boarding</h3>
-                            <p>Boarding life at Vaatia College provides a structured, activity-rich environment that
+                            <p id="live-bento-boarding-desc">Boarding life at Vaatia College provides a structured,
+                                activity-rich environment that
                                 builds independence, responsibility, confidence, and organisation in students.</p>
                         </div>
                     </div>
@@ -379,25 +363,25 @@
                     <div class="carousel-container">
                         <div class="slide active">
                             <img src="Media Content/MANAGEMENT TEAM/MR. T.O VAATIA, PRINCIPAL.jpg" class="card-image"
-                                alt="Mr. T.O Vaatia">
+                                alt="Mr. T.O Vaatia" id="live-mgmt-principal-img">
                             <div class="slide-content-wrapper">
-                                <h2 class="slide-title">Mr. T.O Vaatia</h2>
+                                <h2 class="slide-title" id="live-mgmt-principal-name">Mr. T.O Vaatia</h2>
                                 <p class="slide-text">Principal</p>
                             </div>
                         </div>
                         <div class="slide">
                             <img src="Media Content/MANAGEMENT TEAM/MR. S.T DZAPINE, VICE PRINCIPAL ACADEMICS.jpg"
-                                class="card-image" alt="Mr. S.T Dzapine">
+                                class="card-image" alt="Mr. S.T Dzapine" id="live-mgmt-vp1-img">
                             <div class="slide-content-wrapper">
-                                <h2 class="slide-title">Mr. S.T Dzapine</h2>
+                                <h2 class="slide-title" id="live-mgmt-vp1-name">Mr. S.T Dzapine</h2>
                                 <p class="slide-text">Vice Principal Academics</p>
                             </div>
                         </div>
                         <div class="slide">
                             <img src="Media Content/MANAGEMENT TEAM/MR. M.C. ITODO, VICE PRINCIPAL ADMINISTRATION.jpg"
-                                class="card-image" alt="Mr. M.C. Itodo">
+                                class="card-image" alt="Mr. M.C. Itodo" id="live-mgmt-vp2-img">
                             <div class="slide-content-wrapper">
-                                <h2 class="slide-title">Mr. M.C. Itodo</h2>
+                                <h2 class="slide-title" id="live-mgmt-vp2-name">Mr. M.C. Itodo</h2>
                                 <p class="slide-text">Vice Principal Administration</p>
                             </div>
                         </div>
@@ -506,9 +490,9 @@
             <div class="footer-grid">
                 <div class="footer-brand">
                     <h2 class="text-gradient">Vaatia College</h2>
-                    <p>Vaatia College is a privately owned school established in 2004. A small class size of 30 students
-                        per class and a student/teacher ratio of 7:1 encourages an effective student-teacher
-                        relationship.</p>
+                    <p class="animate-on-scroll" id="live-footer-about">Vaatia College is a privately owned school
+                        established in 2004. A small class size of 30 students per class and a student/teacher ratio of
+                        7:1 encourages an effective student-teacher relationship.</p>
                 </div>
                 <div class="footer-column">
                     <h4>Quick Links</h4>
@@ -520,38 +504,38 @@
                         <li><a href="tuition.html">Payment Guide</a></li>
                         <li><a href="https://portal.vaatiacollege.com.ng/studentsview/login.aspx">Student Portal</a>
                         </li>
+                        <li><a href="admin/login.html" style="color: var(--accent-blue); font-weight: bold;">Admin
+                                Panel</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
                     <ul>
-                        <li><a href="mailto:info@vaatiacollege.com.ng">info@vaatiacollege.com.ng</a></li>
-                        <li><a href="tel:+2348094358825">+234 (0) 8094 35 8825</a></li>
-                        <li>Off Sen. George Akume Way, Makurdi - Benue State</li>
+                        <li><a href="mailto:info@vaatiacollege.com.ng" id="live-footer-email">info@vaatiacollege.com.ng</a></li>
+                        <li><a href="tel:+23408094358825" id="live-footer-phone">+234 (0) 8094 35 8825</a></li>
+                        <li id="live-footer-address">Off Sen. George Akume Way, Makurdi</li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Socials</h4>
                     <div class="social-links">
-                        <a href="https://www.instagram.com/vaatiacollegemakurdi/" class="social-icon" target="_blank"
-                            aria-label="Instagram">
+                        <a href="https://www.instagram.com/vaatiacollegemakurdi/" class="social-icon" target="_blank" aria-label="Instagram">
                             <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44c-.795 0-1.44-.645-1.44-1.44s.645-1.44 1.44-1.44z" />
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44c-.795 0-1.44-.645-1.44-1.44s.645-1.44 1.44-1.44z">
+                                </path>
                             </svg>
                         </a>
-                        <a href="https://www.facebook.com/vaatiacollegemakurdi" class="social-icon" target="_blank"
-                            aria-label="Facebook">
+                        <a href="https://www.facebook.com/vaatiacollegemakurdi" class="social-icon" target="_blank" aria-label="Facebook">
                             <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z">
+                                </path>
                             </svg>
                         </a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; 2026 Darellmax Adima . All rights reserved.
+                © 2026 Darellmax Adima . All rights reserved.
             </div>
         </div>
     </footer>
@@ -586,6 +570,10 @@
 
     <!-- Scripts -->
     <script src="scripts/main.js?v=7"></script>
-</body>
 
-</html>
+
+
+
+
+
+</body></html>

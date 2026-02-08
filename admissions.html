@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admissions | Vaatia College</title>
-    <meta name="description"
-        content="Join the Vaatia College community. Explore our admissions process, requirements, and policy for prospective students.">
+    <meta name="description" content="Join the Vaatia College community. Explore our admissions process, requirements, and policy for prospective students.">
 
     <!-- Design System -->
     <link rel="stylesheet" href="styles/main.css?v=60">
@@ -37,13 +33,13 @@
                         <a href="skillsacquisition.html">Skills Acquisition</a>
                         <a href="club.html">Clubs</a>
                         <a href="sports.html">Sports</a>
-                        <a href="excursions.html">Excursions & School Trips</a>
+                        <a href="excursions.html">Excursions &amp; School Trips</a>
                     </div>
                 </div>
             </div>
-            <div class="logo">
+            <div class="logo" id="live-logo-container">
                 <a href="index.html">
-                    <img src="Media Content/vcm-logo.png" alt="Vaatia College Logo">
+                    <img src="Media Content/vcm-logo.png" alt="Vaatia College Logo" id="live-logo-img">
                 </a>
             </div>
             <div class="menu menu-right desktop-only">
@@ -74,7 +70,7 @@
                         <a href="skillsacquisition.html">Skills Acquisition</a>
                         <a href="club.html">Clubs</a>
                         <a href="sports.html">Sports</a>
-                        <a href="excursions.html">Excursions & Trips</a>
+                        <a href="excursions.html">Excursions &amp; Trips</a>
                     </div>
                 </div>
                 <div class="mobile-dropdown">
@@ -94,16 +90,14 @@
     <!-- Main Content -->
     <main>
         <!-- Hero Section -->
-        <section class="hero secondary-hero"
-            style="background-image: url('Media Content/corevalues.jpg'); background-size: cover; background-position: center;">
+        <section class="hero secondary-hero" style="background-image: url('Media Content/corevalues.jpg'); background-size: cover; background-position: center;">
             <div class="hero-overlay"></div>
             <div class="container hero-content">
-                <h1 class="text-gradient animate-on-scroll">Begin Your Journey <br> of Excellence</h1>
-                <p class="animate-on-scroll">Vaatia College routinely admits students who have the potential to benefit
-                    from the world-class education we offer.</p>
+                <h1 class="text-gradient animate-on-scroll" id="live-header-title">Redefining Excellence  at Vaatia College Makurdi</h1>
+                <p class="animate-on-scroll" id="live-header-description">Where innovation meets tradition. Empowering the next generation of global leaders with world-class
+                    education.</p>
                 <div class="btn-group animate-on-scroll">
-                    <a href="https://parents.vaatiacollege.com.ng" class="btn btn-primary portal-redir"
-                        data-portal-redir="Application Portal">Apply Online</a>
+                    <a href="https://parents.vaatiacollege.com.ng" class="btn btn-primary portal-redir" data-portal-redir="Application Portal">Apply Online</a>
                     <a href="#procedure" class="btn btn-secondary">How to Apply</a>
                 </div>
             </div>
@@ -144,8 +138,8 @@
                             ensure excellence.</p>
 
                         <h3 class="mt-4">Criteria for Entry</h3>
-                        <ul class="liquid-list">
-                            <li>Minimum age of 11 years for Basic 7 entry.</li>
+                        <ul class="liquid-list" id="live-req-criteria">
+                            <li id="live-req-age">Minimum age of 11 years for Basic 7 entry.</li>
                             <li>Aptitude and ability evaluation via entrance assessment.</li>
                             <li>Positive references from the candidate's previous school.</li>
                             <li>Availability of space in the requested class.</li>
@@ -165,9 +159,7 @@
                 <div class="compact-grid">
                     <div class="compact-requirement animate-on-scroll">
                         <span class="step-num">01</span>
-                        <p><strong>Online Application:</strong> Fill the form at <a
-                                href="https://parents.vaatiacollege.com.ng" class="portal-redir"
-                                data-portal-redir="Application Portal">parents.vaatiacollege.com.ng</a> with a
+                        <p><strong>Online Application:</strong> Fill the form at <a href="https://parents.vaatiacollege.com.ng" class="portal-redir" data-portal-redir="Application Portal">parents.vaatiacollege.com.ng</a> with a
                             N10,000 application fee.</p>
                     </div>
                     <div class="compact-requirement animate-on-scroll" style="transition-delay: 0.1s;">
@@ -196,9 +188,9 @@
                     </div>
                 </div>
 
-                <div class="alert liquid-glass mt-4 animate-on-scroll"
-                    style="border-color: var(--accent-color); color: #fff; background: rgba(64, 0, 77, 0.2);">
-                    <p><strong>Entrance Exam Notice:</strong> The next Entrance Examination into Basic 7 is slated for
+                <div class="alert liquid-glass mt-4 animate-on-scroll" style="border-color: var(--accent-color); color: #fff; background: rgba(64, 0, 77, 0.2);">
+                    <p id="live-app-notice"><strong>Entrance Exam Notice:</strong> The next Entrance Examination into
+                        Basic 7 is slated for
                         Saturday, 21st February, 2026. Closing date for application is Wednesday, 18th February, 2026.
                     </p>
                 </div>
@@ -212,32 +204,38 @@
                 <div class="boarding-grid mt-4">
                     <div class="glass-card animate-on-scroll">
                         <h3>Enrollment Fee?</h3>
-                        <p>Yes, an enrollment fee of ₦10,000 is paid before you can fill and submit the application
+                        <p id="live-faq-fee">Yes, an enrollment fee of ₦10,000 is paid before you can fill and submit
+                            the application
                             form.</p>
                     </div>
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.1s;">
                         <h3>Meal Systems?</h3>
-                        <p>Students are fed four times a day with healthy foods prepared in our modern kitchen
+                        <p id="live-faq-meals">Students are fed four times a day with healthy foods prepared in our
+                            modern kitchen
                             facilities.</p>
                     </div>
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.2s;">
                         <h3>Class Size?</h3>
-                        <p>Our classes are designed for a maximum of 30 students to maintain a 7:1 student-teacher
+                        <p id="live-faq-size">Our classes are designed for a maximum of 30 students to maintain a 7:1
+                            student-teacher
                             ratio.</p>
                     </div>
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.3s;">
                         <h3>Visiting Days?</h3>
-                        <p>No set visiting days, but parents can visit for academic tracking and medical follow-up by
+                        <p id="live-faq-visit">No set visiting days, but parents can visit for academic tracking and
+                            medical follow-up by
                             appointment.</p>
                     </div>
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.4s;">
                         <h3>Acceptance?</h3>
-                        <p>A place is accepted only when a signed letter and a non-refundable deposit of N200,000 are
+                        <p id="live-faq-acceptance">A place is accepted only when a signed letter and a non-refundable
+                            deposit of N200,000 are
                             received.</p>
                     </div>
                     <div class="glass-card animate-on-scroll" style="transition-delay: 0.5s;">
                         <h3>Boarding?</h3>
-                        <p>Yes, Vaatia College is 100% boarding with standard and hygienic boarding facilities for all
+                        <p id="live-faq-boarding">Yes, Vaatia College is 100% boarding with standard and hygienic
+                            boarding facilities for all
                             students.</p>
                     </div>
                 </div>
@@ -251,7 +249,8 @@
             <div class="footer-grid">
                 <div class="footer-brand">
                     <h2 class="text-gradient">Vaatia College</h2>
-                    <p>Vaatia College is a privately owned school established in 2004. A small class size of 30 students
+                    <p id="live-footer-about">Vaatia College is a privately owned school established in 2004. A small
+                        class size of 30 students
                         per class and a student/teacher ratio of 7:1 encourages an effective student-teacher
                         relationship.</p>
                 </div>
@@ -265,38 +264,38 @@
                         <li><a href="tuition.html">Payment Guide</a></li>
                         <li><a href="https://portal.vaatiacollege.com.ng/studentsview/login.aspx">Student Portal</a>
                         </li>
+                        <li><a href="admin/login.html" style="color: var(--accent-blue); font-weight: bold;">Admin
+                                Panel</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
                     <ul>
-                        <li><a href="mailto:info@vaatiacollege.com.ng">info@vaatiacollege.com.ng</a></li>
-                        <li><a href="tel:+2348094358825">+234 (0) 8094 35 8825</a></li>
-                        <li>Off Sen. George Akume Way, Makurdi - Benue State</li>
+                        <li><a href="mailto:info@vaatiacollege.com.ng" id="live-footer-email">info@vaatiacollege.com.ng</a></li>
+                        <li><a href="tel:+23408094358825" id="live-footer-phone">+234 (0) 8094 35 8825</a></li>
+                        <li id="live-footer-address">Off Sen. George Akume Way, Makurdi</li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Socials</h4>
                     <div class="social-links">
-                        <a href="https://www.instagram.com/vaatiacollegemakurdi/" class="social-icon" target="_blank"
-                            aria-label="Instagram">
+                        <a href="https://www.instagram.com/vaatiacollegemakurdi/" class="social-icon" target="_blank" aria-label="Instagram">
                             <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44c-.795 0-1.44-.645-1.44-1.44s.645-1.44 1.44-1.44z" />
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c.796 0 1.441.645 1.441 1.44s-.645 1.44-1.441 1.44c-.795 0-1.44-.645-1.44-1.44s.645-1.44 1.44-1.44z">
+                                </path>
                             </svg>
                         </a>
-                        <a href="https://www.facebook.com/vaatiacollegemakurdi" class="social-icon" target="_blank"
-                            aria-label="Facebook">
+                        <a href="https://www.facebook.com/vaatiacollegemakurdi" class="social-icon" target="_blank" aria-label="Facebook">
                             <svg viewBox="0 0 24 24">
-                                <path
-                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z">
+                                </path>
                             </svg>
                         </a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                &copy; 2026 Darellmax Adima . All rights reserved.
+                © 2026 Darellmax Adima . All rights reserved.
             </div>
         </div>
     </footer>
@@ -331,6 +330,9 @@
 
     <!-- Scripts -->
     <script src="scripts/main.js?v=7"></script>
-</body>
 
-</html>
+
+
+
+
+</body></html>

@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Determine API Base URL (Supports accessing via IP/Port 8080 or Port 3000)
+    const getApiBase = () => {
+        if (window.location.port === '3000') return '';
+        const host = window.location.hostname || 'localhost';
+        return `http://${host}:3000`;
+    };
+    const API_BASE = getApiBase();
 
     // 0. Authentication Logic
     const loginForm = document.getElementById('login-form');
@@ -133,40 +140,67 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    const updateStats = () => {
+    const updateStats = async () => {
         const pageStat = document.getElementById('stat-pages');
         const mediaStat = document.getElementById('stat-media');
 
         if (pageStat) pageStat.innerText = stats.pages.length;
-        if (mediaStat) mediaStat.innerText = stats.media.length + 24; // Base + subdirs
+
+        // Determine API Base URL
+        const host = window.location.hostname || 'localhost';
+        const API_BASE = window.location.port === '3000' ? '' : `http://${host}:3000`;
+
+        try {
+            const response = await fetch(`${API_BASE}/api/media`);
+            const data = await response.json();
+            if (data.success && mediaStat) {
+                mediaStat.innerText = data.media.length;
+            } else if (mediaStat) {
+                mediaStat.innerText = stats.media.length + 24;
+            }
+        } catch (err) {
+            console.warn('Could not fetch media stats, using fallback.');
+            if (mediaStat) mediaStat.innerText = stats.media.length + 24;
+        }
     };
 
     // 3. Media Grid Population
-    const loadMedia = () => {
+    const loadMedia = async () => {
         const grid = document.getElementById('main-media-grid');
         if (!grid) return;
-        grid.innerHTML = '';
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">Fetching media library...</div>';
 
-        const mediaItems = [
-            { name: 'mission.jpg', path: '../Media Content/mission.jpg' },
-            { name: 'vision.jpg', path: '../Media Content/vision.jpg' },
-            { name: 'corevalues.jpg', path: '../Media Content/corevalues.jpg' },
-            { name: 'HomePage.jpg', path: '../Media Content/HomePage.jpg' },
-            { name: 'logo.png', path: '../Media Content/vcm-logo.png' },
-            { name: 'principal.jpg', path: '../Media Content/MANAGEMENT TEAM/MR. T.O VAATIA, PRINCIPAL.jpg' }
-        ];
+        // Determine API Base URL
+        const host = window.location.hostname || 'localhost';
+        const API_BASE = window.location.port === '3000' ? '' : `http://${host}:3000`;
 
-        mediaItems.forEach(item => {
-            const el = document.createElement('div');
-            el.className = 'media-item';
-            el.innerHTML = `
-                <img src="${item.path}" alt="${item.name}">
-                <div class="media-overlay">
-                    <span style="font-weight: 700;">${item.name}</span>
-                    <button class="btn-edit" style="margin-top: 10px; font-size: 0.75rem;">Change Image</button>
-                </div>
-            `;
-            grid.appendChild(el);
+        try {
+            const response = await fetch(`${API_BASE}/api/media`);
+            const data = await response.json();
+
+            if (data.success) {
+                grid.innerHTML = '';
+                data.media.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'media-item';
+                    el.innerHTML = `
+                        <img src="../${item.path}" alt="${item.name}" class="image-fade-in" loading="lazy">
+                        <div class="media-overlay">
+                            <span style="font-weight: 700; font-size: 0.65rem; word-break: break-all; padding: 0 10px;">${item.name}</span>
+                            <button class="btn-edit" style="margin-top: 10px; font-size: 0.75rem;" onclick="copyPathToClipboard('${item.path}')">Copy Path</button>
+                        </div>
+                    `;
+                    grid.appendChild(el);
+                });
+            }
+        } catch (err) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #f87171;">Failed to load media assets.</div>';
+        }
+    };
+
+    window.copyPathToClipboard = (path) => {
+        navigator.clipboard.writeText(path).then(() => {
+            alert('Path copied: ' + path);
         });
     };
 
@@ -193,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <a href="../${page}" target="_blank" class="btn-edit" style="text-decoration: none; padding: 10px 20px; font-size: 0.75rem; display: flex; align-items: center; gap: 8px;">
                         <i data-feather="external-link" style="width: 14px; height: 14px;"></i> VIEW
                     </a>
-                    <button class="btn-premium" style="width: auto; padding: 10px 20px; font-size: 0.75rem; border-radius: 12px;" onclick="openPageEditor('${page}')">EDIT</button>
+                    <button class="btn-premium" style="width: auto; padding: 10px 20px; font-size: 0.75rem; border-radius: 12px;" onclick="openSimplePageEditor('${page}')">EDIT</button>
                 </div>
             `;
             list.appendChild(row);
@@ -286,6 +320,176 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.closeModal = () => {
         if (modal) modal.style.display = 'none';
+    };
+
+    // Upload Logic
+    const uploadBtn = document.querySelector('.btn-premium.btn-compact');
+    if (uploadBtn && uploadBtn.innerText === '+ UPLOAD ASSET') {
+        uploadBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                uploadBtn.innerText = 'UPLOADING...';
+                uploadBtn.disabled = true;
+
+                try {
+                    const response = await fetch(`${API_BASE}/api/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        loadMedia();
+                        updateStats();
+                        showPlacementDialogue(result.filePath);
+                    } else {
+                        alert('Upload failed: ' + result.error);
+                    }
+                } catch (err) {
+                    alert('Command server unreachable.');
+                } finally {
+                    uploadBtn.innerText = '+ UPLOAD ASSET';
+                    uploadBtn.disabled = false;
+                }
+            };
+            input.click();
+        });
+    }
+
+    // Post-Upload Placement Dialogue
+    window.showPlacementDialogue = (filePath) => {
+        const title = document.getElementById('modal-title');
+        const body = document.getElementById('modal-body');
+        const modal = document.getElementById('edit-modal');
+        if (!title || !body || !modal) return;
+
+        title.innerText = 'Protocol: Asset Placement';
+        body.innerHTML = `
+            <div style="text-align: center; margin-bottom: 25px;">
+                <img src="../${filePath}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 15px; border: 2px solid var(--accent-blue); margin-bottom: 10px;" class="image-fade-in">
+                <p style="color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 0.05em;">DEPLOYMENT DETECTED: SELECT SECTOR</p>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch;">
+                <button class="btn-edit active" onclick="filterPlacement('all', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">ALL SECTORS</button>
+                <button class="btn-edit" onclick="filterPlacement('home', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">HOMEPAGE</button>
+                <button class="btn-edit" onclick="filterPlacement('inner', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">INTERNAL PAGES</button>
+                <button class="btn-edit" onclick="filterPlacement('global', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">GLOBAL ASSETS</button>
+            </div>
+
+            <div class="placement-options" id="placement-grid" style="max-height: 40vh; overflow-y: auto; padding-right: 5px;">
+                <!-- Home -->
+                <div class="placement-option" data-cat="home" onclick="applyAssetToSection('index.html', 'hero', 'image', '${filePath}')">
+                    <h4>Hero Background</h4>
+                    <p>Homepage > Elite Entry Sector</p>
+                </div>
+                <div class="placement-option" data-cat="home" onclick="applyAssetToSection('index.html', 'mgmt', 'principal-img', '${filePath}')">
+                    <h4>Principal Portrait</h4>
+                    <p>Management > Principal Asset</p>
+                </div>
+                <div class="placement-option" data-cat="home" onclick="applyAssetToSection('index.html', 'mgmt', 'vp1-img', '${filePath}')">
+                    <h4>VP Academic Portrait</h4>
+                    <p>Management > VP Academic Asset</p>
+                </div>
+                
+                <!-- Inner -->
+                <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('admissions.html', 'header', 'image', '${filePath}')">
+                    <h4>Admissions Header</h4>
+                    <p>Admissions > Blueprint Background</p>
+                </div>
+                <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('boarding.html', 'header', 'image', '${filePath}')">
+                    <h4>Boarding Header</h4>
+                    <p>Boarding > Hostel Lifecycle</p>
+                </div>
+                <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('club.html', 'activities', 'image', '${filePath}')">
+                    <h4>Clubs Header</h4>
+                    <p>Activities > Clubs & Society</p>
+                </div>
+                <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('sports.html', 'activities', 'image', '${filePath}')">
+                    <h4>Sports Header</h4>
+                    <p>Activities > Athletic Sector</p>
+                </div>
+                
+                <!-- Global -->
+                <div class="placement-option" data-cat="global" onclick="applyAssetToSection('index.html', 'brand', 'logo-img', '${filePath}')">
+                    <h4>Site Logo</h4>
+                    <p>Global > Brand Identity Asset</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 25px; text-align: center; display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn-edit" onclick="closeModal()" style="width: 100%; border: 1px solid rgba(255,255,255,0.1);">SKIP AUTOMATIC PLACEMENT</button>
+            </div>
+        `;
+        modal.style.display = 'flex';
+        feather.replace();
+    };
+
+    window.filterPlacement = (cat, btn) => {
+        const options = document.querySelectorAll('.placement-option');
+        const buttons = btn.parentElement.querySelectorAll('button');
+
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        options.forEach(opt => {
+            if (cat === 'all' || opt.dataset.cat === cat) {
+                opt.style.display = 'block';
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+    };
+
+    window.applyAssetToSection = async (page, section, key, filePath) => {
+        const data = {};
+        data[`${section}-${key}`] = filePath;
+
+        // Visual feedback
+        const modal = document.getElementById('edit-modal');
+        const body = document.getElementById('modal-body');
+        body.innerHTML = `
+            <div style="text-align: center; padding: 60px;">
+                <div class="loader-circle" style="width: 40px; height: 40px; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;"></div>
+                <p style="color: var(--accent-blue); font-size: 0.7rem; letter-spacing: 0.3em; font-weight: 800; text-transform: uppercase;">
+                    Executing Global Sync...
+                </p>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`${API_BASE}/api/save-section`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page: page, section: section, data: data })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                body.innerHTML = `
+                    <div style="text-align: center; padding: 60px;">
+                        <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
+                        <h3 style="color: white; margin-bottom: 10px;">PROTOCOL SUCCESS</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Asset deployed to ${page} > ${section}.</p>
+                        <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">CONFIRM</button>
+                    </div>
+                `;
+                feather.replace();
+            } else {
+                alert('Sync Error: ' + result.error);
+                closeModal();
+            }
+        } catch (err) {
+            alert('Command server unreachable.');
+            closeModal();
+        }
     };
 
     // Initial Load

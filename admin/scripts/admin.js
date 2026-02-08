@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
             hostname.startsWith('10.') ||
             (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
 
+        // Check for public API override (Global Command Mode)
+        const publicApi = localStorage.getItem('VAATIA_PUBLIC_API');
+        if (publicApi) return publicApi;
+
         if (!isLocal) return null; // Disable API on production (Netlify)
         if (window.location.port === '3000') return '';
         const host = hostname || 'localhost';

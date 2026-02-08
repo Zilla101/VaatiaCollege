@@ -177,7 +177,11 @@ window.saveSectionChanges = async (sectionName) => {
         hostname.startsWith('10.') ||
         (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
 
-    const API_BASE = isLocal ? (window.location.port === '3000' ? '' : `http://${hostname}:3000`) : null;
+    let API_BASE = isLocal ? (window.location.port === '3000' ? '' : `http://${hostname}:3000`) : null;
+
+    // Check for Global Override
+    const globalApi = localStorage.getItem('VAATIA_PUBLIC_API');
+    if (globalApi) API_BASE = globalApi;
 
     if (!API_BASE) {
         alert('Protocol Interrupted: Command server unreachable in production. Please use Local Command Mode for editing.');

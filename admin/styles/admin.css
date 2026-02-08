@@ -25,6 +25,8 @@
     font-family: 'Outfit', sans-serif;
     max-width: 100%;
     overflow-wrap: break-word;
+    -webkit-tap-highlight-color: transparent;
+    /* Remove blue highlight site-wide */
 }
 
 body {
@@ -250,6 +252,8 @@ body::after {
     z-index: 5000;
     transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: -40px 0 100px rgba(0, 0, 0, 0.9);
+    border-radius: 40px 0 0 40px;
+    /* Rounded leading edge for mobile */
 }
 
 .sidebar.active {
@@ -301,6 +305,8 @@ body::after {
     border-radius: 50%;
     /* Pure Circle */
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    /* Remove blue highlight */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     flex-direction: column;

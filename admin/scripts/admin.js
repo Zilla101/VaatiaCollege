@@ -28,6 +28,27 @@ document.addEventListener('DOMContentLoaded', () => {
     window.API_BASE = API_BASE;
     window.isLocalEnv = !!API_BASE && API_BASE !== 'GITHUB_SYNC';
 
+    // GitHub API Configuration
+    const REPO_OWNER = 'Zilla101';
+    const REPO_NAME = 'VaatiaCollege';
+    const GITHUB_TOKEN = localStorage.getItem('VAATIA_GH_TOKEN');
+
+    const fetchFromGitHub = async (path) => {
+        if (!GITHUB_TOKEN) return null;
+        try {
+            const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            return await response.json();
+        } catch (err) {
+            console.error('GitHub Fetch Error:', err);
+            return null;
+        }
+    };
+
     // 0. Authentication Logic
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
@@ -195,6 +216,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     status.innerText = 'WORLDWIDE SYNC: ACTIVE';
                     status.style.color = '#00f2fe';
                 }
+                const mediaData = await fetchFromGitHub('Media Content');
+                if (mediaData && Array.isArray(mediaData) && mediaStat) {
+                    mediaStat.innerText = mediaData.length;
+                }
                 return;
             }
 
@@ -232,7 +257,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (API_BASE === 'GITHUB_SYNC') {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--accent-blue);">GITHUB CLOUD LIBRARY ACTIVE<br><br><button class="btn-premium" style="font-size: 0.6rem;" onclick="location.reload()">REFRESH FROM CLOUD</button></div>';
+                const data = await fetchFromGitHub('Media Content');
+                if (data && Array.isArray(data)) {
+                    grid.innerHTML = '';
+                    // Support images and filtered folders
+                    const validMedia = data.filter(item =>
+                        item.type === 'dir' ||
+                        /\.(jpg|jpeg|png|gif|svg|webp|png|ico)$/i.test(item.name)
+                    );
+
+                    validMedia.forEach(item => {
+                        const el = document.createElement('div');
+                        el.className = 'media-item';
+                        const isDir = item.type === 'dir';
+                        const displayPath = item.path;
+                        const icon = isDir ? 'folder' : 'image';
+
+                        el.innerHTML = `
+                            ${isDir ?
+                                `<div style="height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: var(--accent-blue);">
+                                    <i data-feather="folder" style="width: 40px; height: 40px;"></i>
+                                </div>` :
+                                `<img src="https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${item.path}" alt="${item.name}" class="image-fade-in" loading="lazy">`
+                            }
+                            <div class="media-overlay">
+                                <span style="font-weight: 700; font-size: 0.65rem; word-break: break-all; padding: 0 10px;">${item.name}</span>
+                                <button class="btn-edit" style="margin-top: 10px; font-size: 0.75rem;" onclick="copyPathToClipboard('${displayPath}')">${isDir ? 'Copy Dir Path' : 'Copy path'}</button>
+                            </div>
+                        `;
+                        grid.appendChild(el);
+                    });
+                    if (typeof feather !== 'undefined') feather.replace();
+                } else {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #f87171;">Failed to load cloud media. Check your Token.</div>';
+                }
                 return;
             }
             if (!API_BASE) {

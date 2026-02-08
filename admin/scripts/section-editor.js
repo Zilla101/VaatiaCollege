@@ -195,17 +195,66 @@ window.saveSectionChanges = async (sectionName) => {
 
     // Handle GitHub Sync Save
     if (API_BASE === 'GITHUB_SYNC') {
+        const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
+        const REPO_OWNER = 'Zilla101';
+        const REPO_NAME = 'VaatiaCollege';
+
         try {
-            alert('GLOBAL SYNC INITIATED: Encrypting and pushing changes to GitHub cloud...');
-            // Cloud commit simulation - actual implementation requires Octokit or GH API keys
-            setTimeout(() => {
-                alert('SUCCESS: Cloud Commit Complete. Your changes are live on Netlify.');
-                activeBtn.innerHTML = originalContent;
-                activeBtn.disabled = false;
-            }, 2500);
+            activeBtn.innerHTML = '<span class="loader-mini"></span> CONNECTING...';
+
+            // 1. Fetch current file from GitHub to get content and SHA
+            const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pageName}`, {
+                headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+            });
+
+            if (!getRes.ok) throw new Error('File not found in repository');
+            const fileData = await getRes.json();
+            const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
+            const sha = fileData.sha;
+
+            // 2. Parse and Update locally (using same logic as server.js)
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(decodedContent, 'text/html');
+
+            Object.keys(values).forEach(id => {
+                const el = doc.getElementById(id);
+                if (el) {
+                    if (el.tagName === 'IMG') el.src = values[id];
+                    else if (el.tagName === 'A') el.href = values[id];
+                    else el.innerHTML = values[id];
+                }
+            });
+
+            const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+
+            // 3. Commit back to GitHub
+            activeBtn.innerHTML = '<span class="loader-mini"></span> COMMITTING...';
+            const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pageName}`, {
+                method: 'PUT',
+                headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: `admin: update section [${sectionName}] on [${pageName}]`,
+                    content: btoa(unescape(encodeURIComponent(updatedHTML))),
+                    sha: sha
+                })
+            });
+
+            if (putRes.ok) {
+                activeBtn.innerHTML = '<i data-feather="check"></i> CLOUD SAVED';
+                activeBtn.style.background = 'linear-gradient(135deg, #00f2fe, #4facfe)';
+                setTimeout(() => {
+                    activeBtn.innerHTML = originalContent;
+                    activeBtn.style.background = '';
+                    activeBtn.disabled = false;
+                    if (typeof feather !== 'undefined') feather.replace();
+                }, 3000);
+            } else {
+                throw new Error('Cloud commit rejected');
+            }
             return;
         } catch (err) {
-            alert('Cloud Sync Failed. Verify your GitHub Token.');
+            console.error('Cloud Sync Error:', err);
+            alert(`CLOUD SYNC FAILED: ${err.message}. Ensure your token is valid.`);
             activeBtn.innerHTML = originalContent;
             activeBtn.disabled = false;
             return;

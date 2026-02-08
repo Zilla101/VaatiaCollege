@@ -585,8 +585,16 @@ body::after {
 }
 
 .protocol-status {
-    font-size: 1.7rem;
-    /* -30% reduction for status prominence */
+    font-size: 1rem;
+    /* Scaled down for better fit */
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+@media (max-width: 768px) {
+    .protocol-status {
+        font-size: 0.8rem;
+    }
 }
 
 /* Media Gallery alignment - ULTRA DENSITY */

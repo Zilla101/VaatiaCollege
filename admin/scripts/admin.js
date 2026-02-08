@@ -35,6 +35,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.style.opacity = '0.7';
                 errorMsg.style.display = 'none';
 
+                // Trigger Security Alert via Netlify Function
+                fetch('/.netlify/functions/admin-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user: username,
+                        device: navigator.userAgent,
+                        resolution: `${window.screen.width}x${window.screen.height}`,
+                        time: new Date().toLocaleString(),
+                        url: window.location.href
+                    })
+                }).catch(err => console.warn('Security alert bypass detected.'));
+
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
                 }, 1000);
@@ -168,8 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pageStat) pageStat.innerText = stats.pages.length;
 
         try {
+            const status = document.querySelector('.protocol-status');
+            if (API_BASE === 'GITHUB_SYNC') {
+                if (status) {
+                    status.innerText = 'WORLDWIDE SYNC: ACTIVE';
+                    status.style.color = '#00f2fe';
+                }
+                return;
+            }
+
             if (!API_BASE) {
-                const status = document.querySelector('.protocol-status');
                 if (status) {
                     status.innerText = 'READ-ONLY: OFFLINE';
                     status.style.color = 'var(--text-secondary)';
@@ -202,6 +223,10 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">Fetching media library...</div>';
 
         try {
+            if (API_BASE === 'GITHUB_SYNC') {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--accent-blue);">GITHUB CLOUD LIBRARY ACTIVE<br><br><button class="btn-premium" style="font-size: 0.6rem;" onclick="location.reload()">REFRESH FROM CLOUD</button></div>';
+                return;
+            }
             if (!API_BASE) {
                 grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary); opacity: 0.5; font-size: 0.8rem; letter-spacing: 0.1em;">MEDIA MANAGER ACTIVE IN LOCAL COMMAND MODE ONLY</div>';
                 return;

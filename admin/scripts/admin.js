@@ -216,6 +216,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     status.innerText = 'WORLDWIDE SYNC: ACTIVE';
                     status.style.color = '#00f2fe';
                 }
+
+                // Fetch latest commit SHA for version tracking
+                const commitRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/commits/main`, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                if (commitRes.ok) {
+                    const commitData = await commitRes.json();
+                    const shortSha = commitData.sha.substring(0, 7);
+                    const commitTime = new Date(commitData.commit.committer.date).toLocaleTimeString();
+                    const shaDisplay = document.getElementById('gh-sync-version');
+                    if (shaDisplay) {
+                        shaDisplay.innerHTML = `VERSION: <span style="color: #00f2fe;">${shortSha}</span> <span style="opacity: 0.5; font-size: 0.5rem; margin-left:10px;">(Pushed at ${commitTime})</span>`;
+                    }
+                }
+
                 const mediaData = await fetchFromGitHub('Media Content');
                 if (mediaData && Array.isArray(mediaData) && mediaStat) {
                     mediaStat.innerText = mediaData.length;

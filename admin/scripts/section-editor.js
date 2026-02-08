@@ -170,8 +170,21 @@ window.saveSectionChanges = async (sectionName) => {
     if (typeof feather !== 'undefined') feather.replace();
 
     // Determine Environment
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
-    const API_BASE = isLocal ? (window.location.port === '3000' ? '' : `http://${window.location.hostname}:3000`) : null;
+    const hostname = window.location.hostname;
+    const isLocal = hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname.startsWith('192.168.') ||
+        hostname.startsWith('10.') ||
+        (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
+
+    const API_BASE = isLocal ? (window.location.port === '3000' ? '' : `http://${hostname}:3000`) : null;
+
+    if (!API_BASE) {
+        alert('Protocol Interrupted: Command server unreachable in production. Please use Local Command Mode for editing.');
+        activeBtn.innerHTML = originalContent;
+        activeBtn.disabled = false;
+        return;
+    }
 
     try {
         const response = await fetch(`${API_BASE}/api/save-section`, {

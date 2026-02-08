@@ -1,10 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Determine API Base URL (Supports accessing via IP/Port 8080 or Port 3000)
     const getApiBase = () => {
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const hostname = window.location.hostname;
+        const isLocal = hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
+            hostname.startsWith('192.168.') ||
+            hostname.startsWith('10.') ||
+            (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
+
         if (!isLocal) return null; // Disable API on production (Netlify)
         if (window.location.port === '3000') return '';
-        const host = window.location.hostname || 'localhost';
+        const host = hostname || 'localhost';
         return `http://${host}:3000`;
     };
     const API_BASE = getApiBase();
@@ -158,6 +164,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pageStat) pageStat.innerText = stats.pages.length;
 
         try {
+            if (!API_BASE) {
+                const status = document.querySelector('.protocol-status');
+                if (status) {
+                    status.innerText = 'READ-ONLY: OFFLINE';
+                    status.style.color = 'var(--text-secondary)';
+                }
+                return;
+            }
             const response = await fetch(`${API_BASE}/api/media`);
             const data = await response.json();
             if (data.success && mediaStat) {
@@ -166,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaStat.innerText = stats.media.length + 24;
             }
         } catch (err) {
-            console.warn('Could not fetch media stats, using fallback.');
+            if (window.isLocalEnv) console.warn('Could not fetch media stats, using fallback.');
             if (mediaStat) mediaStat.innerText = stats.media.length + 24;
         }
     };
@@ -184,6 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">Fetching media library...</div>';
 
         try {
+            if (!API_BASE) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary); opacity: 0.5; font-size: 0.8rem; letter-spacing: 0.1em;">MEDIA MANAGER ACTIVE IN LOCAL COMMAND MODE ONLY</div>';
+                return;
+            }
             const response = await fetch(`${API_BASE}/api/media`);
             const data = await response.json();
 
@@ -203,7 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (err) {
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #f87171;">Failed to load media assets.</div>';
+            if (window.isLocalEnv) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #f87171;">Failed to load media assets.</div>';
+            else grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary); opacity: 0.5;">OFFLINE MODE</div>';
         }
     };
 

@@ -169,9 +169,9 @@ window.saveSectionChanges = async (sectionName) => {
     activeBtn.disabled = true;
     if (typeof feather !== 'undefined') feather.replace();
 
-    // Determine API Base URL
-    const host = window.location.hostname || 'localhost';
-    const API_BASE = window.location.port === '3000' ? '' : `http://${host}:3000`;
+    // Determine Environment
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+    const API_BASE = isLocal ? (window.location.port === '3000' ? '' : `http://${window.location.hostname}:3000`) : null;
 
     try {
         const response = await fetch(`${API_BASE}/api/save-section`, {

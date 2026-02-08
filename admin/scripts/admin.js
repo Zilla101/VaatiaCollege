@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Determine API Base URL (Supports accessing via IP/Port 8080 or Port 3000)
     const getApiBase = () => {
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        if (!isLocal) return null; // Disable API on production (Netlify)
         if (window.location.port === '3000') return '';
         const host = window.location.hostname || 'localhost';
         return `http://${host}:3000`;
     };
     const API_BASE = getApiBase();
+    window.isLocalEnv = !!API_BASE;
 
     // 0. Authentication Logic
     const loginForm = document.getElementById('login-form');
@@ -141,14 +144,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateStats = async () => {
+        if (!API_BASE) {
+            const status = document.querySelector('.protocol-status');
+            if (status) {
+                status.innerText = 'READ-ONLY: OFFLINE';
+                status.style.color = 'var(--text-secondary)';
+            }
+            return;
+        }
         const pageStat = document.getElementById('stat-pages');
         const mediaStat = document.getElementById('stat-media');
 
         if (pageStat) pageStat.innerText = stats.pages.length;
-
-        // Determine API Base URL
-        const host = window.location.hostname || 'localhost';
-        const API_BASE = window.location.port === '3000' ? '' : `http://${host}:3000`;
 
         try {
             const response = await fetch(`${API_BASE}/api/media`);
@@ -168,11 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadMedia = async () => {
         const grid = document.getElementById('main-media-grid');
         if (!grid) return;
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">Fetching media library...</div>';
 
-        // Determine API Base URL
-        const host = window.location.hostname || 'localhost';
-        const API_BASE = window.location.port === '3000' ? '' : `http://${host}:3000`;
+        if (!API_BASE) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary); opacity: 0.5; font-size: 0.8rem; letter-spacing: 0.1em;">MEDIA MANAGER ACTIVE IN LOCAL COMMAND MODE ONLY</div>';
+            return;
+        }
+
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">Fetching media library...</div>';
 
         try {
             const response = await fetch(`${API_BASE}/api/media`);
@@ -333,6 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const file = e.target.files[0];
                 if (!file) return;
 
+                if (!API_BASE) {
+                    alert('Upload is only available in Local Command Mode.');
+                    return;
+                }
                 const formData = new FormData();
                 formData.append('file', file);
 

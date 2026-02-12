@@ -8,9 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
             hostname.startsWith('10.') ||
             (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
 
-        // Priority 1: GitHub Global Sync (If token exists)
+        // Priority 1: GitHub Global Sync (If token exists AND not paused)
         const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
-        if (ghToken) return 'GITHUB_SYNC';
+        const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
+
+        if (ghToken && !isPaused) return 'GITHUB_SYNC';
 
         // Priority 2: Public API Override
         const publicApi = localStorage.getItem('VAATIA_PUBLIC_API');
@@ -27,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_BASE = getApiBase();
     window.API_BASE = API_BASE;
     window.isLocalEnv = !!API_BASE && API_BASE !== 'GITHUB_SYNC';
+    window.isSyncPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
 
     // GitHub API Configuration
     const REPO_OWNER = 'Zilla101';
@@ -211,6 +214,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const status = document.querySelector('.protocol-status');
+            if (window.isSyncPaused) {
+                if (status) {
+                    status.innerText = 'SYNC PAUSED: OFFLINE';
+                    status.style.color = '#f87171';
+                }
+                const shaDisplay = document.getElementById('gh-sync-version');
+                if (shaDisplay) {
+                    shaDisplay.innerHTML = `STATUS: <span style="color: #f87171;">PAUSED</span> <span style="opacity: 0.5; font-size: 0.5rem; margin-left:10px;">(Worldwide Push Disabled)</span>`;
+                }
+                return;
+            }
+
             if (API_BASE === 'GITHUB_SYNC') {
                 if (status) {
                     status.innerText = 'WORLDWIDE SYNC: ACTIVE';
@@ -638,6 +653,22 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStats();
     loadMedia();
     loadPages();
+
+    // Update Sync Pause Button Text
+    const pauseBtn = document.getElementById('sync-pause-btn');
+    if (pauseBtn) {
+        if (window.isSyncPaused) {
+            pauseBtn.innerText = 'RESUME SYNC';
+            pauseBtn.style.background = 'rgba(16, 185, 129, 0.1)';
+            pauseBtn.style.borderColor = '#10b981';
+            pauseBtn.style.color = '#10b981';
+        } else {
+            pauseBtn.innerText = 'PAUSE SYNC';
+            pauseBtn.style.background = 'rgba(248, 113, 113, 0.1)';
+            pauseBtn.style.borderColor = '#f87171';
+            pauseBtn.style.color = '#f87171';
+        }
+    }
 });
 
 // Logout Modal Logic
@@ -697,4 +728,19 @@ window.setupGlobalCommand = () => {
             location.reload();
         }
     }
+};
+
+// Toggle Sync Pause Feature
+window.toggleSyncPause = () => {
+    const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
+    const newState = !isPaused;
+    localStorage.setItem('VAATIA_SYNC_PAUSED', newState.toString());
+
+    if (newState) {
+        alert("SYNC PAUSED. Automatic pushes to GitHub and Vercel are now disabled.");
+    } else {
+        alert("SYNC RESUMED. Worldwide sync is active.");
+    }
+
+    location.reload();
 };

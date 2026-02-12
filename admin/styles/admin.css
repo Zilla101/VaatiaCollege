@@ -1337,3 +1337,87 @@ body::after {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 242, 254, 0.3);
 }
+/* --- Admin Mobile Responsiveness Overhaul --- */
+@media (max-width: 768px) {
+    .content-area {
+        padding: 90px 15px 30px !important;
+    }
+
+    .section-header {
+        margin-bottom: 40px !important;
+        text-align: center;
+        align-items: center !important;
+        gap: 15px !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .glass-card {
+        padding: 20px !important;
+        border-radius: 30px !important;
+    }
+
+    .stat-val {
+        font-size: 2.2rem !important;
+    }
+
+    .protocol-status {
+        font-size: 0.75rem !important;
+    }
+
+    .page-row {
+        flex-direction: column;
+        align-items: flex-start !important;
+        padding: 25px !important;
+        gap: 15px !important;
+        border-radius: 30px !important;
+    }
+
+    .page-info {
+        width: 100%;
+    }
+
+    .page-actions {
+        width: 100%;
+        display: flex;
+        gap: 10px;
+    }
+
+    .page-actions .btn {
+        flex: 1;
+        padding: 12px !important;
+        font-size: 0.9rem !important;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Fixed Sidebar for Mobile */
+    .sidebar {
+        max-width: 100% !important;
+        border-radius: 0 !important;
+        padding: 80px 20px 40px !important;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .sidebar-logo img {
+        height: 50px !important;
+    }
+
+    .nav-link {
+        padding: 15px 20px !important;
+        border-radius: 20px !important;
+        font-size: 1rem !important;
+    }
+}
+
+/* Tab/Small Laptop Refinement */
+@media (min-width: 769px) and (max-width: 1100px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}

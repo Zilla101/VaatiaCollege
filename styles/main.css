@@ -2897,3 +2897,110 @@ footer {
         padding: 0.8rem;
     }
 }
+/* --- Mobile Responsiveness Overhaul (Vaatia Elite Edition) --- */
+@media (max-width: 768px) {
+    :root {
+        --container-padding: 1.25rem;
+    }
+
+    .hero h1 {
+        font-size: clamp(2.5rem, 10vw, 3.8rem) !important;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+    }
+
+    .hero p {
+        font-size: 1.1rem !important;
+        line-height: 1.5;
+        max-width: 100%;
+        margin-bottom: 2.5rem;
+    }
+
+    .btn-group {
+        gap: 0.8rem;
+    }
+
+    .btn {
+        padding: 0.9rem 1.8rem;
+        font-size: 0.95rem;
+    }
+
+    section {
+        padding: 4rem 0 !important;
+    }
+
+    .section-header h2 {
+        font-size: 2.2rem !important;
+    }
+
+    /* Bento Grid Mobile Refinement */
+    .bento-grid {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto !important;
+        gap: 1.25rem !important;
+    }
+
+    .bento-item {
+        height: 280px !important;
+        border-radius: 25px !important;
+        grid-column: span 1 !important;
+    }
+
+    .bento-content {
+        padding: 1.5rem !important;
+    }
+
+    .bento-content h3 {
+        font-size: 1.3rem !important;
+    }
+
+    /* Footer Mobile Refinement */
+    footer {
+        padding: 4rem 0 2rem !important;
+    }
+
+    .footer-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2.5rem !important;
+        text-align: center;
+    }
+
+    .footer-brand p {
+        margin: 0 auto;
+    }
+
+    .footer-brand h2 {
+        font-size: 1.8rem !important;
+    }
+
+    .footer-bottom {
+        padding-top: 1.5rem !important;
+        font-size: 0.8rem;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+}
+
+/* Extreme Mobile Optimization */
+@media (max-width: 420px) {
+    .hero h1 {
+        font-size: clamp(2.2rem, 12vw, 2.8rem) !important;
+    }
+
+    .hero-content {
+        padding-top: 140px !important;
+    }
+
+    .btn-group {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 0.8rem 1.5rem;
+    }
+}

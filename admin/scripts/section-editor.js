@@ -186,6 +186,15 @@ window.saveSectionChanges = async (sectionName) => {
     if (ghToken) API_BASE = 'GITHUB_SYNC';
     else if (globalApi) API_BASE = globalApi;
 
+    // Handle Paused State
+    const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
+    if (isPaused && API_BASE === 'GITHUB_SYNC') {
+        alert('Protocol Interrupted: SYNC IS PAUSED. Please resume sync from the dashboard to push changes to GitHub/Vercel.');
+        activeBtn.innerHTML = originalContent;
+        activeBtn.disabled = false;
+        return;
+    }
+
     if (!API_BASE) {
         alert('Protocol Interrupted: Command server unreachable. Link your GitHub Token for Worldwide access or use Local Command Mode.');
         activeBtn.innerHTML = originalContent;

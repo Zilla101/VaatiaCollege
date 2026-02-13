@@ -102,102 +102,72 @@ app.post('/api/save-section', async (req, res) => {
                     return false;
                 };
 
-                // Apply ALL synchronization rules to EVERY page
-                // This ensures that if matching IDs exist anywhere, they get synced.
+                // --- Advanced Greedy Universal Sync Engine ---
+                // Iterates through all incoming data and matches elements site-wide by ID.
+                Object.keys(data).forEach(key => {
+                    const content = data[key];
+                    if (!content) return;
 
-                // 1. Hero / Header Sync
-                if (data['hero-heading']) updateEl('#live-hero-heading, h1', data['hero-heading']);
-                if (data['hero-subheading']) updateEl('#live-hero-subheading, h1 + p', data['hero-subheading']);
-                if (data['hero-image']) updateEl('#live-hero-image', data['hero-image']);
-                if (data['header-title']) updateEl('#live-header-title, h1', data['header-title']);
-                if (data['header-description']) updateEl('#live-header-description, h1 + p', data['header-description']);
-                if (data['logo-img']) updateEl('#live-logo-img', data['logo-img']);
+                    // Match both raw ID and 'live-' prefixed version
+                    const selectors = [`#${key}`, `#live-${key}`];
 
-                // 2. About Section / Footer Brand Sync
-                if (data['about-title']) updateEl('#live-about-title, #about h2', data['about-title']);
-                if (data['about-description']) {
-                    updateEl('#live-about-description, #about p', data['about-description']);
-                    updateEl('#live-footer-about, .footer-brand p', data['about-description']);
-                }
+                    selectors.forEach(selector => {
+                        const elements = $(selector);
+                        if (elements.length > 0) {
+                            elements.each((i, el) => {
+                                const $el = $(el);
+                                let currentContent;
+                                let isModified = false;
 
-                // 3. Philosophy Section
-                if (data['mission-text']) updateEl('#live-mission-text, .glass-card:contains("Mission") p', data['mission-text']);
-                if (data['vision-text']) updateEl('#live-vision-text, .glass-card:contains("Vision") p', data['vision-text']);
-                if (data['core-values-text']) updateEl('#live-core-values-text, .glass-card:contains("Values") p', data['core-values-text']);
+                                if ($el.is('img')) {
+                                    currentContent = $el.attr('src');
+                                    if (currentContent !== content) {
+                                        $el.attr('src', content);
+                                        isModified = true;
+                                    }
+                                } else if ($el.is('a')) {
+                                    // Handle both Text and Href for links
+                                    const currentHref = $el.attr('href');
+                                    if (key.includes('email') || key.includes('phone')) {
+                                        const prefix = key.includes('email') ? 'mailto:' : 'tel:';
+                                        const cleanVal = key.includes('phone') ? content.replace(/[^\d+]/g, '') : content;
+                                        const newHref = prefix + cleanVal;
+                                        if (currentHref !== newHref) {
+                                            $el.attr('href', newHref);
+                                            isModified = true;
+                                        }
+                                    }
+                                    // Also sync text if it's not a logo/image link
+                                    if ($el.contents().length === 1 && $el.contents()[0].type === 'text') {
+                                        if ($el.text().trim() !== content) {
+                                            $el.text(content);
+                                            isModified = true;
+                                        }
+                                    }
+                                } else {
+                                    // Handle generic text/html containers
+                                    const useHtml = content.includes('<') || content.includes('\n');
+                                    const newContent = useHtml ? content.replace(/\n/g, '<br>') : content;
+                                    currentContent = useHtml ? $el.html() : $el.text();
 
-                // 4. Management Team Sync (Slider/Carousel)
-                if (data['mgmt-principal-img']) updateEl('#live-mgmt-principal-img', data['mgmt-principal-img']);
-                if (data['mgmt-principal-name']) updateEl('#live-mgmt-principal-name', data['mgmt-principal-name']);
-                if (data['mgmt-vp1-img']) updateEl('#live-mgmt-vp1-img', data['mgmt-vp1-img']);
-                if (data['mgmt-vp1-name']) updateEl('#live-mgmt-vp1-name', data['mgmt-vp1-name']);
-                if (data['mgmt-vp2-img']) updateEl('#live-mgmt-vp2-img', data['mgmt-vp2-img']);
-                if (data['mgmt-vp2-name']) updateEl('#live-mgmt-vp2-name', data['mgmt-vp2-name']);
+                                    if (currentContent !== newContent) {
+                                        if (useHtml) $el.html(newContent);
+                                        else $el.text(newContent);
+                                        isModified = true;
+                                    }
+                                }
 
-                // 5. Academic Dashboard / Bento Sync
-                if (data['bento-academics-desc']) updateEl('#live-bento-academics-desc', data['bento-academics-desc']);
-                if (data['bento-skills-desc']) updateEl('#live-bento-skills-desc', data['bento-skills-desc']);
-                if (data['bento-sports-desc']) updateEl('#live-bento-sports-desc', data['bento-sports-desc']);
-                if (data['bento-boarding-desc']) updateEl('#live-bento-boarding-desc', data['bento-boarding-desc']);
-
-                // 6. Contact Info Sync (Site-wide Footer & Links)
-                if (data['contact-email']) {
-                    updateEl('a[href^="mailto:"], #live-footer-email', data['contact-email']);
-                    $('a[href^="mailto:"]').each((i, el) => {
-                        const currentHref = $(el).attr('href');
-                        const newHref = `mailto:${data['contact-email']}`;
-                        if (currentHref !== newHref) {
-                            $(el).attr('href', newHref);
-                            pageWasModified = true;
+                                if (isModified) pageWasModified = true;
+                            });
                         }
                     });
-                }
-                if (data['contact-phone']) {
-                    updateEl('a[href^="tel:"], #live-footer-phone', data['contact-phone']);
-                    const dialNum = data['contact-phone'].replace(/[^\d+]/g, '');
-                    $('a[href^="tel:"]').each((i, el) => {
-                        const currentHref = $(el).attr('href');
-                        const newHref = `tel:${dialNum}`;
-                        if (currentHref !== newHref) {
-                            $(el).attr('href', newHref);
-                            pageWasModified = true;
-                        }
-                    });
-                }
-                if (data['contact-address']) {
-                    updateEl('#live-contact-address, #live-footer-address, .footer-column:contains("Contact") li:last-child', data['contact-address']);
-                }
+                });
 
-                // 4. Pricing / Fees Sync
-                if (data['price-tuition']) updateEl('#live-price-tuition, .fee-amount', data['price-tuition']);
-                if (data['price-other']) updateEl('#live-price-other', data['price-other']);
+                // --- Legacy Fallback Selectors (Ensures 100% compatibility with older markup) ---
+                if (data['hero-heading']) updateEl('h1', data['hero-heading']);
+                if (data['about-description']) updateEl('.footer-brand p', data['about-description']);
+                if (data['contact-address']) updateEl('.footer-column:contains("Contact") li:last-child', data['contact-address']);
 
-                // 5. Admissions / Requirements
-                if (data['req-age']) updateEl('#live-req-age', data['req-age']);
-                if (data['req-documents']) updateEl('#live-req-documents', data['req-documents'].replace(/\n/g, '<br>'), true);
-                if (data['app-process']) updateEl('#live-app-notice', data['app-process'], true);
-                if (data['app-deadline']) updateEl('#live-app-deadline', data['app-deadline']);
-
-                // 6. Boarding Sync
-                if (data['boarding-dorms']) updateEl('#live-boarding-dorms', data['boarding-dorms'].replace(/\n/g, '<br>'), true);
-                if (data['boarding-capacity']) updateEl('#live-boarding-capacity', data['boarding-capacity']);
-                if (data['boarding-facilities']) updateEl('#live-boarding-facilities, #live-boarding-overview', data['boarding-facilities'].replace(/\n/g, '<br>'), true);
-                if (data['boarding-meals']) updateEl('#live-boarding-meals', data['boarding-meals'].replace(/\n/g, '<br>'), true);
-
-                // 7. Activities Sync (Clubs, Sports, Excursions)
-                if (data['activities-overview']) updateEl('#live-activities-overview', data['activities-overview'].replace(/\n/g, '<br>'), true);
-                if (data['activities-schedule']) updateEl('#live-activities-schedule', data['activities-schedule']);
-
-                // 8. Skills Sync
-                if (data['skills-programs']) updateEl('#live-skills-programs', data['skills-programs'].replace(/\n/g, '<br>'), true);
-                if (data['skills-duration']) updateEl('#live-skills-duration', data['skills-duration']);
-
-                // 9. Student Life Sync
-                if (data['students-info']) updateEl('#live-students-info', data['students-info'].replace(/\n/g, '<br>'), true);
-                if (data['students-activities']) updateEl('#live-students-activities', data['students-activities'].replace(/\n/g, '<br>'), true);
-
-                // 10. Payment Info Sync
-                if (data['payment-methods']) updateEl('#live-payment-methods', data['payment-methods'].replace(/\n/g, '<br>'), true);
-                if (data['payment-installment']) updateEl('#live-payment-installment', data['payment-installment']);
 
                 if (pageWasModified) {
                     console.log(`💾 Writing update to: ${filePath}`);

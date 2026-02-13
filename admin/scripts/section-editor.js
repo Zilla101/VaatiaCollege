@@ -202,64 +202,100 @@ window.saveSectionChanges = async (sectionName) => {
         return;
     }
 
-    // Handle GitHub Sync Save
+    // Handle GitHub Sync Save (Universal Greedy Sync Mode)
     if (API_BASE === 'GITHUB_SYNC') {
         const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
         const REPO_OWNER = 'Zilla101';
         const REPO_NAME = 'VaatiaCollege';
+        const ALL_PAGES = [
+            'index.html', 'admissions.html', 'boarding.html', 'club.html',
+            'excursions.html', 'fees.html', 'skillsacquisition.html',
+            'sports.html', 'students.html', 'tuition.html'
+        ];
 
         try {
-            activeBtn.innerHTML = '<span class="loader-mini"></span> CONNECTING...';
+            activeBtn.innerHTML = '<span class="loader-mini"></span> GLOBAL SYNC...';
+            let updatedCount = 0;
 
-            // 1. Fetch current file from GitHub to get content and SHA
-            const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pageName}`, {
-                headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
-            });
+            for (const targetPage of ALL_PAGES) {
+                try {
+                    // 1. Fetch current file from GitHub
+                    const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+                        headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+                    });
 
-            if (!getRes.ok) throw new Error('File not found in repository');
-            const fileData = await getRes.json();
+                    if (!getRes.ok) continue; // Skip missing files
+                    const fileData = await getRes.json();
 
-            // Robust UTF-8 Decoding
-            const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
+                    const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
 
-            const sha = fileData.sha;
+                    const sha = fileData.sha;
 
-            // 2. Parse and Update locally (using same logic as server.js)
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(decodedContent, 'text/html');
+                    // 2. Parse and Update (Greedy Mode)
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(decodedContent, 'text/html');
+                    let pageModified = false;
 
-            Object.keys(values).forEach(id => {
-                const el = doc.getElementById(id);
-                if (el) {
-                    if (el.tagName === 'IMG') el.src = values[id];
-                    else if (el.tagName === 'A') el.href = values[id];
-                    else el.innerHTML = values[id];
+                    Object.keys(values).forEach(id => {
+                        // Greedily match both the ID and the live- prefixed version
+                        const selectors = [`#${id}`, `#live-${id}`];
+                        selectors.forEach(selector => {
+                            const elements = doc.querySelectorAll(selector);
+                            elements.forEach(el => {
+                                let newValue = values[id];
+                                let currentVal;
+
+                                if (el.tagName === 'IMG') {
+                                    currentVal = el.getAttribute('src');
+                                    if (currentVal !== newValue) {
+                                        el.src = newValue;
+                                        pageModified = true;
+                                    }
+                                } else if (el.tagName === 'A') {
+                                    currentVal = el.getAttribute('href');
+                                    if (currentVal !== newValue) {
+                                        el.href = newValue;
+                                        pageModified = true;
+                                    }
+                                } else {
+                                    currentVal = el.innerHTML;
+                                    if (currentVal !== newValue) {
+                                        el.innerHTML = newValue;
+                                        pageModified = true;
+                                    }
+                                }
+                            });
+                        });
+                    });
+
+                    if (!pageModified) continue;
+
+                    activeBtn.innerHTML = `<span class="loader-mini"></span> PUSHING ${targetPage.toUpperCase()}...`;
+                    const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+
+                    const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+                        return String.fromCharCode('0x' + p1);
+                    }));
+
+                    const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: `admin: universal greedy sync [${sectionName}]`,
+                            content: encodedContent,
+                            sha: sha
+                        })
+                    });
+
+                    if (putRes.ok) updatedCount++;
+                } catch (err) {
+                    console.warn(`Sync failed for ${targetPage}:`, err);
                 }
-            });
+            }
 
-            const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-
-            // 3. Commit back to GitHub
-            activeBtn.innerHTML = '<span class="loader-mini"></span> COMMITTING...';
-
-            // Robust UTF-8 Encoding
-            const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
-                return String.fromCharCode('0x' + p1);
-            }));
-
-            const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${pageName}`, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: `admin: update section [${sectionName}] on [${pageName}]`,
-                    content: encodedContent,
-                    sha: sha
-                })
-            });
-
-            if (putRes.ok) {
+            if (updatedCount > 0) {
                 activeBtn.innerHTML = '<i data-feather="loader"></i> DEPLOYING (30s)...';
                 activeBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
 
@@ -273,12 +309,10 @@ window.saveSectionChanges = async (sectionName) => {
                         activeBtn.innerHTML = '<i data-feather="check"></i> SITE IS LIVE';
                         activeBtn.style.background = 'linear-gradient(135deg, #00f2fe, #4facfe)';
 
-                        // Nudge user to hard refresh to see changes
                         setTimeout(() => {
-                            if (confirm("Deployment complete! Changes are now live on the server.\n\nWould you like to reload the page to verify?")) {
+                            if (confirm(`Universal Greedy Sync Complete! ${updatedCount} pages updated.\n\nWould you like to reload the page to verify?`)) {
                                 window.open('../' + pageName, '_blank');
                             }
-
                             activeBtn.innerHTML = originalContent;
                             activeBtn.style.background = '';
                             activeBtn.disabled = false;
@@ -287,12 +321,14 @@ window.saveSectionChanges = async (sectionName) => {
                     }
                 }, 1000);
             } else {
-                throw new Error('Cloud commit rejected');
+                alert('No changes detected site-wide.');
+                activeBtn.innerHTML = originalContent;
+                activeBtn.disabled = false;
             }
             return;
         } catch (err) {
             console.error('Cloud Sync Error:', err);
-            alert(`CLOUD SYNC FAILED: ${err.message}. Ensure your token is valid.`);
+            alert(`CLOUD SYNC FAILED: ${err.message}`);
             activeBtn.innerHTML = originalContent;
             activeBtn.disabled = false;
             return;

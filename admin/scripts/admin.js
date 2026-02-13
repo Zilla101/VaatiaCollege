@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Determine API Base URL (Supports accessing via IP/Port 8080 or Port 3000)
     const getApiBase = () => {
         const hostname = window.location.hostname;
+        const port = window.location.port;
         const isLocal = hostname === 'localhost' ||
             hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
@@ -18,9 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const publicApi = localStorage.getItem('VAATIA_PUBLIC_API');
         if (publicApi) return publicApi;
 
-        // Priority 3: Local Command Engine
+        // Priority 3: Production Domain Auto-Detection (e.g., vaatiacollege.com.ng)
+        // If we are on the main domain and local server is running (or integrated), use relative paths
+        if (!isLocal && hostname.includes('vaatiacollege')) {
+            return ''; // Use relative API calls
+        }
+
+        // Priority 4: Local Command Engine
         if (isLocal) {
-            if (window.location.port === '3000') return '';
+            if (port === '3000' || port === '8080') return ''; // We are likely on the server already
             return `http://${hostname}:3000`;
         }
 
@@ -620,6 +627,116 @@ document.addEventListener('DOMContentLoaded', () => {
                 </p>
             </div>
         `;
+
+        if (API_BASE === 'GITHUB_SYNC') {
+            const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
+            const REPO_OWNER = 'Zilla101';
+            const REPO_NAME = 'VaatiaCollege';
+            const ALL_PAGES = [
+                'index.html', 'admissions.html', 'boarding.html', 'club.html',
+                'excursions.html', 'fees.html', 'skillsacquisition.html',
+                'sports.html', 'students.html', 'tuition.html'
+            ];
+
+            try {
+                let updatedCount = 0;
+                for (const targetPage of ALL_PAGES) {
+                    try {
+                        // 1. Fetch current file from GitHub
+                        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+                            headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+                        });
+
+                        if (!getRes.ok) continue;
+                        const fileData = await getRes.json();
+
+                        // Robust UTF-8 Decoding
+                        const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
+                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                        }).join(''));
+
+                        const sha = fileData.sha;
+
+                        // 2. Parse and Update (Greedy Mode)
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(decodedContent, 'text/html');
+                        let pageModified = false;
+
+                        const targetId = `${section}-${key}`;
+                        const selectors = [`#${targetId}`, `#live-${targetId}`];
+
+                        selectors.forEach(selector => {
+                            const elements = doc.querySelectorAll(selector);
+                            elements.forEach(el => {
+                                let currentVal;
+                                if (el.tagName === 'IMG') {
+                                    currentVal = el.getAttribute('src');
+                                    if (currentVal !== filePath) {
+                                        el.src = filePath;
+                                        pageModified = true;
+                                    }
+                                } else if (el.tagName === 'A') {
+                                    currentVal = el.getAttribute('href');
+                                    if (currentVal !== filePath) {
+                                        el.href = filePath;
+                                        pageModified = true;
+                                    }
+                                } else {
+                                    currentVal = el.innerHTML;
+                                    if (currentVal !== filePath) {
+                                        el.innerHTML = filePath;
+                                        pageModified = true;
+                                    }
+                                }
+                            });
+                        });
+
+                        if (!pageModified) continue;
+
+                        // 3. Commit back to GitHub
+                        const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+                        const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+                            return String.fromCharCode('0x' + p1);
+                        }));
+
+                        const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+                            method: 'PUT',
+                            headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: `admin: universal greedy asset deploy [${filePath}]`,
+                                content: encodedContent,
+                                sha: sha
+                            })
+                        });
+
+                        if (putRes.ok) updatedCount++;
+                    } catch (err) {
+                        console.warn(`Asset sync failed for ${targetPage}:`, err);
+                    }
+                }
+
+                if (updatedCount > 0) {
+                    body.innerHTML = `
+                        <div style="text-align: center; padding: 60px;">
+                            <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
+                            <h3 style="color: white; margin-bottom: 10px;">WORLDWIDE DEPLOY SUCCESS</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Asset deployed to ${updatedCount} pages. Live on Vercel in ~30s.</p>
+                            <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">CONFIRM</button>
+                        </div>
+                    `;
+                    feather.replace();
+                } else {
+                    alert('No matching elements found site-wide for this asset.');
+                    closeModal();
+                }
+                return;
+            } catch (err) {
+                console.error('Cloud Sync Error:', err);
+                alert(`CLOUD SYNC FAILED: ${err.message}`);
+                closeModal();
+                return;
+            }
+        }
 
         try {
             const response = await fetch(`${API_BASE}/api/save-section`, {

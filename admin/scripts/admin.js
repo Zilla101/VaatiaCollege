@@ -47,11 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const publicAPI = localStorage.getItem('VAATIA_PUBLIC_API');
         const radarOverride = localStorage.getItem('VAATIA_RADAR_URL');
 
+        // FORCE UNIFIED HUB: If local, default to Vercel production API for session parity
         if (radarOverride) return `${radarOverride.replace(/\/$/, '')}/api/session`;
-        if (isProdDomain || (!API_BASE && !publicAPI)) return '/api/session';
         if (publicAPI) return `${publicAPI}/api/session`;
-        if (API_BASE === 'GITHUB_SYNC') return 'https://vaatiacollege.vercel.app/api/session';
-        return `${API_BASE}/api/session`;
+        if (isProdDomain || (!API_BASE && !publicAPI)) return '/api/session';
+
+        // If on localhost/internal, we MUST point to production Vercel to see global sessions
+        return 'https://vaatiacollege.vercel.app/api/session';
     };
 
     const GITHUB_TOKEN = localStorage.getItem('VAATIA_GH_TOKEN');
@@ -100,7 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // GATE: Regular admins must pass access check before login
                 if (!isSuper) {
-                    fetch('/api/session')
+                    const gateEndpoint = window.getRadarEndpoint();
+                    fetch(gateEndpoint)
                         .then(r => r.json())
                         .then(data => {
                             if (data.adminAccessBlocked) {
@@ -288,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const res = await fetch(endpoint, {
                         method: 'POST',
+                        credentials: 'include',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             username,
@@ -411,6 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'GET',
                     mode: 'cors',
                     cache: 'no-cache',
+                    credentials: 'include',
                     headers: { 'Accept': 'application/json' }
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);

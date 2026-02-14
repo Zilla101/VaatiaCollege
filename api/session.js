@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     if (method === 'GET') {
         return res.status(200).json({
             success: true,
-            users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 60000 })),
+            users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 90000 })),
             actions: (mockActions || []).slice(-15).reverse(),
             adminAccessBlocked
         });
@@ -117,14 +117,14 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Cleanup stale sessions (5 min threshold)
-            const STALE_THRESHOLD = 5 * 60 * 1000;
+            // Cleanup stale sessions (10 min threshold for better Vercel persistence)
+            const STALE_THRESHOLD = 10 * 60 * 1000;
             mockUsers = mockUsers.filter(u => (now - u.timestamp) < STALE_THRESHOLD);
 
             return res.status(200).json({
                 success: true,
                 adminAccessBlocked,
-                users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 60000 }))
+                users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 90000 }))
             });
         }
     }

@@ -52,6 +52,12 @@
                         <span>Page Manager</span>
                     </a>
                 </li>
+                <li class="nav-item" id="nav-item-settings" style="display: none;">
+                    <a href="#" class="nav-link" data-tab="settings">
+                        <i data-feather="settings"></i>
+                        <span>System Settings</span>
+                    </a>
+                </li>
                 <li class="nav-item" style="margin-top: auto;">
                     <a href="javascript:void(0)" class="nav-link" onclick="openLogoutModal()">
                         <i data-feather="log-out"></i>
@@ -110,6 +116,9 @@
                     </div>
                 </div>
 
+                <!-- Super Admin Console Injection Point -->
+                <div id="super-admin-console"></div>
+
                 <div class="glass-card" style="margin-top: 20px;">
                     <h2 style="margin-bottom: 25px; font-weight: 800;" class="text-gradient directives-title">Quick
                         Directives</h2>
@@ -148,6 +157,26 @@
                 </header>
                 <div class="page-list" id="main-page-list">
                     <!-- Dynamic Alignment: Buttons will link to actual project files -->
+                </div>
+            </section>
+
+            <!-- Tab: Settings (Super Admin Only) -->
+            <section id="settings" class="tab-content">
+                <header class="section-header center-aligned">
+                    <div>
+                        <h1 class="text-gradient">System Settings</h1>
+                        <p
+                            style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.8rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-top: 10px;">
+                            Global Configuration Sector</p>
+                    </div>
+                </header>
+                <div class="glass-card" style="margin-top: 20px;">
+                    <p style="color: var(--text-secondary); opacity: 0.7;">Centralized control for API protocols, global
+                        variables, and security keys.</p>
+                    <div style="margin-top: 30px; display: grid; gap: 20px;">
+                        <button class="btn-edit" onclick="setupGlobalCommand()">Manage API Connection</button>
+                        <button class="btn-edit" onclick="openSettings()">Advanced Security Panel</button>
+                    </div>
                 </div>
             </section>
 

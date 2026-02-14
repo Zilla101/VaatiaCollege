@@ -69,12 +69,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = loginForm.querySelector('.btn-billion');
             const errorMsg = document.getElementById('auth-error');
 
-            if (username === 'VaatiaAdmin' && password === 'Vaatia@2004') {
+            const superAdmins = ['Darellmax', 'Tavershima'];
+            const regularAdmin = 'VaatiaAdmin';
+            const validPass = 'Vaatia@2004';
+
+            if ((superAdmins.includes(username) || username === regularAdmin) && password === validPass) {
                 btn.innerText = 'AUTHENTICATING...';
                 btn.style.opacity = '0.7';
                 errorMsg.style.display = 'none';
 
-                // Trigger Security Alert via Vercel API (Migrated from Netlify)
+                // Set Session Data
+                const role = superAdmins.includes(username) ? 'Super Admin' : 'Admin';
+                localStorage.setItem('VAATIA_USER', username);
+                localStorage.setItem('VAATIA_ROLE', role);
+                localStorage.setItem('VAATIA_LOGIN_TIME', new Date().toLocaleString());
+
+                // Trigger Security Alert via Vercel API
                 fetch('/api/admin-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -115,6 +125,158 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // --- Session Pulse & Role-Based UI Init ---
+    const initSession = () => {
+        const username = localStorage.getItem('VAATIA_USER');
+        const role = localStorage.getItem('VAATIA_ROLE');
+
+        if (!username || !window.location.pathname.includes('dashboard.html')) return;
+
+        // 1. Personalize UI
+        const sidebarUser = document.querySelector('.sidebar-logo span');
+        if (sidebarUser) sidebarUser.innerText = username;
+
+        const welcomeSubtext = document.querySelector('.hero-header-content p');
+        if (welcomeSubtext) welcomeSubtext.innerText = `Welcome, ${username} (${role})`;
+
+        // 1.1 Role-Based Visibility Restrictions
+        if (role !== 'Super Admin') {
+            // Hide Super Admin specific controls in Overview
+            const syncPauseBtn = document.getElementById('sync-pause-btn');
+            if (syncPauseBtn) syncPauseBtn.style.display = 'none';
+
+            // Also hide 'Manage Connection' for regular admins
+            const overviewButtons = document.querySelectorAll('#overview .hero-header-content button');
+            overviewButtons.forEach(btn => {
+                if (btn.innerText.includes('MANAGE CONNECTION')) {
+                    btn.style.display = 'none';
+                }
+            });
+
+            // Ensure they can't see the Settings nav item (though it's hidden by CSS/inline by default now)
+            const settingsNav = document.getElementById('nav-item-settings');
+            if (settingsNav) settingsNav.style.display = 'none';
+        } else {
+            // Super Admin specifics
+            const settingsNav = document.getElementById('nav-item-settings');
+            if (settingsNav) settingsNav.style.display = 'block';
+        }
+
+        // 2. Start Heartbeat
+        const startHeartbeat = () => {
+            const beat = async () => {
+                try {
+                    const res = await fetch(`${API_BASE || 'http://localhost:3000'}/api/session/heartbeat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, role })
+                    });
+
+                    if (res.status === 403) {
+                        const data = await res.json();
+                        if (data.killed) {
+                            alert('🚨 SESSION TERMINATED\nA Super Admin has ended your session for security reasons.');
+                            confirmLogout();
+                        }
+                    }
+                } catch (err) {
+                    console.warn('Heartbeat connection lost.');
+                }
+            };
+            beat();
+            setInterval(beat, 10000); // Pulse every 10s
+        };
+
+        startHeartbeat();
+
+        // 3. Super Admin Specific Features
+        if (role === 'Super Admin') {
+            renderCommandDeck();
+        }
+    };
+
+    const renderCommandDeck = () => {
+        const consolePoint = document.getElementById('super-admin-console');
+        if (!consolePoint) return;
+
+        const deckHTML = `
+            <div class="glass-card" style="margin-top: 20px; border-left: 4px solid var(--accent-blue); animation: slideInUp 0.5s ease-out;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <div>
+                        <h2 class="text-gradient" style="font-weight: 800; margin: 0;">Command Radar</h2>
+                        <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7;">REAL-TIME SESSION MONITORING</p>
+                    </div>
+                    <span style="font-size: 0.65rem; color: var(--accent-blue); letter-spacing: 0.2em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
+                </div>
+                <div id="online-users-list" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div style="text-align: center; padding: 20px; opacity: 0.5;">
+                        <div class="loader-circle" style="width: 20px; height: 20px; border: 2px solid var(--accent-blue); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                        <p style="font-size: 0.6rem; letter-spacing: 0.1em;">SCANNING NETWORK...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        consolePoint.innerHTML = deckHTML;
+
+        const updateOnlineList = async () => {
+            try {
+                const res = await fetch(`${API_BASE || 'http://localhost:3000'}/api/session/online`);
+                const data = await res.json();
+                const list = document.getElementById('online-users-list');
+
+                if (data.success && list) {
+                    if (data.users.length === 0) {
+                        list.innerHTML = '<p style="color: var(--text-secondary); opacity: 0.5;">No other active sessions detected.</p>';
+                        return;
+                    }
+
+                    list.innerHTML = data.users.map(u => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="width: 32px; height: 32px; background: ${u.role === 'Super Admin' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a0a; font-size: 0.8rem;">
+                                    ${u.username[0]}
+                                </div>
+                                <div>
+                                    <div style="color: white; font-weight: 700; font-size: 0.9rem;">${u.username} <span style="font-size: 0.6rem; color: var(--text-secondary); font-weight: 400; opacity: 0.7;">(${u.ip})</span></div>
+                                    <div style="color: var(--accent-blue); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">${u.role} • LAST SEEN: ${u.lastSeen}</div>
+                                </div>
+                            </div>
+                            ${u.role !== 'Super Admin' ? `
+                                <button onclick="terminateSession('${u.username}')" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 0.55rem; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase;">Terminate</button>
+                            ` : '<span style="color: var(--text-secondary); font-size: 0.6rem; font-weight: 800; text-transform: uppercase;">Protected</span>'}
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.warn('Failed to fetch online users.');
+            }
+        };
+
+        updateOnlineList();
+        setInterval(updateOnlineList, 15000); // Refresh list every 15s
+    };
+
+    window.terminateSession = async (username) => {
+        if (!confirm(`Are you sure you want to FORCE LOGOUT ${username}?`)) return;
+
+        try {
+            const res = await fetch(`${API_BASE || 'http://localhost:3000'}/api/session/terminate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ targetUser: username })
+            });
+
+            if (res.ok) {
+                alert(`Session for ${username} has been flagged for termination.`);
+            }
+        } catch (err) {
+            alert('Failed to execute termination command.');
+        }
+    };
+
+    initSession();
 
     // --- Dashboard & Navigation Logic (Universal) ---
 
@@ -820,6 +982,11 @@ function confirmLogout() {
 
 // --- Global Connection Settings ---
 window.setupGlobalCommand = () => {
+    const role = localStorage.getItem('VAATIA_ROLE');
+    if (role !== 'Super Admin') {
+        alert("ACCESS DENIED: Restricted to Super Administrators.");
+        return;
+    }
     const mode = confirm("Activate Direct Cloud Sync?\n\nOK = Worldwide Access (GitHub Login)\nCancel = Local Command Mode Only");
 
     if (mode) {
@@ -849,6 +1016,11 @@ window.setupGlobalCommand = () => {
 
 // Toggle Sync Pause Feature
 window.toggleSyncPause = () => {
+    const role = localStorage.getItem('VAATIA_ROLE');
+    if (role !== 'Super Admin') {
+        alert("ACCESS DENIED: Restricted to Super Administrators.");
+        return;
+    }
     const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
     const newState = !isPaused;
     localStorage.setItem('VAATIA_SYNC_PAUSED', newState.toString());

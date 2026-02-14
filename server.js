@@ -41,6 +41,56 @@ const ALL_PAGES = [
     'sports.html', 'students.html', 'tuition.html'
 ];
 
+// --- Session Management Memory Store ---
+let activeSessions = {}; // { username: { lastSeen: timestamp, ip: string, role: string } }
+let killedSessions = new Set();
+
+// Session Heartbeat Endpoint
+app.post('/api/session/heartbeat', (req, res) => {
+    const { username, role } = req.body;
+    if (!username) return res.status(400).json({ error: 'Username required' });
+
+    // Check if session was killed by a Super Admin
+    if (killedSessions.has(username)) {
+        killedSessions.delete(username); // Clean up
+        delete activeSessions[username];
+        return res.status(403).json({ killed: true, message: 'Session terminated by Super Admin' });
+    }
+
+    activeSessions[username] = {
+        lastSeen: Date.now(),
+        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+        role: role || 'Admin'
+    };
+
+    res.json({ success: true });
+});
+
+// Get Online Users (Super Admin Only)
+app.get('/api/session/online', (req, res) => {
+    const now = Date.now();
+    const onlineUsers = Object.keys(activeSessions)
+        .filter(user => (now - activeSessions[user].lastSeen) < 30000) // 30s timeout
+        .map(user => ({
+            username: user,
+            role: activeSessions[user].role,
+            ip: activeSessions[user].ip,
+            lastSeen: new Date(activeSessions[user].lastSeen).toLocaleTimeString()
+        }));
+
+    res.json({ success: true, users: onlineUsers });
+});
+
+// Terminate Session (Super Admin Only)
+app.post('/api/session/terminate', (req, res) => {
+    const { targetUser } = req.body;
+    if (!targetUser) return res.status(400).json({ error: 'Target user required' });
+
+    killedSessions.add(targetUser);
+    console.log(`🚨 SESSION TERMINATED: ${targetUser} by Super Admin`);
+    res.json({ success: true, message: `${targetUser} flagged for termination` });
+});
+
 // API endpoint to save section changes
 app.post('/api/save-section', async (req, res) => {
     try {

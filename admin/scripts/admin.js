@@ -60,22 +60,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = document.getElementById('user-id').value;
+            const rawUsername = document.getElementById('user-id').value;
             const password = document.getElementById('pass-key').value;
             const btn = loginForm.querySelector('.btn-billion');
             const errorMsg = document.getElementById('auth-error');
 
+            const username = rawUsername.trim();
             const superAdmins = ['Darellmax', 'Tavershima'];
             const regularAdmin = 'VaatiaAdmin';
             const validPass = 'Vaatia@2004';
 
-            if ((superAdmins.includes(username) || username === regularAdmin) && password === validPass) {
+            // Case-Insensitive check for known admins
+            const isSuper = superAdmins.some(name => name.toLowerCase() === username.toLowerCase());
+            const isAdmin = username.toLowerCase() === regularAdmin.toLowerCase();
+
+            if ((isSuper || isAdmin) && password === validPass) {
                 btn.innerText = 'AUTHENTICATING...';
                 btn.style.opacity = '0.7';
                 errorMsg.style.display = 'none';
 
-                // Set Session Data
-                const role = superAdmins.includes(username) ? 'Super Admin' : 'Admin';
+                // Set Session Data (Normalized Case)
+                const role = isSuper ? 'Super Admin' : 'Admin';
                 sessionStorage.setItem('VAATIA_USER', username);
                 sessionStorage.setItem('VAATIA_ROLE', role);
                 sessionStorage.setItem('VAATIA_LOGIN_TIME', new Date().toLocaleString());
@@ -164,14 +169,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (welcomeSubtext) welcomeSubtext.innerText = `Welcome, ${username} (${role})`;
 
         // 1.1 Role-Based Visibility Restrictions
-        if (role !== 'Super Admin' && role !== 'Admin') {
-            // Hide Super Admin specific controls in Overview for non-admins
+        const isAuthorized = role === 'Super Admin' || role === 'Admin';
+
+        if (!isAuthorized) {
+            // Hide admin specific controls in Overview for non-authorized personnel
             const syncPauseBtn = document.getElementById('sync-pause-btn');
             if (syncPauseBtn) syncPauseBtn.style.display = 'none';
 
             const overviewButtons = document.querySelectorAll('#overview .hero-header-content button');
             overviewButtons.forEach(btn => {
-                if (btn.innerText.includes('MANAGE CONNECTION')) {
+                const text = btn.innerText.toUpperCase();
+                if (text.includes('MANAGE') && text.includes('CONNECTION')) {
                     btn.style.display = 'none';
                 }
             });
@@ -185,7 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const overviewButtons = document.querySelectorAll('#overview .hero-header-content button');
             overviewButtons.forEach(btn => {
-                if (btn.innerText.includes('MANAGE CONNECTION')) {
+                const text = btn.innerText.toUpperCase();
+                if (text.includes('MANAGE') && text.includes('CONNECTION')) {
                     btn.style.display = 'block';
                 }
             });

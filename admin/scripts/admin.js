@@ -405,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .command-radar-grid { grid-template-columns: 1fr !important; gap: 30px !important; }
                     .glass-card { padding: 20px !important; }
                     .radar-action-stack { margin-top: 20px; width: 100%; }
+                    .strategy-btn-container { margin-left: 0% !important; margin-top: 25px !important; }
                 }
                 @media (max-width: 768px) {
                     .text-gradient { font-size: 1.4rem !important; }

@@ -491,7 +491,7 @@ body::after {
 .sidebar-logo span {
     font-family: 'Poppins', sans-serif;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 1.235rem;
     letter-spacing: -0.02em;
     background: linear-gradient(135deg, #fff, var(--accent-blue));
     -webkit-background-clip: text;
@@ -520,7 +520,7 @@ body::after {
     text-decoration: none;
     transition: all var(--transition-premium);
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.975rem;
     border: 1px solid transparent;
 }
 

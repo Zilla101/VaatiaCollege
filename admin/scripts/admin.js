@@ -741,6 +741,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-calculate stats or refresh grid if needed
         if (tabId === 'media') loadMedia();
         if (tabId === 'pages') loadPages();
+
+        // Log Navigation for Radar Visibility
+        if (window.logAdminAction) {
+            const activeLink = document.querySelector(`.nav-link[data-tab="${tabId}"]`);
+            const tabName = activeLink && activeLink.querySelector('span') ? activeLink.querySelector('span').innerText : tabId;
+            window.logAdminAction(`Navigated to ${tabName}`);
+        }
     }
 
     navLinks.forEach(link => {
@@ -994,8 +1001,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
             const originalText = saveBtn.innerText;
+            const modalTitle = document.getElementById('modal-title');
+            const pageName = modalTitle ? modalTitle.innerText : 'Unknown Page';
+
             saveBtn.innerText = 'EXECUTING SYNC...';
             saveBtn.style.opacity = '0.7';
+
+            // Log Action for Radar Visibility
+            if (window.logAdminAction) window.logAdminAction(`Saved Changes to: ${pageName}`);
 
             setTimeout(() => {
                 saveBtn.innerText = 'PROTOCOL SYNCED';
@@ -1052,6 +1065,9 @@ document.addEventListener('DOMContentLoaded', () => {
             input.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
+
+                // Log Action for Radar Visibility
+                if (window.logAdminAction) window.logAdminAction(`Uploading Asset: ${file.name}`);
 
                 if (!API_BASE) {
                     alert('Upload is only available in Local Command Mode.');
@@ -1175,6 +1191,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.applyAssetToSection = async (page, section, key, filePath) => {
         const data = {};
         data[`${section}-${key}`] = filePath;
+
+        // Log Action for Radar Visibility
+        if (window.logAdminAction) {
+            window.logAdminAction(`Placed Asset [${key}] in ${page}`);
+        }
 
         // Visual feedback
         const modal = document.getElementById('edit-modal');

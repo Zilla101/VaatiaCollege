@@ -56,15 +56,16 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true, adminAccessBlocked });
         }
 
-        // 1. Handle Terminate Protocol
+        // 1. Handle Terminate Protocol (Unified with Lockdown)
         if (targetUser) {
             mockUsers = mockUsers.filter(u => u.username.toLowerCase() !== targetUser.toLowerCase());
+            adminAccessBlocked = true; // Ejecting an admin now triggers a system-wide block
             mockActions.push({
                 username: 'SYSTEM',
-                action: `Terminated ${targetUser} session`,
+                action: `Terminated ${targetUser} session & INITIATED LOCKDOWN`,
                 timestamp: new Date().toISOString()
             });
-            return res.status(200).json({ success: true });
+            return res.status(200).json({ success: true, adminAccessBlocked: true });
         }
 
         // 2. Handle Heartbeat & Identity tracking

@@ -1158,18 +1158,55 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Security & Systems</h3>
                     <p style="color: var(--text-secondary); opacity: 0.7; max-width: 400px; margin: 0 auto 30px;">
                         This section is restricted to Level 2 Administrators. Your identity is currently being verified.
+    // Global Command Setup (Manage API Connection)
+    window.setupGlobalCommand = () => {
+        const modal = document.getElementById('edit-modal');
+        const title = document.getElementById('modal-title');
+        const body = document.getElementById('modal-body');
+
+        if (title && body) {
+            title.innerText = 'Command Link Setup';
+            body.innerHTML = `
+                < div style = "text-align: center;" >
+                    <i data-feather="globe" style="width: 48px; height: 48px; color: var(--accent-blue); margin-bottom: 20px;"></i>
+                    <p style="color: var(--text-secondary); margin-bottom: 30px;">
+                        Configure the connection protocol for the Administrative Command Centre.
                     </p>
-                    <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                        <p style="font-size: 0.8rem; letter-spacing: 0.1em; color: var(--accent-blue); font-weight: 800;">PROTOCOL: VCM-ADMIN-AUTH-V2</p>
+                    
+                    <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px;">
+                        <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: var(--accent-blue);">GitHub Satellite Link</h3>
+                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Enable Universal Cloud Sync to edit from anywhere (Required for Failover).</p>
+                        
+                        <input type="password" id="gh-token-input" placeholder="Paste GitHub Personal Access Token" value="${localStorage.getItem('VAATIA_GH_TOKEN') || ''}" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 15px;">
+                        
+                        <button class="btn-edit" onclick="saveGitHubToken()" style="width: 100%; justify-content: center; background: rgba(0, 242, 254, 0.1); border-color: var(--accent-blue); color: var(--accent-blue);">
+                            <i data-feather="link" style="width: 14px; height: 14px; margin-right: 8px;"></i> LINK SATELLITE
+                        </button>
                     </div>
-                </div>
-            `;
+
+                    <div style="text-align: right;">
+                        <button class="btn-premium" onclick="closeModal()">DONE</button>
+                    </div>
+                </div >
+                `;
 
             if (modal) {
                 modal.style.display = 'flex';
-                feather.replace();
+                if (typeof feather !== 'undefined') feather.replace();
             }
         }
+    };
+
+    // Helper to save token
+    window.saveGitHubToken = () => {
+         const token = document.getElementById('gh-token-input').value.trim();
+         if (token) {
+             localStorage.setItem('VAATIA_GH_TOKEN', token);
+             alert('✅ Satellite Linked! Universal Cloud Sync is now ACTIVE.');
+         } else {
+             localStorage.removeItem('VAATIA_GH_TOKEN');
+             alert('Satellite Link Severed.');
+         }
     };
 
     window.closeModal = () => {
@@ -1188,7 +1225,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!file) return;
 
                 // Log Action for Radar Visibility
-                if (window.logAdminAction) window.logAdminAction(`Uploading Asset: ${file.name}`);
+                if (window.logAdminAction) window.logAdminAction(`Uploading Asset: ${ file.name } `);
 
                 if (!API_BASE) {
                     alert('Upload is only available in Local Command Mode.');
@@ -1201,7 +1238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 uploadBtn.disabled = true;
 
                 try {
-                    const response = await fetch(`${API_BASE}/api/upload`, {
+                    const response = await fetch(`${ API_BASE } /api/upload`, {
                         method: 'POST',
                         body: formData
                     });
@@ -1233,7 +1270,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         title.innerText = 'Protocol: Asset Placement';
         body.innerHTML = `
-            <div style="text-align: center; margin-bottom: 25px;">
+                < div style = "text-align: center; margin-bottom: 25px;" >
                 <img src="../${filePath}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 15px; border: 2px solid var(--accent-blue); margin-bottom: 10px;" class="image-fade-in">
                 <p style="color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 0.05em;">DEPLOYMENT DETECTED: SELECT SECTOR</p>
             </div>
@@ -1288,7 +1325,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="margin-top: 25px; text-align: center; display: flex; flex-direction: column; gap: 10px;">
                 <button class="btn-edit" onclick="closeModal()" style="width: 100%; border: 1px solid rgba(255,255,255,0.1);">SKIP AUTOMATIC PLACEMENT</button>
             </div>
-        `;
+            `;
         modal.style.display = 'flex';
         feather.replace();
     };
@@ -1311,24 +1348,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.applyAssetToSection = async (page, section, key, filePath) => {
         const data = {};
-        data[`${section}-${key}`] = filePath;
+        data[`${ section } -${ key } `] = filePath;
 
         // Log Action for Radar Visibility
         if (window.logAdminAction) {
-            window.logAdminAction(`Placed Asset [${key}] in ${page}`);
+            window.logAdminAction(`Placed Asset[${ key }] in ${ page } `);
         }
 
         // Visual feedback
         const modal = document.getElementById('edit-modal');
         const body = document.getElementById('modal-body');
         body.innerHTML = `
-            <div style="text-align: center; padding: 60px;">
+                < div style = "text-align: center; padding: 60px;" >
                 <div class="loader-circle" style="width: 40px; height: 40px; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;"></div>
                 <p style="color: var(--accent-blue); font-size: 0.7rem; letter-spacing: 0.3em; font-weight: 800; text-transform: uppercase;">
                     Executing Global Sync...
                 </p>
-            </div>
-        `;
+            </div >
+                `;
 
         if (API_BASE === 'GITHUB_SYNC') {
             const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
@@ -1346,79 +1383,79 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         // 1. Fetch current file from GitHub
                         const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
-                            headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
-                        });
+            headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
 
-                        if (!getRes.ok) continue;
-                        const fileData = await getRes.json();
+if (!getRes.ok) continue;
+const fileData = await getRes.json();
 
-                        // Robust UTF-8 Decoding
-                        const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
-                            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                        }).join(''));
+// Robust UTF-8 Decoding
+const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+}).join(''));
 
-                        const sha = fileData.sha;
+const sha = fileData.sha;
 
-                        // 2. Parse and Update (Greedy Mode)
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(decodedContent, 'text/html');
-                        let pageModified = false;
+// 2. Parse and Update (Greedy Mode)
+const parser = new DOMParser();
+const doc = parser.parseFromString(decodedContent, 'text/html');
+let pageModified = false;
 
-                        const targetId = `${section}-${key}`;
-                        const selectors = [`#${targetId}`, `#live-${targetId}`];
+const targetId = `${section}-${key}`;
+const selectors = [`#${targetId}`, `#live-${targetId}`];
 
-                        selectors.forEach(selector => {
-                            const elements = doc.querySelectorAll(selector);
-                            elements.forEach(el => {
-                                let currentVal;
-                                if (el.tagName === 'IMG') {
-                                    currentVal = el.getAttribute('src');
-                                    if (currentVal !== filePath) {
-                                        el.src = filePath;
-                                        pageModified = true;
-                                    }
-                                } else if (el.tagName === 'A') {
-                                    currentVal = el.getAttribute('href');
-                                    if (currentVal !== filePath) {
-                                        el.href = filePath;
-                                        pageModified = true;
-                                    }
-                                } else {
-                                    currentVal = el.innerHTML;
-                                    if (currentVal !== filePath) {
-                                        el.innerHTML = filePath;
-                                        pageModified = true;
-                                    }
-                                }
-                            });
-                        });
+selectors.forEach(selector => {
+    const elements = doc.querySelectorAll(selector);
+    elements.forEach(el => {
+        let currentVal;
+        if (el.tagName === 'IMG') {
+            currentVal = el.getAttribute('src');
+            if (currentVal !== filePath) {
+                el.src = filePath;
+                pageModified = true;
+            }
+        } else if (el.tagName === 'A') {
+            currentVal = el.getAttribute('href');
+            if (currentVal !== filePath) {
+                el.href = filePath;
+                pageModified = true;
+            }
+        } else {
+            currentVal = el.innerHTML;
+            if (currentVal !== filePath) {
+                el.innerHTML = filePath;
+                pageModified = true;
+            }
+        }
+    });
+});
 
-                        if (!pageModified) continue;
+if (!pageModified) continue;
 
-                        // 3. Commit back to GitHub
-                        const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-                        const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
-                            return String.fromCharCode('0x' + p1);
-                        }));
+// 3. Commit back to GitHub
+const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+    return String.fromCharCode('0x' + p1);
+}));
 
-                        const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
-                            method: 'PUT',
-                            headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                message: `admin: universal greedy asset deploy [${filePath}]`,
-                                content: encodedContent,
-                                sha: sha
-                            })
-                        });
+const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+    method: 'PUT',
+    headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        message: `admin: universal greedy asset deploy [${filePath}]`,
+        content: encodedContent,
+        sha: sha
+    })
+});
 
-                        if (putRes.ok) updatedCount++;
+if (putRes.ok) updatedCount++;
                     } catch (err) {
-                        console.warn(`Asset sync failed for ${targetPage}:`, err);
-                    }
+    console.warn(`Asset sync failed for ${targetPage}:`, err);
+}
                 }
 
-                if (updatedCount > 0) {
-                    body.innerHTML = `
+if (updatedCount > 0) {
+    body.innerHTML = `
                         <div style="text-align: center; padding: 60px;">
                             <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
                             <h3 style="color: white; margin-bottom: 10px;">WORLDWIDE DEPLOY SUCCESS</h3>
@@ -1426,31 +1463,31 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">CONFIRM</button>
                         </div>
                     `;
-                    feather.replace();
-                } else {
-                    alert('No matching elements found site-wide for this asset.');
-                    closeModal();
-                }
-                return;
+    feather.replace();
+} else {
+    alert('No matching elements found site-wide for this asset.');
+    closeModal();
+}
+return;
             } catch (err) {
-                console.error('Cloud Sync Error:', err);
-                alert(`CLOUD SYNC FAILED: ${err.message}`);
-                closeModal();
-                return;
-            }
+    console.error('Cloud Sync Error:', err);
+    alert(`CLOUD SYNC FAILED: ${err.message}`);
+    closeModal();
+    return;
+}
         }
 
-        try {
-            const response = await fetch(`${API_BASE}/api/save-section`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ page: page, section: section, data: data })
-            });
+try {
+    const response = await fetch(`${API_BASE}/api/save-section`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ page: page, section: section, data: data })
+    });
 
-            const result = await response.json();
-            if (result.success) {
-                sessionStorage.setItem('VAATIA_LAST_EDIT', `${page} > ${section}`);
-                body.innerHTML = `
+    const result = await response.json();
+    if (result.success) {
+        sessionStorage.setItem('VAATIA_LAST_EDIT', `${page} > ${section}`);
+        body.innerHTML = `
                     <div style="text-align: center; padding: 60px;">
                         <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
                         <h3 style="color: white; margin-bottom: 10px;">PROTOCOL SUCCESS</h3>
@@ -1458,37 +1495,37 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">CONFIRM</button>
                     </div>
                 `;
-                feather.replace();
-            } else {
-                alert('Sync Error: ' + result.error);
-                closeModal();
-            }
-        } catch (err) {
-            alert('Command server unreachable.');
-            closeModal();
-        }
+        feather.replace();
+    } else {
+        alert('Sync Error: ' + result.error);
+        closeModal();
+    }
+} catch (err) {
+    alert('Command server unreachable.');
+    closeModal();
+}
     };
 
-    // Initial Load
-    updateStats();
-    loadMedia();
-    loadPages();
+// Initial Load
+updateStats();
+loadMedia();
+loadPages();
 
-    // Update Sync Pause Button Text
-    const pauseBtn = document.getElementById('sync-pause-btn');
-    if (pauseBtn) {
-        if (window.isSyncPaused) {
-            pauseBtn.innerText = 'RESUME SYNC';
-            pauseBtn.style.background = 'rgba(16, 185, 129, 0.1)';
-            pauseBtn.style.borderColor = '#10b981';
-            pauseBtn.style.color = '#10b981';
-        } else {
-            pauseBtn.innerText = 'PAUSE SYNC';
-            pauseBtn.style.background = 'rgba(248, 113, 113, 0.1)';
-            pauseBtn.style.borderColor = '#f87171';
-            pauseBtn.style.color = '#f87171';
-        }
+// Update Sync Pause Button Text
+const pauseBtn = document.getElementById('sync-pause-btn');
+if (pauseBtn) {
+    if (window.isSyncPaused) {
+        pauseBtn.innerText = 'RESUME SYNC';
+        pauseBtn.style.background = 'rgba(16, 185, 129, 0.1)';
+        pauseBtn.style.borderColor = '#10b981';
+        pauseBtn.style.color = '#10b981';
+    } else {
+        pauseBtn.innerText = 'PAUSE SYNC';
+        pauseBtn.style.background = 'rgba(248, 113, 113, 0.1)';
+        pauseBtn.style.borderColor = '#f87171';
+        pauseBtn.style.color = '#f87171';
     }
+}
 });
 
 // Logout Modal Logic

@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         updateOnlineList();
-        setInterval(updateOnlineList, 15000); // Refresh list every 15s
+        setInterval(updateOnlineList, 10000); // Pulse: 10s for ASAP tactical updates
     };
 
     // --- Dynamic Security Interceptor ---

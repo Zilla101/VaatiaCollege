@@ -13,26 +13,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const getApiBase = () => {
         const hostname = window.location.hostname;
         const port = window.location.port;
-        const isLocal = hostname === 'localhost' ||
+        const savedAPI = localStorage.getItem('VAATIA_PUBLIC_API');
+        const forceLocal = localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true';
+
+        // 1. If user explicitly wants online server (or it's the default)
+        if (!forceLocal) {
+            if (savedAPI) return savedAPI.replace(/\/$/, '');
+            // Default Online Hub
+            return 'https://vaatiacollege.vercel.app';
+        }
+
+        // 2. Local Fallback logic
+        const isLocalHost = hostname === 'localhost' ||
             hostname === '127.0.0.1' ||
             hostname.startsWith('192.168.') ||
             hostname.startsWith('10.') ||
             (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
 
-        const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
-        if (ghToken) return 'GITHUB_SYNC';
-
-        if (!isLocal) {
-            if (hostname.includes('vaatia') || hostname.includes('vercel.app')) {
-                return '';
-            }
+        if (isLocalHost) {
+            if (port === '3000' || port === '8080') return ''; // Use relative routes if on the same port
+            return `http://${hostname}:3000`; // Standard local backend port
         }
 
-        if (isLocal) {
-            if (port === '3000' || port === '8080') return '';
-            return `http://${hostname}:3000`;
-        }
-        return '';
+        return ''; // Default to relative
     };
 
     const API_BASE = getApiBase();
@@ -46,14 +49,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const isProdDomain = hostname.includes('vaatia') || hostname.includes('vercel.app');
         const publicAPI = localStorage.getItem('VAATIA_PUBLIC_API');
         const radarOverride = localStorage.getItem('VAATIA_RADAR_URL');
+        const forceLocal = localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true';
 
-        // FORCE UNIFIED HUB: If local, default to Vercel production API for session parity
+        // 1. Overrides
         if (radarOverride) return `${radarOverride.replace(/\/$/, '')}/api/session`;
-        if (publicAPI) return `${publicAPI}/api/session`;
-        if (isProdDomain || (!API_BASE && !publicAPI)) return '/api/session';
 
-        // If on localhost/internal, we MUST point to production Vercel to see global sessions
+        // 2. If forced local, use local API BASE or relative
+        if (forceLocal) {
+            return API_BASE ? `${API_BASE}/api/session` : '/api/session';
+        }
+
+        // 3. Online Priority
+        if (publicAPI) return `${publicAPI.replace(/\/$/, '')}/api/session`;
+        if (isProdDomain) return '/api/session';
+
+        // Default to production Vercel hub for unified session monitoring
         return 'https://vaatiacollege.vercel.app/api/session';
+    };
+
+    // Helper to switch modes
+    window.setServerMode = (mode) => {
+        if (mode === 'online') {
+            localStorage.removeItem('VAATIA_FORCE_LOCAL');
+            console.log('🌐 PROTOCOL: Switching to ONLINE SERVER');
+        } else {
+            localStorage.setItem('VAATIA_FORCE_LOCAL', 'true');
+            console.log('💻 PROTOCOL: Switching to LOCAL SERVER');
+        }
+        location.reload();
     };
 
     const GITHUB_TOKEN = localStorage.getItem('VAATIA_GH_TOKEN');
@@ -367,6 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             SETUP
                         </button>
                         <button id="access-toggle-btn" onclick="toggleAdminAccess()" class="tactical-btn" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 8px 20px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; cursor: pointer; letter-spacing: 0.1em; transition: 0.3s;">INITIALIZING...</button>
+                        <div style="display: flex; gap: 5px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                            <button onclick="window.setServerMode('online')" style="background: ${!localStorage.getItem('VAATIA_FORCE_LOCAL') ? 'var(--accent-blue)' : 'transparent'}; border: none; color: ${!localStorage.getItem('VAATIA_FORCE_LOCAL') ? '#0c0c0c' : 'rgba(255,255,255,0.4)'}; padding: 6px 10px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Online</button>
+                            <button onclick="window.setServerMode('local')" style="background: ${localStorage.getItem('VAATIA_FORCE_LOCAL') ? '#f87171' : 'transparent'}; border: none; color: ${localStorage.getItem('VAATIA_FORCE_LOCAL') ? 'white' : 'rgba(255,255,255,0.4)'}; padding: 6px 10px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Local</button>
+                        </div>
                         <div class="active-status-badge" style="display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(0, 0, 0, 0.2); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
                             <div class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue);"></div>
                             <span style="font-size: 0.6rem; color: var(--accent-blue); letter-spacing: 0.15em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>

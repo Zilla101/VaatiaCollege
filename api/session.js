@@ -170,13 +170,13 @@ function parseDevice(ua) {
     } else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
     else if (ua.includes('iPhone')) {
         const version = ua.match(/OS (\d+)_/);
-        os = version ? `iPhone (iOS ${version[1]})` : 'iPhone';
+        os = version ? `iPhone(iOS ${version[1]})` : 'iPhone';
     } else if (ua.includes('iPad')) {
         const version = ua.match(/OS (\d+)_/);
-        os = version ? `iPad (iOS ${version[1]})` : 'iPad';
+        os = version ? `iPad(iOS ${version[1]})` : 'iPad';
     } else if (ua.includes('Android')) {
         const version = ua.match(/Android (\d+)/);
-        os = version ? `Android ${version[1]}` : 'Android';
+        os = version ? `Android ${version[1]} ` : 'Android';
     } else if (ua.includes('Mac OS X')) {
         os = 'macOS';
     } else if (ua.includes('Linux')) {

@@ -46,8 +46,14 @@ window.saveSectionChanges = async (sectionName) => {
     const pageName = pageMatch ? pageMatch[1].toLowerCase() + '.html' : 'index.html';
 
     try {
+        // Resolve target URL (ensure it doesn't end with double slashes)
+        const baseUrl = (window.API_BASE || '').replace(/\/$/, '');
+        const targetUrl = `${baseUrl}/api/save-section`;
+
+        console.log(`🚀 Dispatching update to: ${targetUrl}`);
+
         // Make API call to save changes
-        const response = await fetch('http://localhost:3000/api/save-section', {
+        const response = await fetch(targetUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

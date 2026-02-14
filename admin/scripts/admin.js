@@ -353,10 +353,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const list = document.getElementById('online-users-list');
                 if (list) {
                     list.innerHTML = `
-                        <div style="text-align: center; padding: 20px; background: rgba(248, 113, 113, 0.05); border: 1px solid rgba(248, 113, 113, 0.2); border-radius: 12px;">
-                            <i data-feather="wifi-off" style="color: #f87171; margin-bottom: 10px;"></i>
-                            <p style="color: #f87171; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">Command Server Offline</p>
-                            <p style="color: var(--text-secondary); font-size: 0.55rem; margin-top: 5px; opacity: 0.7;">SESSION TRACKING RESTRICTED TO LOCAL HOST</p>
+                        <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;">
+                            <i data-feather="globe" style="color: var(--accent-blue); margin-bottom: 10px; opacity: 0.5;"></i>
+                            <p style="color: white; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8;">Syncing with Cloud...</p>
+                            <p style="color: var(--text-secondary); font-size: 0.55rem; margin-top: 5px; opacity: 0.7;">ESTABLISHING GLOBAL CONNECTION</p>
                         </div>
                     `;
                     if (typeof feather !== 'undefined') feather.replace();
@@ -1103,7 +1103,7 @@ function confirmLogout() {
 
 // --- Global Connection Settings ---
 window.setupGlobalCommand = () => {
-    const role = localStorage.getItem('VAATIA_ROLE');
+    const role = sessionStorage.getItem('VAATIA_ROLE');
     if (role !== 'Super Admin') {
         alert("ACCESS DENIED: Restricted to Super Administrators.");
         return;
@@ -1137,7 +1137,7 @@ window.setupGlobalCommand = () => {
 
 // Toggle Sync Pause Feature
 window.toggleSyncPause = () => {
-    const role = localStorage.getItem('VAATIA_ROLE');
+    const role = sessionStorage.getItem('VAATIA_ROLE');
     if (role !== 'Super Admin') {
         alert("ACCESS DENIED: Restricted to Super Administrators.");
         return;

@@ -20,8 +20,8 @@ export default async function handler(req, res) {
     if (method === 'GET') {
         return res.status(200).json({
             success: true,
-            users: mockUsers,
-            actions: mockActions.slice(-15).reverse() // Show last 15 actions
+            users: mockUsers || [],
+            actions: (mockActions || []).slice(-15).reverse() // Show last 15 actions
         });
     }
 

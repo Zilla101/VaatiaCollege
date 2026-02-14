@@ -310,9 +310,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }).catch(() => { });
         };
 
-        // 2. Start Heartbeat
-        const startHeartbeat = () => {
-            const beat = async () => {
+        // 2. Start Session Sync (Renamed from Heartbeat)
+        const startSessionSync = () => {
+            const sync = async () => {
                 try {
                     const endpoint = window.getRadarEndpoint();
 
@@ -354,14 +354,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 } catch (err) {
-                    console.warn('[HEARTBEAT] Connection issue:', err.message);
+                    // Silent fail to avoid annoying logs
                 }
             };
-            beat();
-            setInterval(beat, 5000); // Fast pulse: 5s
+            sync();
+            setInterval(sync, 5000); // 5s Sync Interval
         };
 
-        startHeartbeat();
+        startSessionSync();
 
         // 3. Super Admin Specific Features
         if (role === 'Super Admin') {
@@ -618,29 +618,78 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         window.toggleAdminAccess = async () => {
-            const isBlocked = window.adminAccessBlocked;
             const btn = document.getElementById('access-toggle-btn');
             const currentUser = sessionStorage.getItem('VAATIA_USER');
-            if (btn) btn.innerText = 'PROCESSING...';
+
+            // 1. OPTIMISTIC UPDATE (INSTANT)
+            const previousState = window.adminAccessBlocked;
+            const newState = !previousState;
+            window.adminAccessBlocked = newState; // Commit to local state
+
+            if (btn) {
+                btn.innerText = 'UPDATING PROTOCOL...';
+                // Immediately calculate expected visual state
+                if (newState) {
+                    btn.innerText = 'RESTORE ADMIN ACCESS';
+                    btn.style.background = 'rgba(16, 185, 129, 0.1)';
+                    btn.style.color = '#10b981';
+                    btn.style.borderColor = '#10b981';
+                } else {
+                    btn.innerText = 'DENY ADMIN ACCESS';
+                    btn.style.background = 'rgba(248, 113, 113, 0.1)';
+                    btn.style.color = '#f87171';
+                    btn.style.borderColor = '#f87171';
+                }
+            }
 
             try {
                 const endpoint = window.getRadarEndpoint();
                 const res = await fetch(endpoint, {
                     method: 'POST',
-                    credentials: 'include',
-                    mode: 'cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ toggleAccess: !isBlocked, initiator: currentUser })
+                    body: JSON.stringify({
+                        toggleAccess: newState, // Send new state
+                        initiator: currentUser
+                    })
                 });
 
                 if (res.ok) {
+                    const data = await res.json();
+                    // Confirm server state matches our optimistic state
+                    if (data.adminAccessBlocked !== newState) {
+                        // Revert if server disagrees (Rare)
+                        window.adminAccessBlocked = data.adminAccessBlocked;
+                        revertButtonVisual(data.adminAccessBlocked);
+                    }
                     if (typeof updateOnlineList === 'function') await updateOnlineList();
+                } else {
+                    throw new Error('Server rejected toggle');
                 }
             } catch (err) {
-                console.error('Failed to update access state.');
-                if (btn) btn.innerText = isBlocked ? 'RESTORE ADMIN ACCESS' : 'DENY ADMIN ACCESS';
+                console.error('Failed to update access state:', err);
+                // Revert on Error
+                window.adminAccessBlocked = previousState;
+                revertButtonVisual(previousState);
+                if (btn) btn.innerText = 'COMMAND FAILED';
             }
         };
+
+        function revertButtonVisual(state) {
+            const btn = document.getElementById('access-toggle-btn');
+            if (btn) {
+                if (state) {
+                    btn.innerText = 'RESTORE ADMIN ACCESS';
+                    btn.style.background = 'rgba(16, 185, 129, 0.1)';
+                    btn.style.color = '#10b981';
+                    btn.style.borderColor = '#10b981';
+                } else {
+                    btn.innerText = 'DENY ADMIN ACCESS';
+                    btn.style.background = 'rgba(248, 113, 113, 0.1)';
+                    btn.style.color = '#f87171';
+                    btn.style.borderColor = '#f87171';
+                }
+            }
+        }
 
         window.pulseRadar = () => {
             console.log('[RADAR] Manual Pulse Requested');

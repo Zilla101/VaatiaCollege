@@ -27,37 +27,56 @@ export default async function handler(req, res) {
 
     if (method === 'POST') {
         const { username, targetUser, action, timestamp, role } = req.body;
+        const now = Date.now();
 
-        // Handle Heartbeat
-        if (username && !action) {
-            const userIdx = mockUsers.findIndex(u => u.username === username);
-            if (userIdx > -1) {
-                mockUsers[userIdx].timestamp = timestamp || new Date().toISOString();
-                mockUsers[userIdx].lastSeen = new Date().toLocaleTimeString();
+        // 1. Handle Terminate Protocol
+        if (targetUser) {
+            mockUsers = mockUsers.filter(u => u.username.toLowerCase() !== targetUser.toLowerCase());
+            mockActions.push({
+                username: 'SYSTEM',
+                action: `Terminated ${targetUser} session`,
+                timestamp: new Date().toISOString()
+            });
+            return res.status(200).json({ success: true });
+        }
+
+        // 2. Handle Heartbeat & Identity tracking
+        if (username) {
+            const existingIndex = mockUsers.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+            const userRole = (role || '').trim() || 'Admin';
+
+            if (existingIndex > -1) {
+                mockUsers[existingIndex] = {
+                    ...mockUsers[existingIndex],
+                    role: userRole,
+                    lastSeen: new Date().toLocaleTimeString(),
+                    timestamp: now,
+                    lastAction: action || mockUsers[existingIndex].lastAction || 'Active'
+                };
             } else {
                 mockUsers.push({
                     username,
-                    role: role || 'Admin',
-                    ip: 'REMOTE_IP',
+                    role: userRole,
+                    ip: req.headers['x-forwarded-for'] || 'SERVER',
                     lastSeen: new Date().toLocaleTimeString(),
-                    timestamp: timestamp || new Date().toISOString()
+                    timestamp: now,
+                    lastAction: action || 'Session Initialized'
                 });
             }
-            return res.status(200).json({ success: true });
-        }
 
-        // Handle Action Log
-        if (username && action) {
-            mockActions.push({ username, action, timestamp: timestamp || new Date().toISOString() });
-            const userIdx = mockUsers.findIndex(u => u.username === username);
-            if (userIdx > -1) mockUsers[userIdx].lastAction = action;
-            return res.status(200).json({ success: true });
-        }
+            // 3. Handle Action Log Record
+            if (action) {
+                mockActions.push({
+                    username,
+                    action,
+                    timestamp: new Date().toISOString()
+                });
+            }
 
-        // Handle Terminate
-        if (targetUser) {
-            mockUsers = mockUsers.filter(u => u.username !== targetUser);
-            mockActions.push({ username: 'SYSTEM', action: `Terminated ${targetUser} session`, timestamp: new Date().toISOString() });
+            // 4. Cleanup stale sessions (Threshold: 5 mins)
+            const STALE_THRESHOLD = 5 * 60 * 1000;
+            mockUsers = mockUsers.filter(u => (now - u.timestamp) < STALE_THRESHOLD);
+
             return res.status(200).json({ success: true });
         }
     }

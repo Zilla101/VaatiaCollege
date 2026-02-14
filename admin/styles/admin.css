@@ -141,8 +141,8 @@ body::after {
     border: 1px solid var(--glass-border);
     border-radius: 40px;
     padding: 25px 40px;
-    max-width: 95%;
-    /* Perfect fit for mobile */
+    max-width: 440px;
+    /* Restored to standard login card size */
     margin: 0 auto;
     width: 100%;
     /* Ensure full width usage */
@@ -823,6 +823,20 @@ body::after {
     align-items: center;
     justify-content: center;
     z-index: 10;
+}
+
+/* Standardized Admin Footer */
+.admin-footer {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    opacity: 0.4;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    width: 100%;
 }
 
 .peek-btn:hover {

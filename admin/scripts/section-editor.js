@@ -31,7 +31,7 @@ function renderSectionEditor(page, htmlContent) {
             f.key.includes('image') || f.key.includes('img') ?
                 `<div style="display: flex; gap: 10px;">
                     <input type="text" id="${id}-${f.key}" value="${getVal(f.selector)}" style="flex: 1;">
-                    <button class="btn-edit" style="width: auto; padding: 0 15px; font-size: 0.7rem;" onclick="switchTab('media'); alert('Select an image from the library and copy its path, then paste it here.')">
+                    <button class="btn-edit" style="width: auto; padding: 0 15px; font-size: 0.7rem;" onclick="switchTab('media'); showCustomAlert('Select an image from the library and copy its path, then paste it here.', 'Image Selection')">
                         LIBRARY
                     </button>
                 </div>` :
@@ -184,14 +184,14 @@ window.saveSectionChanges = async (sectionName) => {
     // Handle Paused State
     const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
     if (isPaused && API_BASE === 'GITHUB_SYNC') {
-        alert('Protocol Interrupted: SYNC IS PAUSED. Please resume sync from the dashboard to push changes to GitHub/Vercel.');
+        showCustomAlert('Protocol Interrupted: SYNC IS PAUSED. Please resume sync from the dashboard to push changes to GitHub/Vercel.', 'Sync Paused', true);
         activeBtn.innerHTML = originalContent;
         activeBtn.disabled = false;
         return;
     }
 
     if (!API_BASE) {
-        alert('Protocol Interrupted: Command server unreachable. Link your GitHub Token for Worldwide access or use Local Command Mode.');
+        showCustomAlert('Protocol Interrupted: Command server unreachable. Link your GitHub Token for Worldwide access or use Local Command Mode.', 'Connection Error', true);
         activeBtn.innerHTML = originalContent;
         activeBtn.disabled = false;
         return;
@@ -305,9 +305,10 @@ window.saveSectionChanges = async (sectionName) => {
                         activeBtn.style.background = 'linear-gradient(135deg, #00f2fe, #4facfe)';
 
                         setTimeout(() => {
-                            if (confirm(`Universal Greedy Sync Complete! ${updatedCount} pages updated.\n\nWould you like to reload the page to verify?`)) {
+                            showCustomConfirm(`Universal Greedy Sync Complete! ${updatedCount} pages updated.\n\nWould you like to reload the page to verify?`, () => {
                                 window.open('../' + pageName, '_blank');
-                            }
+                            }, "Sync Complete");
+
                             activeBtn.innerHTML = originalContent;
                             activeBtn.style.background = '';
                             activeBtn.disabled = false;
@@ -316,14 +317,14 @@ window.saveSectionChanges = async (sectionName) => {
                     }
                 }, 1000);
             } else {
-                alert('No changes detected site-wide.');
+                showCustomAlert('No changes detected site-wide.', 'Sync Info');
                 activeBtn.innerHTML = originalContent;
                 activeBtn.disabled = false;
             }
             return;
         } catch (err) {
             console.error('Cloud Sync Error:', err);
-            alert(`CLOUD SYNC FAILED: ${err.message}`);
+            showCustomAlert(`CLOUD SYNC FAILED: ${err.message}`, 'Sync Failed', true);
             activeBtn.innerHTML = originalContent;
             activeBtn.disabled = false;
             return;
@@ -357,7 +358,7 @@ window.saveSectionChanges = async (sectionName) => {
         } else {
             // If backend reports failure, try fallback?
             // For now, respect the backend's explicit error
-            alert(`⚠️ Protocol Error: ${result.error}`);
+            showCustomAlert(`⚠️ Protocol Error: ${result.error}`, 'Sync Error', true);
             activeBtn.innerHTML = originalContent;
             activeBtn.disabled = false;
             if (typeof feather !== 'undefined') feather.replace();
@@ -377,7 +378,7 @@ window.saveSectionChanges = async (sectionName) => {
             }, 500);
         } else {
             console.warn('❌ Failover denied: No GitHub Token.');
-            alert(`❌ CONNECTIVITY ERROR: \n\n1. The Command Server is unreachable.\n2. No GitHub Token found for failover.\n\nPlease ensure you are connected to the internet OR add your GitHub Token in 'Settings' to enable Universal Cloud Sync.`);
+            showCustomAlert(`❌ CONNECTIVITY ERROR: \n\n1. The Command Server is unreachable.\n2. No GitHub Token found for failover.\n\nPlease ensure you are connected to the internet OR add your GitHub Token in 'Settings' to enable Universal Cloud Sync.`, 'Connectivity Error', true);
             activeBtn.innerHTML = originalContent;
             activeBtn.disabled = false;
             if (typeof feather !== 'undefined') feather.replace();

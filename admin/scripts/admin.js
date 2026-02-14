@@ -1158,118 +1158,69 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Security & Systems</h3>
                     <p style="color: var(--text-secondary); opacity: 0.7; max-width: 400px; margin: 0 auto 30px;">
                         This section is restricted to Level 2 Administrators. Your identity is currently being verified.
-    // Global Command Setup (Manage API Connection)
-    window.setupGlobalCommand = () => {
-        const modal = document.getElementById('edit-modal');
-        const title = document.getElementById('modal-title');
-        const body = document.getElementById('modal-body');
-
-        if (title && body) {
-            title.innerText = 'Command Link Setup';
-            body.innerHTML = `
-                < div style = "text-align: center;" >
-                    <i data-feather="globe" style="width: 48px; height: 48px; color: var(--accent-blue); margin-bottom: 20px;"></i>
-                    <p style="color: var(--text-secondary); margin-bottom: 30px;">
-                        Configure the connection protocol for the Administrative Command Centre.
                     </p>
-                    
-                    <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px;">
-                        <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: var(--accent-blue);">GitHub Satellite Link</h3>
-                        <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Enable Universal Cloud Sync to edit from anywhere (Required for Failover).</p>
-                        
-                        <input type="password" id="gh-token-input" placeholder="Paste GitHub Personal Access Token" value="${localStorage.getItem('VAATIA_GH_TOKEN') || ''}" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 15px;">
-                        
-                        <button class="btn-edit" onclick="saveGitHubToken()" style="width: 100%; justify-content: center; background: rgba(0, 242, 254, 0.1); border-color: var(--accent-blue); color: var(--accent-blue);">
-                            <i data-feather="link" style="width: 14px; height: 14px; margin-right: 8px;"></i> LINK SATELLITE
-                        </button>
-                    </div>
+                </div>
+            `;
 
-                    <div style="text-align: right;">
-                        <button class="btn-premium" onclick="closeModal()">DONE</button>
-                    </div>
-                </div >
-                `;
 
-            if (modal) {
-                modal.style.display = 'flex';
-                if (typeof feather !== 'undefined') feather.replace();
+
+            // Upload Logic
+            const uploadBtn = document.querySelector('.btn-premium.btn-compact');
+            if (uploadBtn && uploadBtn.innerText === '+ UPLOAD ASSET') {
+                uploadBtn.addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        if (window.logAdminAction) window.logAdminAction(`Uploading Asset: ${file.name} `);
+
+                        if (!API_BASE) {
+                            showCustomAlert('Upload is only available in Local Command Mode.', 'Upload Restricted', true);
+                            return;
+                        }
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        uploadBtn.innerText = 'UPLOADING...';
+                        uploadBtn.disabled = true;
+
+                        try {
+                            const response = await fetch(`${API_BASE} /api/upload`, {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                                loadMedia();
+                                updateStats();
+                                showPlacementDialogue(result.filePath);
+                                showCustomAlert('Asset uploaded successfully.', 'Upload Complete');
+                            } else {
+                                showCustomAlert('Upload failed: ' + result.error, 'Upload Error', true);
+                            }
+                        } catch (err) {
+                            showCustomAlert('Command server unreachable.', 'Connection Error', true);
+                        } finally {
+                            uploadBtn.innerText = '+ UPLOAD ASSET';
+                            uploadBtn.disabled = false;
+                        }
+                    };
+                    input.click();
+                });
             }
-        }
-    };
 
-    // Helper to save token
-    window.saveGitHubToken = () => {
-         const token = document.getElementById('gh-token-input').value.trim();
-         if (token) {
-             localStorage.setItem('VAATIA_GH_TOKEN', token);
-             alert('✅ Satellite Linked! Universal Cloud Sync is now ACTIVE.');
-         } else {
-             localStorage.removeItem('VAATIA_GH_TOKEN');
-             alert('Satellite Link Severed.');
-         }
-    };
+            // Post-Upload Placement Dialogue
+            window.showPlacementDialogue = (filePath) => {
+                const title = document.getElementById('modal-title');
+                const body = document.getElementById('modal-body');
+                const modal = document.getElementById('edit-modal');
+                if (!title || !body || !modal) return;
 
-    window.closeModal = () => {
-        if (modal) modal.style.display = 'none';
-    };
-
-    // Upload Logic
-    const uploadBtn = document.querySelector('.btn-premium.btn-compact');
-    if (uploadBtn && uploadBtn.innerText === '+ UPLOAD ASSET') {
-        uploadBtn.addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                // Log Action for Radar Visibility
-                if (window.logAdminAction) window.logAdminAction(`Uploading Asset: ${ file.name } `);
-
-                if (!API_BASE) {
-                    alert('Upload is only available in Local Command Mode.');
-                    return;
-                }
-                const formData = new FormData();
-                formData.append('file', file);
-
-                uploadBtn.innerText = 'UPLOADING...';
-                uploadBtn.disabled = true;
-
-                try {
-                    const response = await fetch(`${ API_BASE } /api/upload`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        loadMedia();
-                        updateStats();
-                        showPlacementDialogue(result.filePath);
-                    } else {
-                        alert('Upload failed: ' + result.error);
-                    }
-                } catch (err) {
-                    alert('Command server unreachable.');
-                } finally {
-                    uploadBtn.innerText = '+ UPLOAD ASSET';
-                    uploadBtn.disabled = false;
-                }
-            };
-            input.click();
-        });
-    }
-
-    // Post-Upload Placement Dialogue
-    window.showPlacementDialogue = (filePath) => {
-        const title = document.getElementById('modal-title');
-        const body = document.getElementById('modal-body');
-        const modal = document.getElementById('edit-modal');
-        if (!title || !body || !modal) return;
-
-        title.innerText = 'Protocol: Asset Placement';
-        body.innerHTML = `
+                title.innerText = 'Protocol: Asset Placement';
+                body.innerHTML = `
                 < div style = "text-align: center; margin-bottom: 25px;" >
                 <img src="../${filePath}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 15px; border: 2px solid var(--accent-blue); margin-bottom: 10px;" class="image-fade-in">
                 <p style="color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 0.05em;">DEPLOYMENT DETECTED: SELECT SECTOR</p>
@@ -1326,39 +1277,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="btn-edit" onclick="closeModal()" style="width: 100%; border: 1px solid rgba(255,255,255,0.1);">SKIP AUTOMATIC PLACEMENT</button>
             </div>
             `;
-        modal.style.display = 'flex';
-        feather.replace();
-    };
+                modal.style.display = 'flex';
+                feather.replace();
+            };
 
-    window.filterPlacement = (cat, btn) => {
-        const options = document.querySelectorAll('.placement-option');
-        const buttons = btn.parentElement.querySelectorAll('button');
+            window.filterPlacement = (cat, btn) => {
+                const options = document.querySelectorAll('.placement-option');
+                const buttons = btn.parentElement.querySelectorAll('button');
 
-        buttons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
 
-        options.forEach(opt => {
-            if (cat === 'all' || opt.dataset.cat === cat) {
-                opt.style.display = 'block';
-            } else {
-                opt.style.display = 'none';
-            }
-        });
-    };
+                options.forEach(opt => {
+                    if (cat === 'all' || opt.dataset.cat === cat) {
+                        opt.style.display = 'block';
+                    } else {
+                        opt.style.display = 'none';
+                    }
+                });
+            };
 
-    window.applyAssetToSection = async (page, section, key, filePath) => {
-        const data = {};
-        data[`${ section } -${ key } `] = filePath;
+            window.applyAssetToSection = async (page, section, key, filePath) => {
+                const data = {};
+                data[`${section} -${key} `] = filePath;
 
-        // Log Action for Radar Visibility
-        if (window.logAdminAction) {
-            window.logAdminAction(`Placed Asset[${ key }] in ${ page } `);
-        }
+                // Log Action for Radar Visibility
+                if (window.logAdminAction) {
+                    window.logAdminAction(`Placed Asset[${key}] in ${page} `);
+                }
 
-        // Visual feedback
-        const modal = document.getElementById('edit-modal');
-        const body = document.getElementById('modal-body');
-        body.innerHTML = `
+                // Visual feedback
+                const modal = document.getElementById('edit-modal');
+                const body = document.getElementById('modal-body');
+                body.innerHTML = `
                 < div style = "text-align: center; padding: 60px;" >
                 <div class="loader-circle" style="width: 40px; height: 40px; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;"></div>
                 <p style="color: var(--accent-blue); font-size: 0.7rem; letter-spacing: 0.3em; font-weight: 800; text-transform: uppercase;">
@@ -1367,95 +1318,95 @@ document.addEventListener('DOMContentLoaded', () => {
             </div >
                 `;
 
-        if (API_BASE === 'GITHUB_SYNC') {
-            const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
-            const REPO_OWNER = 'Zilla101';
-            const REPO_NAME = 'VaatiaCollege';
-            const ALL_PAGES = [
-                'index.html', 'admissions.html', 'boarding.html', 'club.html',
-                'excursions.html', 'fees.html', 'skillsacquisition.html',
-                'sports.html', 'students.html', 'tuition.html'
-            ];
+                if (API_BASE === 'GITHUB_SYNC') {
+                    const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
+                    const REPO_OWNER = 'Zilla101';
+                    const REPO_NAME = 'VaatiaCollege';
+                    const ALL_PAGES = [
+                        'index.html', 'admissions.html', 'boarding.html', 'club.html',
+                        'excursions.html', 'fees.html', 'skillsacquisition.html',
+                        'sports.html', 'students.html', 'tuition.html'
+                    ];
 
-            try {
-                let updatedCount = 0;
-                for (const targetPage of ALL_PAGES) {
                     try {
-                        // 1. Fetch current file from GitHub
-                        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
-            headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
-        });
+                        let updatedCount = 0;
+                        for (const targetPage of ALL_PAGES) {
+                            try {
+                                // 1. Fetch current file from GitHub
+                                const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+                                    headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+                                });
 
-if (!getRes.ok) continue;
-const fileData = await getRes.json();
+                                if (!getRes.ok) continue;
+                                const fileData = await getRes.json();
 
-// Robust UTF-8 Decoding
-const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-}).join(''));
+                                // Robust UTF-8 Decoding
+                                const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
+                                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                                }).join(''));
 
-const sha = fileData.sha;
+                                const sha = fileData.sha;
 
-// 2. Parse and Update (Greedy Mode)
-const parser = new DOMParser();
-const doc = parser.parseFromString(decodedContent, 'text/html');
-let pageModified = false;
+                                // 2. Parse and Update (Greedy Mode)
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(decodedContent, 'text/html');
+                                let pageModified = false;
 
-const targetId = `${section}-${key}`;
-const selectors = [`#${targetId}`, `#live-${targetId}`];
+                                const targetId = `${section}-${key}`;
+                                const selectors = [`#${targetId}`, `#live-${targetId}`];
 
-selectors.forEach(selector => {
-    const elements = doc.querySelectorAll(selector);
-    elements.forEach(el => {
-        let currentVal;
-        if (el.tagName === 'IMG') {
-            currentVal = el.getAttribute('src');
-            if (currentVal !== filePath) {
-                el.src = filePath;
-                pageModified = true;
-            }
-        } else if (el.tagName === 'A') {
-            currentVal = el.getAttribute('href');
-            if (currentVal !== filePath) {
-                el.href = filePath;
-                pageModified = true;
-            }
-        } else {
-            currentVal = el.innerHTML;
-            if (currentVal !== filePath) {
-                el.innerHTML = filePath;
-                pageModified = true;
-            }
-        }
-    });
-});
+                                selectors.forEach(selector => {
+                                    const elements = doc.querySelectorAll(selector);
+                                    elements.forEach(el => {
+                                        let currentVal;
+                                        if (el.tagName === 'IMG') {
+                                            currentVal = el.getAttribute('src');
+                                            if (currentVal !== filePath) {
+                                                el.src = filePath;
+                                                pageModified = true;
+                                            }
+                                        } else if (el.tagName === 'A') {
+                                            currentVal = el.getAttribute('href');
+                                            if (currentVal !== filePath) {
+                                                el.href = filePath;
+                                                pageModified = true;
+                                            }
+                                        } else {
+                                            currentVal = el.innerHTML;
+                                            if (currentVal !== filePath) {
+                                                el.innerHTML = filePath;
+                                                pageModified = true;
+                                            }
+                                        }
+                                    });
+                                });
 
-if (!pageModified) continue;
+                                if (!pageModified) continue;
 
-// 3. Commit back to GitHub
-const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
-    return String.fromCharCode('0x' + p1);
-}));
+                                // 3. Commit back to GitHub
+                                const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+                                const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+                                    return String.fromCharCode('0x' + p1);
+                                }));
 
-const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
-    method: 'PUT',
-    headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        message: `admin: universal greedy asset deploy [${filePath}]`,
-        content: encodedContent,
-        sha: sha
-    })
-});
+                                const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+                                    method: 'PUT',
+                                    headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        message: `admin: universal greedy asset deploy [${filePath}]`,
+                                        content: encodedContent,
+                                        sha: sha
+                                    })
+                                });
 
-if (putRes.ok) updatedCount++;
-                    } catch (err) {
-    console.warn(`Asset sync failed for ${targetPage}:`, err);
-}
-                }
+                                if (putRes.ok) updatedCount++;
+                            } catch (err) {
+                                console.warn(`Asset sync failed for ${targetPage}:`, err);
+                            }
+                        }
 
-if (updatedCount > 0) {
-    body.innerHTML = `
+                        if (updatedCount > 0) {
+                            body.innerHTML = `
                         <div style="text-align: center; padding: 60px;">
                             <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
                             <h3 style="color: white; margin-bottom: 10px;">WORLDWIDE DEPLOY SUCCESS</h3>
@@ -1463,31 +1414,31 @@ if (updatedCount > 0) {
                             <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">CONFIRM</button>
                         </div>
                     `;
-    feather.replace();
-} else {
-    alert('No matching elements found site-wide for this asset.');
-    closeModal();
-}
-return;
-            } catch (err) {
-    console.error('Cloud Sync Error:', err);
-    alert(`CLOUD SYNC FAILED: ${err.message}`);
-    closeModal();
-    return;
-}
-        }
+                            feather.replace();
+                        } else {
+                            alert('No matching elements found site-wide for this asset.');
+                            closeModal();
+                        }
+                        return;
+                    } catch (err) {
+                        console.error('Cloud Sync Error:', err);
+                        alert(`CLOUD SYNC FAILED: ${err.message}`);
+                        closeModal();
+                        return;
+                    }
+                }
 
-try {
-    const response = await fetch(`${API_BASE}/api/save-section`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ page: page, section: section, data: data })
-    });
+                try {
+                    const response = await fetch(`${API_BASE}/api/save-section`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ page: page, section: section, data: data })
+                    });
 
-    const result = await response.json();
-    if (result.success) {
-        sessionStorage.setItem('VAATIA_LAST_EDIT', `${page} > ${section}`);
-        body.innerHTML = `
+                    const result = await response.json();
+                    if (result.success) {
+                        sessionStorage.setItem('VAATIA_LAST_EDIT', `${page} > ${section}`);
+                        body.innerHTML = `
                     <div style="text-align: center; padding: 60px;">
                         <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
                         <h3 style="color: white; margin-bottom: 10px;">PROTOCOL SUCCESS</h3>
@@ -1495,38 +1446,38 @@ try {
                         <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">CONFIRM</button>
                     </div>
                 `;
-        feather.replace();
-    } else {
-        alert('Sync Error: ' + result.error);
-        closeModal();
-    }
-} catch (err) {
-    alert('Command server unreachable.');
-    closeModal();
-}
-    };
+                        feather.replace();
+                    } else {
+                        alert('Sync Error: ' + result.error);
+                        closeModal();
+                    }
+                } catch (err) {
+                    alert('Command server unreachable.');
+                    closeModal();
+                }
+            };
 
-// Initial Load
-updateStats();
-loadMedia();
-loadPages();
+            // Initial Load
+            updateStats();
+            loadMedia();
+            loadPages();
 
-// Update Sync Pause Button Text
-const pauseBtn = document.getElementById('sync-pause-btn');
-if (pauseBtn) {
-    if (window.isSyncPaused) {
-        pauseBtn.innerText = 'RESUME SYNC';
-        pauseBtn.style.background = 'rgba(16, 185, 129, 0.1)';
-        pauseBtn.style.borderColor = '#10b981';
-        pauseBtn.style.color = '#10b981';
-    } else {
-        pauseBtn.innerText = 'PAUSE SYNC';
-        pauseBtn.style.background = 'rgba(248, 113, 113, 0.1)';
-        pauseBtn.style.borderColor = '#f87171';
-        pauseBtn.style.color = '#f87171';
-    }
-}
-});
+            // Update Sync Pause Button Text
+            const pauseBtn = document.getElementById('sync-pause-btn');
+            if (pauseBtn) {
+                if (window.isSyncPaused) {
+                    pauseBtn.innerText = 'RESUME SYNC';
+                    pauseBtn.style.background = 'rgba(16, 185, 129, 0.1)';
+                    pauseBtn.style.borderColor = '#10b981';
+                    pauseBtn.style.color = '#10b981';
+                } else {
+                    pauseBtn.innerText = 'PAUSE SYNC';
+                    pauseBtn.style.background = 'rgba(248, 113, 113, 0.1)';
+                    pauseBtn.style.borderColor = '#f87171';
+                    pauseBtn.style.color = '#f87171';
+                }
+            }
+        });
 
 // Logout Modal Logic
 function openLogoutModal() {
@@ -1578,54 +1529,116 @@ function confirmLogout() {
 }
 
 // --- Global Connection Settings ---
+// --- Global Connection Settings ---
 window.setupGlobalCommand = () => {
-    // Re-detect owner/name to avoid stale scope
-    const currentOwner = localStorage.getItem('VAATIA_GH_OWNER') || 'Zilla101';
-    const currentRepo = localStorage.getItem('VAATIA_GH_REPO') || 'VaatiaCollege';
+    const modal = document.getElementById('edit-modal');
+    const title = document.getElementById('modal-title');
+    const body = document.getElementById('modal-body');
 
-    const mode = confirm("Activate Worldwide Command?\n\nOK = Worldwide Access (GitHub Sync)\nCancel = Remote/Local API Mode");
+    if (title && body) {
+        title.innerText = 'Command Link Setup';
+        body.innerHTML = `
+            <div style="text-align: center;">
+                <i data-feather="globe" style="width: 48px; height: 48px; color: var(--accent-blue); margin-bottom: 20px;"></i>
+                <p style="color: var(--text-secondary); margin-bottom: 30px;">
+                    Configure the connection protocol for the Administrative Command Centre.
+                </p>
+                
+                <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px;">
+                    <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: var(--accent-blue);">GitHub Satellite Link</h3>
+                    <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Enable Universal Cloud Sync to edit from anywhere (Required for Failover).</p>
+                    
+                    <input type="password" id="gh-token-input" placeholder="Paste GitHub Personal Access Token" value="${localStorage.getItem('VAATIA_GH_TOKEN') || ''}" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 15px;">
+                    
+                    <button class="btn-edit" onclick="saveGitHubToken()" style="width: 100%; justify-content: center; background: rgba(0, 242, 254, 0.1); border-color: var(--accent-blue); color: var(--accent-blue);">
+                        <i data-feather="link" style="width: 14px; height: 14px; margin-right: 8px;"></i> LINK SATELLITE
+                    </button>
+                </div>
 
-    if (mode) {
-        const repoPath = prompt("Enter GitHub Repo Path (e.g. Owner/Repository):", `${currentOwner}/${currentRepo}`);
-        if (repoPath && repoPath.includes('/')) {
-            const [owner, repo] = repoPath.split('/');
-            const token = prompt("Enter your GitHub Personal Access Token:");
+                <div style="text-align: right;">
+                    <button class="btn-premium" onclick="closeModal()">DONE</button>
+                </div>
+            </div>
+        `;
+
+        // Helper to save token (Attached globally for onclick access)
+        window.saveGitHubToken = () => {
+            const token = document.getElementById('gh-token-input').value.trim();
             if (token) {
-                localStorage.setItem('VAATIA_GH_OWNER', owner.trim());
-                localStorage.setItem('VAATIA_GH_REPO', repo.trim());
-                localStorage.setItem('VAATIA_GH_TOKEN', token.trim());
-                localStorage.removeItem('VAATIA_PUBLIC_API');
-
-                const radarUrl = prompt("Enter your Vercel URL for Command Radar (e.g. https://your-site.vercel.app) or leave blank for default:", "https://vaatiacollege.vercel.app");
-                if (radarUrl && radarUrl.trim()) {
-                    localStorage.setItem('VAATIA_RADAR_URL', radarUrl.trim());
-                } else {
-                    localStorage.removeItem('VAATIA_RADAR_URL');
-                }
-
-                alert("WORLDWIDE SYNC: ACTIVE.\nTarget: " + owner + "/" + repo + "\nReloading...");
-                location.reload();
-            }
-        } else if (repoPath) {
-            alert("Invalid Format. Please use 'Owner/Repository'.");
-        }
-    } else {
-        const url = prompt("Enter Public API URL (e.g. Render/Railway) or leave blank to reset to Local:");
-        if (url !== null) {
-            if (url.trim() === "") {
-                localStorage.removeItem('VAATIA_PUBLIC_API');
-                localStorage.removeItem('VAATIA_GH_TOKEN');
-                localStorage.removeItem('VAATIA_GH_OWNER');
-                localStorage.removeItem('VAATIA_GH_REPO');
-                alert("Settings Cleared. Using Local CMS.");
+                localStorage.setItem('VAATIA_GH_TOKEN', token);
+                showCustomAlert('Reference: Satellite Linked! Universal Cloud Sync is now ACTIVE.', 'Link Established');
             } else {
-                localStorage.setItem('VAATIA_PUBLIC_API', url);
                 localStorage.removeItem('VAATIA_GH_TOKEN');
-                alert("Remote Connection Updated.");
+                showCustomAlert('Satellite Link Severed.', 'Link Terminataed', true);
             }
-            location.reload();
+        };
+
+        if (modal) {
+            modal.style.display = 'flex';
+            if (typeof feather !== 'undefined') feather.replace();
         }
     }
+};
+
+// --- Custom Dialog System (Replaces Native Alerts) ---
+window.showCustomAlert = (message, title = 'Notification', isError = false) => {
+    const dialog = document.getElementById('dialog-modal');
+    if (!dialog) return alert(message); // Fallback
+
+    document.getElementById('dialog-title').innerText = title;
+    document.getElementById('dialog-message').innerText = message;
+
+    // Icon Logic
+    const iconContainer = document.getElementById('dialog-icon');
+    iconContainer.innerHTML = isError
+        ? '<i data-feather="alert-circle" style="width: 48px; height: 48px; color: #ef4444;"></i>'
+        : '<i data-feather="check-circle" style="width: 48px; height: 48px; color: var(--accent-blue);"></i>';
+
+    // Action Logic
+    const actionContainer = document.getElementById('dialog-actions');
+    actionContainer.innerHTML = `<button class="btn-premium" onclick="closeDialog()">OK</button>`;
+
+    dialog.style.display = 'flex';
+    if (typeof feather !== 'undefined') feather.replace();
+};
+
+window.showCustomConfirm = (message, onConfirm, title = 'Confirmation Required') => {
+    const dialog = document.getElementById('dialog-modal');
+    if (!dialog) return confirm(message) ? onConfirm() : null; // Fallback
+
+    document.getElementById('dialog-title').innerText = title;
+    document.getElementById('dialog-message').innerText = message;
+
+    // Icon Logic
+    const iconContainer = document.getElementById('dialog-icon');
+    iconContainer.innerHTML = '<i data-feather="help-circle" style="width: 48px; height: 48px; color: var(--accent-blue);"></i>';
+
+    // Action Logic
+    const actionContainer = document.getElementById('dialog-actions');
+    actionContainer.innerHTML = ''; // Clear previous
+
+    const btnConfirm = document.createElement('button');
+    btnConfirm.className = 'btn-premium';
+    btnConfirm.innerText = 'PROCEED';
+    btnConfirm.onclick = () => {
+        closeDialog();
+        onConfirm();
+    };
+
+    const btnCancel = document.createElement('button');
+    btnCancel.className = 'btn-edit';
+    btnCancel.innerText = 'CANCEL';
+    btnCancel.onclick = closeDialog;
+
+    actionContainer.appendChild(btnCancel);
+    actionContainer.appendChild(btnConfirm);
+
+    dialog.style.display = 'flex';
+    if (typeof feather !== 'undefined') feather.replace();
+};
+
+window.closeDialog = () => {
+    document.getElementById('dialog-modal').style.display = 'none';
 };
 
 // Toggle Sync Pause Feature
@@ -1636,12 +1649,12 @@ window.toggleSyncPause = () => {
     localStorage.setItem('VAATIA_SYNC_PAUSED', newState.toString());
 
     if (newState) {
-        alert("SYNC PAUSED. Automatic pushes to GitHub and Vercel are now disabled.");
+        showCustomAlert("Automatic pushes to GitHub and Vercel are now disabled.", "SYNC PAUSED");
     } else {
-        alert("SYNC RESUMED. Worldwide sync is active.");
+        showCustomAlert("Worldwide sync is active.", "SYNC RESUMED");
     }
 
-    location.reload();
+    setTimeout(() => location.reload(), 2000);
 };
 
 // --- Tactical Command Hotkeys ---

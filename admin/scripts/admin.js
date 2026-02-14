@@ -236,18 +236,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (res.status === 403) {
                         const data = await res.json();
                         if (data.blocked) {
-                            document.body.innerHTML = `
-                                <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #0a0b1e; color: white; flex-direction: column; text-align: center; padding: 20px;">
-                                    <i data-feather="lock" style="width: 80px; height: 80px; color: #f87171; margin-bottom: 20px;"></i>
-                                    <h1 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 15px;" class="text-gradient">ACCESS SUSPENDED</h1>
-                                    <p style="color: var(--text-secondary); max-width: 500px; line-height: 1.6;">Your administrative access has been temporarily restricted by a Super Admin. Please contact the Command Centre for restoration.</p>
-                                    <button onclick="location.reload()" style="margin-top: 30px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 30px; border-radius: 12px; cursor: pointer;">RE-AUTHENTICATE</button>
-                                </div>
-                            `;
-                            feather.replace();
+                            showSecurityOverlay();
                         } else if (data.killed) {
                             alert('🚨 SESSION TERMINATED\nA Super Admin has ended your session for security reasons.');
                             confirmLogout();
+                        }
+                    } else if (res.ok) {
+                        const data = await res.json();
+                        if (!data.adminAccessBlocked || role.includes('Super')) {
+                            hideSecurityOverlay();
                         }
                     }
                 } catch (err) {
@@ -484,6 +481,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateOnlineList();
         setInterval(updateOnlineList, 15000); // Refresh list every 15s
+    };
+
+    // --- Dynamic Security Interceptor ---
+    window.showSecurityOverlay = () => {
+        let overlay = document.getElementById('security-interceptor');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'security-interceptor';
+            overlay.innerHTML = `
+                <div class="interceptor-content" style="text-align: center; padding: 40px; background: rgba(10, 11, 30, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(248, 113, 113, 0.3); border-radius: 24px; max-width: 90%; width: 500px; box-shadow: 0 0 50px rgba(248, 113, 113, 0.2);">
+                    <div style="margin-bottom: 25px; position: relative; display: inline-block;">
+                        <i data-feather="slash" style="width: 80px; height: 80px; color: #f87171;"></i>
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                            <i data-feather="user" style="width: 30px; height: 30px; color: white;"></i>
+                        </div>
+                    </div>
+                    <h1 style="font-size: 2rem; font-weight: 900; color: white; margin-bottom: 15px; letter-spacing: -0.02em;">ACCESS RESTRICTED</h1>
+                    <div style="display: inline-block; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.2); padding: 8px 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <span style="color: #f87171; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;">Status: Logged out by Super Admin</span>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.6); line-height: 1.6; font-size: 0.9rem; margin-bottom: 30px;">Your administrative tools have been temporarily disabled. Please stand by for automatic restoration or contact authorized personnel.</p>
+                    <div class="radar-scan" style="width: 40px; height: 40px; margin: 0 auto; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p style="color: var(--accent-blue); font-size: 0.65rem; font-weight: 800; margin-top: 15px; letter-spacing: 0.1em;">WAITING FOR RE-AUTHORIZATION...</p>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            // Apply overlay styles
+            Object.assign(overlay.style, {
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                background: 'rgba(0, 0, 0, 0.8)',
+                zIndex: '99999',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: '0',
+                transition: 'opacity 0.4s ease'
+            });
+            setTimeout(() => overlay.style.opacity = '1', 10);
+            if (typeof feather !== 'undefined') feather.replace();
+        }
+    };
+
+    window.hideSecurityOverlay = () => {
+        const overlay = document.getElementById('security-interceptor');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.remove(), 400);
+        }
     };
 
     initSession();

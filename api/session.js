@@ -7,9 +7,10 @@ let adminAccessBlocked = false;
 let mockActions = [];
 
 export default async function handler(req, res) {
-    // 🛡️ Universal CORS Handler
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // 🛡️ Enhanced CORS Handler
+    const origin = req.headers.origin || '*';
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader(
         'Access-Control-Allow-Headers',

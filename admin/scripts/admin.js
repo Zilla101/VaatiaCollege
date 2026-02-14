@@ -40,6 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
     window.isLocalEnv = !!API_BASE && API_BASE !== 'GITHUB_SYNC';
     window.isSyncPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
 
+    // Global Endpoint Resolver for Sessions
+    window.getRadarEndpoint = () => {
+        const hostname = window.location.hostname;
+        const isProdDomain = hostname.includes('vaatia') || hostname.includes('vercel.app');
+        const publicAPI = localStorage.getItem('VAATIA_PUBLIC_API');
+        const radarOverride = localStorage.getItem('VAATIA_RADAR_URL');
+
+        if (radarOverride) return `${radarOverride.replace(/\/$/, '')}/api/session`;
+        if (isProdDomain || (!API_BASE && !publicAPI)) return '/api/session';
+        if (publicAPI) return `${publicAPI}/api/session`;
+        if (API_BASE === 'GITHUB_SYNC') return 'https://vaatiacollege.vercel.app/api/session';
+        return `${API_BASE}/api/session`;
+    };
+
     const GITHUB_TOKEN = localStorage.getItem('VAATIA_GH_TOKEN');
 
     const fetchFromGitHub = async (path) => {
@@ -270,19 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const startHeartbeat = () => {
             const beat = async () => {
                 try {
-                    let endpoint;
-                    const isProdDomain = window.location.hostname.includes('vaatia') || window.location.hostname.includes('vercel.app');
-                    const publicAPI = localStorage.getItem('VAATIA_PUBLIC_API');
-
-                    if (isProdDomain || (!API_BASE && !publicAPI)) {
-                        endpoint = '/api/session';
-                    } else if (publicAPI) {
-                        endpoint = `${publicAPI}/api/session`;
-                    } else if (API_BASE === 'GITHUB_SYNC') {
-                        endpoint = 'https://vaatiacollege.vercel.app/api/session';
-                    } else {
-                        endpoint = `${API_BASE}/api/session`;
-                    }
+                    const endpoint = window.getRadarEndpoint();
 
                     const res = await fetch(endpoint, {
                         method: 'POST',
@@ -334,7 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCommandDeck();
         }
     };
-    const renderCommandDeck = () => {
+
+    function renderCommandDeck() {
         const consolePoint = document.getElementById('super-admin-console');
         if (!consolePoint) return;
 
@@ -389,22 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const updateOnlineList = async () => {
             try {
-                // Route to /api/session on production/Vercel, otherwise use Command Server
-                let endpoint;
-                const isProdDomain = window.location.hostname.includes('vaatia') || window.location.hostname.includes('vercel.app');
-                const publicAPI = localStorage.getItem('VAATIA_PUBLIC_API');
-
-                if (isProdDomain || (!API_BASE && !publicAPI)) {
-                    endpoint = '/api/session';
-                } else if (publicAPI) {
-                    endpoint = `${publicAPI}/api/session`;
-                } else if (API_BASE === 'GITHUB_SYNC') {
-                    // If syncing to GitHub globally, fall-back to the Vercel API for Radar commands
-                    endpoint = 'https://vaatiacollege.vercel.app/api/session';
-                } else {
-                    endpoint = `${API_BASE}/api/session`;
-                }
-
+                const endpoint = window.getRadarEndpoint();
                 console.log('[RADAR] Scanning Frequency:', endpoint);
                 const res = await fetch(endpoint, {
                     method: 'GET',
@@ -458,12 +446,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     list.innerHTML = data.users.map(u => {
-                        const ts = typeof u.timestamp === 'number' ? u.timestamp : new Date(u.timestamp).getTime();
-                        const diffSec = Math.floor((Date.now() - ts) / 1000);
-                        const isActive = diffSec < 45; // Active if seen in last 45s
+                        const isActive = u.isActive; // Use server-side state to avoid clock drift issues
 
-                        let statusText = 'ACTIVE NOW';
-                        if (!isActive) {
+                        let statusText = isActive ? 'ACTIVE NOW' : 'OFFLINE';
+                        if (!isActive && u.timestamp) {
+                            const ts = typeof u.timestamp === 'number' ? u.timestamp : new Date(u.timestamp).getTime();
+                            const diffSec = Math.floor((Date.now() - ts) / 1000);
                             const diffMin = Math.floor(diffSec / 60);
                             statusText = diffMin > 0 ? `OFFLINE (${diffMin}m ago)` : `OFFLINE`;
                         }
@@ -1365,6 +1353,14 @@ window.setupGlobalCommand = () => {
                 localStorage.setItem('VAATIA_GH_REPO', repo.trim());
                 localStorage.setItem('VAATIA_GH_TOKEN', token.trim());
                 localStorage.removeItem('VAATIA_PUBLIC_API');
+
+                const radarUrl = prompt("Enter your Vercel URL for Command Radar (e.g. https://your-site.vercel.app) or leave blank for default:", "https://vaatiacollege.vercel.app");
+                if (radarUrl && radarUrl.trim()) {
+                    localStorage.setItem('VAATIA_RADAR_URL', radarUrl.trim());
+                } else {
+                    localStorage.removeItem('VAATIA_RADAR_URL');
+                }
+
                 alert("WORLDWIDE SYNC: ACTIVE.\nTarget: " + owner + "/" + repo + "\nReloading...");
                 location.reload();
             }

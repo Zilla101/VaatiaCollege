@@ -44,81 +44,116 @@ const ALL_PAGES = [
 // --- Session Management Memory Store ---
 let sessions = []; // [{ username, role, ip, lastSeen, timestamp, lastAction, killed }]
 let actionLog = []; // [{ username, action, timestamp }]
+let adminAccessBlocked = false; // Global Lockdown State
 
-// 1. Session Heartbeat
-app.post('/api/session/heartbeat', (req, res) => {
-    const { username, role, timestamp, lastAction } = req.body;
-    if (!username) return res.status(400).json({ error: 'Username required' });
+// --- Unified Session Management API ---
+// This endpoint handles GET (online list) and POST (heartbeat/actions) for localized and production parity
+app.all('/api/session', (req, res) => {
+    const { method } = req;
+    const now = Date.now();
 
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const existingSession = sessions.find(s => s.username === username);
+    if (method === 'GET') {
+        return res.json({
+            success: true,
+            users: sessions.map(u => ({
+                ...u,
+                isActive: (now - new Date(u.timestamp).getTime()) < 90000
+            })),
+            actions: actionLog.slice(-15).reverse(),
+            adminAccessBlocked
+        });
+    }
 
-    if (existingSession) {
-        if (existingSession.killed) {
-            return res.status(403).json({ killed: true, message: 'Session terminated' });
+    if (method === 'POST') {
+        const { username, role, timestamp, lastAction, targetUser, initiator, toggleAccess } = req.body;
+
+        // A. Handle Access Toggle
+        if (toggleAccess !== undefined) {
+            adminAccessBlocked = toggleAccess;
+            actionLog.push({
+                username: initiator || 'SYSTEM',
+                action: `${toggleAccess ? 'DENIED' : 'RESTORED'} access for regular admins`,
+                timestamp: new Date().toISOString()
+            });
+            return res.json({ success: true, adminAccessBlocked });
         }
-        existingSession.lastSeen = new Date().toLocaleTimeString();
-        existingSession.timestamp = timestamp || new Date().toISOString();
-        existingSession.lastAction = lastAction || existingSession.lastAction || 'Active';
-        existingSession.ip = ip;
-    } else {
-        sessions.push({
-            username,
-            role: role || 'Admin',
-            ip,
-            lastSeen: new Date().toLocaleTimeString(),
-            timestamp: timestamp || new Date().toISOString(),
-            lastAction: lastAction || 'Active'
+
+        // B. Handle Terminal Protocol
+        if (targetUser) {
+            const session = sessions.find(s => s.username === targetUser);
+            if (session) {
+                session.killed = true;
+                actionLog.push({
+                    username: initiator || 'SYSTEM',
+                    action: `Terminated ${targetUser} session`,
+                    timestamp: new Date().toISOString()
+                });
+                return res.json({ success: true, message: `Session for ${targetUser} terminated` });
+            }
+            return res.status(404).json({ error: 'Session not found' });
+        }
+
+        // C. Handle Heartbeat
+        if (!username) return res.status(400).json({ error: 'Username required' });
+
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const userRole = role || 'Admin';
+
+        // Block check
+        if (adminAccessBlocked && !userRole.includes('Super')) {
+            return res.status(403).json({
+                success: false,
+                blocked: true,
+                adminAccessBlocked: true,
+                message: 'ACCESS RESTRICTED BY SUPER ADMIN'
+            });
+        }
+
+        const existingSession = sessions.find(s => s.username === username);
+        if (existingSession) {
+            if (existingSession.killed) {
+                return res.status(403).json({ killed: true, message: 'Session terminated' });
+            }
+            existingSession.lastSeen = new Date().toLocaleTimeString();
+            existingSession.timestamp = timestamp || new Date().toISOString();
+            existingSession.lastAction = lastAction || existingSession.lastAction || 'Active';
+            existingSession.ip = ip;
+        } else {
+            sessions.push({
+                username,
+                role: userRole,
+                ip,
+                lastSeen: new Date().toLocaleTimeString(),
+                timestamp: timestamp || new Date().toISOString(),
+                lastAction: lastAction || 'Active'
+            });
+        }
+
+        // Cleanup stale sessions (2 minutes)
+        sessions = sessions.filter(s => (now - new Date(s.timestamp).getTime()) < 120000);
+
+        return res.json({
+            success: true,
+            adminAccessBlocked,
+            users: sessions.map(u => ({
+                ...u,
+                isActive: (now - new Date(u.timestamp).getTime()) < 90000
+            }))
         });
     }
 
-    // Cleanup old sessions (older than 2 minutes)
-    const now = new Date();
-    sessions = sessions.filter(s => {
-        const lastSeenDate = new Date(s.timestamp || 0);
-        return (now - lastSeenDate) < 120000;
-    });
-
-    res.json({ success: true });
+    res.status(405).json({ error: 'Method not allowed' });
 });
 
-// 2. Get Online Users & Actions
-app.get('/api/session/online', (req, res) => {
-    res.json({
-        success: true,
-        users: sessions,
-        actions: actionLog.slice(-15).reverse() // Last 15 actions
-    });
-});
-
-// 3. Terminate Session
-app.post('/api/session/terminate', (req, res) => {
-    const { targetUser, initiator } = req.body;
-    if (!targetUser) return res.status(400).json({ error: 'Target user required' });
-
-    const session = sessions.find(s => s.username === targetUser);
-    if (session) {
-        session.killed = true;
-        actionLog.push({
-            username: initiator || 'SYSTEM',
-            action: `TERMINATED session for ${targetUser}`,
-            timestamp: new Date().toISOString()
-        });
-        console.log(`🚨 SESSION TERMINATED: ${targetUser} by ${initiator || 'SYSTEM'}`);
-        res.json({ success: true, message: `${targetUser} session terminated` });
-    } else {
-        res.status(404).json({ error: 'Session not found' });
-    }
-});
-
-// 4. Record Action
+// Legacy sub-routes for backward compatibility (Optional)
+app.post('/api/session/heartbeat', (req, res) => res.redirect(307, '/api/session'));
+app.get('/api/session/online', (req, res) => res.redirect('/api/session'));
+app.post('/api/session/terminate', (req, res) => res.redirect(307, '/api/session'));
 app.post('/api/session/action', (req, res) => {
     const { username, action, timestamp } = req.body;
     actionLog.push({ username, action, timestamp: timestamp || new Date().toISOString() });
-
     const session = sessions.find(s => s.username === username);
     if (session) session.lastAction = action;
-
     res.json({ success: true });
 });
 

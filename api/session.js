@@ -149,9 +149,7 @@ export default async function handler(req, res) {
             users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 90000 }))
         });
     }
-}
-
-return res.status(405).json({ message: 'Method Not Allowed' });
+    return res.status(405).json({ message: 'Method Not Allowed' });
 }
 
 // Parse user-agent into friendly device name (Precise OS Intelligence)

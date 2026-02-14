@@ -424,6 +424,13 @@ body::after {
         display: none !important;
     }
 
+    /* Command Radar Base Grid */
+    .command-radar-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
     /* Command Radar Responsive Grid */
     .command-radar-grid {
         display: grid;
@@ -437,6 +444,29 @@ body::after {
         display: grid;
         grid-template-columns: 1fr !important;
         gap: 20px !important;
+    }
+}
+
+/* Missing Keyframe Animations */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 

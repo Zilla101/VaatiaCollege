@@ -222,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const beat = async () => {
                 try {
                     const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/heartbeat`;
+                    console.log('[HEARTBEAT] Sending...', { username, role, endpoint });
                     const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -234,8 +235,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         })
                     });
 
+                    console.log('[HEARTBEAT] Status:', res.status);
                     if (res.status === 403) {
                         const data = await res.json();
+                        console.log('[HEARTBEAT] BLOCKED:', data);
                         if (data.blocked) {
                             showSecurityOverlay();
                         } else if (data.killed) {
@@ -244,7 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } else if (res.ok) {
                         const data = await res.json();
-                        // Real-time access sync: Unlock if flag is explicitly false
+                        console.log('[HEARTBEAT] OK:', { adminAccessBlocked: data.adminAccessBlocked, role });
+                        // Real-time access sync
                         if (data.adminAccessBlocked === false || role.includes('Super')) {
                             hideSecurityOverlay();
                         } else if (data.adminAccessBlocked === true && !role.includes('Super')) {
@@ -252,11 +256,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 } catch (err) {
-                    console.warn('Heartbeat connection lost.');
+                    console.warn('[HEARTBEAT] Connection lost:', err.message);
                 }
             };
             beat();
-            setInterval(beat, 10000); // Tactical Pulse: 10s for ASAP sync
+            setInterval(beat, 10000); // Tactical Pulse: 10s
         };
 
         startHeartbeat();
@@ -391,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div style="display: flex; align-items: center; gap: 12px;">
                                     <div style="width: 42px; height: 42px; background: ${u.role.includes('Super') ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)'}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a0a; font-size: 1rem; position: relative; box-shadow: ${u.role.includes('Super') ? '0 0 15px rgba(0, 242, 254, 0.3)' : 'none'};">
                                         ${u.username[0].toUpperCase()}
-                                        ${isActive ? '<div style="position: absolute; -top: 2px; -right: 2px; width: 10px; height: 10px; background: #10b981; border-radius: 50%; border: 2px solid #0a0b1e; box-shadow: 0 0 5px #10b981;"></div>' : ''}
+                                        ${isActive ? '<div style="position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #10b981; border-radius: 50%; border: 2px solid #0a0b1e; box-shadow: 0 0 5px #10b981;"></div>' : ''}
                                     </div>
                                     <div>
                                         <div style="color: white; font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 6px;">
@@ -437,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     if (typeof feather !== 'undefined') feather.replace();
                 }
-                console.warn('Failed to fetch online users.');
+                console.warn('[RADAR] Failed to fetch online users:', err.message);
             }
         };
 

@@ -10,6 +10,9 @@ let mockUsers = [
     }
 ];
 
+// Global Access State (Ephemeral for Vercel)
+let adminAccessBlocked = false;
+
 let mockActions = [
     { username: 'VaatiaAdmin', action: 'Accessed Page Manager', timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString() }
 ];
@@ -21,13 +24,25 @@ export default async function handler(req, res) {
         return res.status(200).json({
             success: true,
             users: mockUsers || [],
-            actions: (mockActions || []).slice(-15).reverse() // Show last 15 actions
+            actions: (mockActions || []).slice(-15).reverse(), // Show last 15 actions
+            adminAccessBlocked // Export the flag
         });
     }
 
     if (method === 'POST') {
-        const { username, targetUser, action, timestamp, role } = req.body;
+        const { username, targetUser, action, timestamp, role, toggleAccess } = req.body;
         const now = Date.now();
+
+        // 0. Handle Admin Access Toggle (Super Admin only call)
+        if (toggleAccess !== undefined) {
+            adminAccessBlocked = toggleAccess;
+            mockActions.push({
+                username: 'SYSTEM',
+                action: `${toggleAccess ? 'DENIED' : 'RESTORED'} access for regular admins`,
+                timestamp: new Date().toISOString()
+            });
+            return res.status(200).json({ success: true, adminAccessBlocked });
+        }
 
         // 1. Handle Terminate Protocol
         if (targetUser) {
@@ -42,8 +57,13 @@ export default async function handler(req, res) {
 
         // 2. Handle Heartbeat & Identity tracking
         if (username) {
-            const existingIndex = mockUsers.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+            // Block regular admins if flag is active
             const userRole = (role || '').trim() || 'Admin';
+            if (adminAccessBlocked && !userRole.includes('Super')) {
+                return res.status(403).json({ success: false, blocked: true, message: 'ADMIN ACCESS TEMPORARILY SUSPENDED' });
+            }
+
+            const existingIndex = mockUsers.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
 
             if (existingIndex > -1) {
                 mockUsers[existingIndex] = {

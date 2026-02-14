@@ -234,7 +234,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (res.status === 403) {
                         const data = await res.json();
-                        if (data.killed) {
+                        if (data.blocked) {
+                            document.body.innerHTML = `
+                                <div style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #0a0b1e; color: white; flex-direction: column; text-align: center; padding: 20px;">
+                                    <i data-feather="lock" style="width: 80px; height: 80px; color: #f87171; margin-bottom: 20px;"></i>
+                                    <h1 style="font-size: 2.5rem; font-weight: 900; margin-bottom: 15px;" class="text-gradient">ACCESS SUSPENDED</h1>
+                                    <p style="color: var(--text-secondary); max-width: 500px; line-height: 1.6;">Your administrative access has been temporarily restricted by a Super Admin. Please contact the Command Centre for restoration.</p>
+                                    <button onclick="location.reload()" style="margin-top: 30px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 30px; border-radius: 12px; cursor: pointer;">RE-AUTHENTICATE</button>
+                                </div>
+                            `;
+                            feather.replace();
+                        } else if (data.killed) {
                             alert('🚨 SESSION TERMINATED\nA Super Admin has ended your session for security reasons.');
                             confirmLogout();
                         }
@@ -265,9 +275,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h2 class="text-gradient" style="font-weight: 800; margin: 0;">Command Radar</h2>
                         <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7; letter-spacing: 0.2rem;">REAL-TIME SESSION MONITORING</p>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue);"></div>
-                        <span style="font-size: 0.65rem; color: var(--accent-blue); letter-spacing: 0.2em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <button id="access-toggle-btn" onclick="toggleAdminAccess()" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 15px; border-radius: 10px; font-size: 0.6rem; font-weight: 800; cursor: pointer; letter-spacing: 0.1em;">INITIALIZING...</button>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue);"></div>
+                            <span style="font-size: 0.65rem; color: var(--accent-blue); letter-spacing: 0.2em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -317,6 +330,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 const list = document.getElementById('online-users-list');
+
+                // Update Access Control toggle state
+                window.adminAccessBlocked = data.adminAccessBlocked;
+                const toggleBtn = document.getElementById('access-toggle-btn');
+                if (toggleBtn) {
+                    if (data.adminAccessBlocked) {
+                        toggleBtn.innerText = 'RESTORE ADMIN ACCESS';
+                        toggleBtn.style.background = 'rgba(16, 185, 129, 0.1)';
+                        toggleBtn.style.color = '#10b981';
+                        toggleBtn.style.borderColor = '#10b981';
+                    } else {
+                        toggleBtn.innerText = 'DENY ADMIN ACCESS';
+                        toggleBtn.style.background = 'rgba(248, 113, 113, 0.1)';
+                        toggleBtn.style.color = '#f87171';
+                        toggleBtn.style.borderColor = '#f87171';
+                    }
+                }
 
                 if (data.success && list) {
                     const actionList = document.getElementById('action-log-list');
@@ -390,31 +420,50 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
+        window.terminateSession = async (targetUser) => {
+            if (!confirm(`🚨 PROTOCOL INITIATED: Are you sure you want to FORCE TERMINATE ${targetUser.toUpperCase()}?`)) return;
+
+            try {
+                const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/terminate`;
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ targetUser, initiator: username })
+                });
+
+                if (res.ok) {
+                    alert(`SUCCESS: Session for ${targetUser} has been terminated.`);
+                    if (typeof updateOnlineList === 'function') updateOnlineList();
+                }
+            } catch (err) {
+                alert('CRITICAL ERROR: Failed to execute termination protocol.');
+            }
+        };
+
+        window.toggleAdminAccess = async () => {
+            const isBlocked = window.adminAccessBlocked;
+            const action = isBlocked ? 'RESTORE' : 'DENY';
+            if (!confirm(`🚨 PROTOCOL OVERRIDE: Are you sure you want to ${action} ACCESS for all regular admins?`)) return;
+
+            try {
+                const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/access`;
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ toggleAccess: !isBlocked })
+                });
+
+                if (res.ok) {
+                    alert(`SUCCESS: Accessibility protocols have been ${isBlocked ? 'restored' : 'suspended'}.`);
+                    if (typeof updateOnlineList === 'function') updateOnlineList();
+                }
+            } catch (err) {
+                alert('CRITICAL ERROR: Failed to update access state.');
+            }
+        };
+
         updateOnlineList();
         setInterval(updateOnlineList, 15000); // Refresh list every 15s
-    };
-
-    window.terminateSession = async (targetUser) => {
-        if (!confirm(`🚨 PROTOCOL INITIATED: Are you sure you want to FORCE TERMINATE ${targetUser.toUpperCase()}?`)) return;
-
-        try {
-            const username = sessionStorage.getItem('VAATIA_USER');
-            const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/terminate`;
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetUser, initiator: username })
-            });
-
-            if (res.ok) {
-                alert(`SUCCESS: Session for ${targetUser} has been terminated.`);
-                if (typeof updateOnlineList === 'function') updateOnlineList();
-            } else {
-                alert('ERROR: Target session could not be terminated.');
-            }
-        } catch (err) {
-            alert('CRITICAL ERROR: Failed to execute termination protocol.');
-        }
     };
 
     initSession();
@@ -1128,14 +1177,7 @@ function confirmLogout() {
 
 // --- Global Connection Settings ---
 window.setupGlobalCommand = () => {
-    const rawRole = sessionStorage.getItem('VAATIA_ROLE') || '';
-    const role = rawRole.trim();
-    const isAuthorized = role === 'Super Admin' || role === 'Admin';
-
-    if (!isAuthorized) {
-        alert("ACCESS DENIED: Restricted to Administrators.");
-        return;
-    }
+    // Local Access Logic Removed - Access is now managed dynamically via Command Radar
     const mode = confirm("Activate Direct Cloud Sync?\n\nOK = Worldwide Access (GitHub Login)\nCancel = Local Command Mode Only");
 
     if (mode) {
@@ -1165,14 +1207,7 @@ window.setupGlobalCommand = () => {
 
 // Toggle Sync Pause Feature
 window.toggleSyncPause = () => {
-    const rawRole = sessionStorage.getItem('VAATIA_ROLE') || '';
-    const role = rawRole.trim();
-    const isAuthorized = role === 'Super Admin' || role === 'Admin';
-
-    if (!isAuthorized) {
-        alert("ACCESS DENIED: Restricted to Administrators.");
-        return;
-    }
+    // Local Access Logic Removed - Access is now managed dynamically via Command Radar
     const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
     const newState = !isPaused;
     localStorage.setItem('VAATIA_SYNC_PAUSED', newState.toString());

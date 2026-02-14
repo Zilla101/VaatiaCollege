@@ -255,7 +255,13 @@ body::after {
     transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: -40px 0 100px rgba(0, 0, 0, 0.9);
     border-radius: 40px 0 0 40px;
-    /* Rounded leading edge for mobile */
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none;
 }
 
 .sidebar.active {
@@ -396,6 +402,13 @@ body::after {
         border-radius: 40px;
         box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
         z-index: 100;
+        /* Hide scrollbar */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .sidebar::-webkit-scrollbar {
+        display: none;
     }
 
     .sidebar .nav-item {
@@ -405,6 +418,21 @@ body::after {
 
     .mobile-nav-toggle {
         display: none !important;
+    }
+
+    /* Command Radar Responsive Grid */
+    .command-radar-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .command-radar-grid {
+        display: grid;
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
     }
 }
 
@@ -420,16 +448,15 @@ body::after {
 }
 
 .sidebar-logo img {
-    height: 67px;
-    /* Reduced from 112px for better sidebar layout balance */
-    margin-bottom: 10px;
+    height: 50px;
+    margin-bottom: 8px;
     filter: brightness(0) invert(1) drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
 }
 
 .sidebar-logo span {
     font-family: 'Poppins', sans-serif;
     font-weight: 800;
-    font-size: 1.4rem;
+    font-size: 0.95rem;
     letter-spacing: -0.02em;
     background: linear-gradient(135deg, #fff, var(--accent-blue));
     -webkit-background-clip: text;
@@ -456,7 +483,7 @@ body::after {
     text-decoration: none;
     transition: all var(--transition-premium);
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 0.75rem;
     border: 1px solid transparent;
 }
 
@@ -589,7 +616,7 @@ body::after {
 }
 
 .protocol-status {
-    font-size: 1rem;
+    font-size: 0.95rem;
     /* Scaled down for better fit */
     font-weight: 800;
     letter-spacing: 0.1em;
@@ -784,7 +811,7 @@ body::after {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     pointer-events: none;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1110,7 +1137,7 @@ body::after {
     }
 
     .text-gradient {
-        font-size: clamp(2.2rem, 10vw, 3rem) !important;
+        font-size: clamp(2rem, 8vw, 2.5rem) !important;
         letter-spacing: -0.04em;
         line-height: 1.1;
     }
@@ -1248,7 +1275,7 @@ body::after {
     padding: 14px 18px;
     border-radius: 12px;
     width: 100%;
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
 }
 
@@ -1416,7 +1443,7 @@ body::after {
     .nav-link {
         padding: 15px 20px !important;
         border-radius: 20px !important;
-        font-size: 1rem !important;
+        font-size: 0.75rem !important;
     }
 }
 

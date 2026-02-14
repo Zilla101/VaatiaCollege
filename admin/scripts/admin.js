@@ -9,20 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
             hostname.startsWith('10.') ||
             (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
 
-        // Priority 1: GitHub Global Sync (If token exists AND not paused)
-        const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
-        const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
-
-        if (ghToken && !isPaused) return 'GITHUB_SYNC';
-
-        // Priority 2: Public API Override
-        const publicApi = localStorage.getItem('VAATIA_PUBLIC_API');
-        if (publicApi) return publicApi;
-
-        // Priority 3: Production Domain Auto-Detection (e.g., vaatiacollege.com.ng)
-        // If we are on the main domain and local server is running (or integrated), use relative paths
-        if (!isLocal && hostname.includes('vaatiacollege')) {
-            return ''; // Use relative API calls
+        // Priority 3: Production/Cloud Detection
+        if (!isLocal) {
+            // If on Vercel or main domain, use relative paths
+            if (hostname.includes('vaatia') || hostname.includes('vercel.app')) {
+                return '';
+            }
         }
 
         // Priority 4: Local Command Engine
@@ -31,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return `http://${hostname}:3000`;
         }
 
-        return null;
+        return ''; // Default to relative paths for maximum Vercel compatibility
     };
     const API_BASE = getApiBase();
     window.API_BASE = API_BASE;
@@ -263,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                <div class="command-radar-grid">
                     <div>
                         <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">AUTHORIZED PERSONNEL</p>
                         <div id="online-users-list" style="display: flex; flex-direction: column; gap: 12px;">
@@ -295,8 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const updateOnlineList = async () => {
             try {
                 // Route to /api/session on production/Vercel, otherwise use Command Server
-                const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/online`;
+                let endpoint;
+                if (!API_BASE || API_BASE === 'GITHUB_SYNC') {
+                    endpoint = '/api/session';
+                } else {
+                    endpoint = `${API_BASE}/api/session/online`;
+                }
+
                 const res = await fetch(endpoint);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 const list = document.getElementById('online-users-list');
 

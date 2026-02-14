@@ -462,6 +462,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         return; // Exit early if no users
                     }
 
+                    // TACTICAL SORT: Active users first, then offline users
+                    const sortedUsers = [...data.users].sort((a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0));
+
                     // Render Action Log if available
                     if (actionList && data.actions) {
                         if (data.actions.length === 0) {
@@ -477,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    list.innerHTML = data.users.map(u => {
+                    list.innerHTML = sortedUsers.map(u => {
                         const isActive = u.isActive; // Use server-side state to avoid clock drift issues
                         const currentUser = (sessionStorage.getItem('VAATIA_USER') || '').toLowerCase();
 
@@ -1394,6 +1397,20 @@ function confirmLogout() {
         btn.innerText = 'TERMINATING...';
         btn.style.opacity = '0.7';
 
+        const username = sessionStorage.getItem('VAATIA_USER');
+        const role = sessionStorage.getItem('VAATIA_ROLE');
+
+        // SIGNAL OFFLINE STATE BEFORE REDIRECT
+        if (window.getRadarEndpoint && username) {
+            fetch(window.getRadarEndpoint(), {
+                method: 'POST',
+                credentials: 'include',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, role, isLogout: true })
+            }).catch(() => { }); // Fire and forget
+        }
+
         // Clear Session Storage
         sessionStorage.removeItem('VAATIA_USER');
         sessionStorage.removeItem('VAATIA_ROLE');
@@ -1401,7 +1418,7 @@ function confirmLogout() {
 
         setTimeout(() => {
             window.location.href = 'login.html';
-        }, 800);
+        }, 1200); // Slight delay for signal to propagate
     }
 }
 

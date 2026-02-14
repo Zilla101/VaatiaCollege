@@ -5,7 +5,7 @@ let mockUsers = [
         role: 'Admin',
         ip: '192.168.1.5',
         lastSeen: new Date().toLocaleTimeString(),
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(),
         lastAction: 'Reviewing Pages'
     }
 ];
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
             // Block regular admins if flag is active
             const userRole = (role || '').trim() || 'Admin';
             if (adminAccessBlocked && !userRole.includes('Super')) {
-                return res.status(403).json({ success: false, blocked: true, message: 'ADMIN ACCESS TEMPORARILY SUSPENDED' });
+                return res.status(403).json({ success: false, blocked: true, adminAccessBlocked: true, message: 'ACCESS RESTRICTED BY SUPER ADMIN' });
             }
 
             const existingIndex = mockUsers.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
@@ -102,7 +102,11 @@ export default async function handler(req, res) {
             const STALE_THRESHOLD = 5 * 60 * 1000;
             mockUsers = mockUsers.filter(u => (now - u.timestamp) < STALE_THRESHOLD);
 
-            return res.status(200).json({ success: true });
+            return res.status(200).json({
+                success: true,
+                adminAccessBlocked,
+                users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 300000 }))
+            });
         }
     }
 

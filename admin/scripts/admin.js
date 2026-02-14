@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 <div class="command-radar-grid">
                     <div>
-                        <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">AUTHORIZED PERSONNEL</p>
+                        <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">ACTIVE SESSIONS</p>
                         <div id="online-users-list" style="display: flex; flex-direction: column; gap: 12px;">
                             <div style="text-align: center; padding: 20px; opacity: 0.5;">
                                 <div class="loader-circle" style="width: 20px; height: 20px; border: 2px solid var(--accent-blue); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
@@ -375,9 +375,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     list.innerHTML = data.users.map(u => {
-                        const ts = u.timestamp;
+                        const ts = typeof u.timestamp === 'number' ? u.timestamp : new Date(u.timestamp).getTime();
                         const diffSec = Math.floor((Date.now() - ts) / 1000);
-                        const isActive = diffSec < 45; // Active if seen in last 45s (conservative)
+                        const isActive = diffSec < 45; // Active if seen in last 45s
 
                         let statusText = 'ACTIVE NOW';
                         if (!isActive) {

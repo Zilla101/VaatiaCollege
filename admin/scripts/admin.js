@@ -267,7 +267,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const startHeartbeat = () => {
             const beat = async () => {
                 try {
-                    const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/heartbeat`;
+                    let endpoint;
+                    const isProdDomain = window.location.hostname.includes('vaatia') || window.location.hostname.includes('vercel.app');
+                    const publicAPI = localStorage.getItem('VAATIA_PUBLIC_API');
+
+                    if (isProdDomain || (!API_BASE && !publicAPI)) {
+                        endpoint = '/api/session';
+                    } else if (publicAPI) {
+                        endpoint = `${publicAPI}/api/session`;
+                    } else if (API_BASE === 'GITHUB_SYNC') {
+                        endpoint = 'https://vaatiacollege.vercel.app/api/session';
+                    } else {
+                        endpoint = `${API_BASE}/api/session`;
+                    }
+
                     const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

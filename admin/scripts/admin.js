@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if ((isSuper || isAdmin) && password === validPass) {
                 btn.innerText = 'VERIFYING ACCESS...';
                 btn.style.opacity = '0.7';
+                btn.disabled = true; // Prevent double clicks
                 errorMsg.style.display = 'none';
 
                 const role = isSuper ? 'Super Admin' : 'Admin';
@@ -140,6 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 setTimeout(() => {
                                     errorMsg.style.display = 'none';
                                     btn.innerText = 'LOGIN';
+                                    btn.disabled = false;
                                 }, 4000);
                                 return;
                             }
@@ -148,15 +150,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             completeLogin(username, role);
                         })
                         .catch(() => {
-                            // If server unreachable, check localStorage fallback
-                            if (localStorage.getItem('VAATIA_BLOCKED') === 'true') {
-                                btn.innerText = 'ACCESS DENIED';
-                                errorMsg.style.display = 'block';
-                                errorMsg.textContent = '🔒 Access suspended by Super Admin.';
-                                setTimeout(() => { errorMsg.style.display = 'none'; btn.innerText = 'LOGIN'; }, 4000);
-                                return;
-                            }
-                            completeLogin(username, role);
+                            // FAIL-SAFE: If check fails, Assume Blocked
+                            btn.innerText = 'CONNECTION ERROR';
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                            errorMsg.style.display = 'block';
+                            errorMsg.textContent = '🔒 System Unreachable. Access Denied for Safety.';
+                            setTimeout(() => {
+                                errorMsg.style.display = 'none';
+                                btn.innerText = 'LOGIN';
+                            }, 4000);
                         });
                 } else {
                     // Super Admins always pass

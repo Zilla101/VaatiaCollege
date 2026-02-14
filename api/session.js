@@ -11,8 +11,22 @@ const REPO_NAME = 'VaatiaCollege';
 const LOCK_FILE_PATH = 'admin-lock.json';
 
 // Helper: Fetch Lock State from GitHub
+// Helper: Fetch Lock State from GitHub (with caching)
+let lockCache = {
+    value: false,
+    timestamp: 0
+};
+const CACHE_TTL = 15000; // 15 seconds
+
 async function getGitHubLockState() {
     if (!GITHUB_TOKEN) return adminAccessBlocked; // Fallback to memory if no token
+
+    // Check Cache
+    const now = Date.now();
+    if (now - lockCache.timestamp < CACHE_TTL) {
+        return lockCache.value;
+    }
+
     try {
         const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${LOCK_FILE_PATH}`, {
             headers: {
@@ -20,13 +34,27 @@ async function getGitHubLockState() {
                 'Accept': 'application/vnd.github.v3+json'
             }
         });
-        if (!response.ok) return adminAccessBlocked;
+
+        if (!response.ok) {
+            console.error('GitHub Fetch Failed:', response.status);
+            // FAIL-SAFE: If we have a stale value, use it. If not, default to TRUE (Locked) for safety.
+            return lockCache.timestamp > 0 ? lockCache.value : true;
+        }
+
         const data = await response.json();
         const content = JSON.parse(atob(data.content));
+
+        // Update Cache
+        lockCache = {
+            value: content.adminAccessBlocked,
+            timestamp: now
+        };
+
         return content.adminAccessBlocked;
     } catch (err) {
         console.error('Failed to fetch lock state:', err);
-        return adminAccessBlocked;
+        // FAIL-SAFE on network error
+        return lockCache.timestamp > 0 ? lockCache.value : true;
     }
 }
 
@@ -60,6 +88,14 @@ async function setGitHubLockState(blocked, username) {
                 sha: sha
             })
         });
+
+        if (putRes.ok) {
+            // Update Cache Immediately
+            lockCache = {
+                value: blocked,
+                timestamp: Date.now()
+            };
+        }
         return putRes.ok;
     } catch (err) {
         console.error('Failed to update lock state:', err);

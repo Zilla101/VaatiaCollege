@@ -131,11 +131,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const username = localStorage.getItem('VAATIA_USER');
         const role = localStorage.getItem('VAATIA_ROLE');
 
-        if (!username || !window.location.pathname.includes('dashboard.html')) return;
+        // Robust path matching: Handle dashboard.html, /dashboard, /admin/dashboard, etc.
+        const isDashboard = window.location.pathname.match(/dashboard(\.html)?$/i);
+        if (!username || !isDashboard) return;
 
         // 1. Personalize UI
         const sidebarUser = document.querySelector('.sidebar-logo span');
-        if (sidebarUser) sidebarUser.innerText = username;
+        if (sidebarUser) {
+            sidebarUser.innerText = username;
+
+            // Add Elite Badge for Super Admins
+            if (role === 'Super Admin') {
+                const badge = document.createElement('div');
+                badge.className = 'role-badge';
+                badge.innerHTML = '<i data-feather="shield"></i> SUPER ADMIN';
+                badge.style.cssText = `
+                    font-size: 0.5rem;
+                    background: var(--accent-blue);
+                    color: #0c0c0c;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-weight: 900;
+                    letter-spacing: 0.1em;
+                    margin-top: 5px;
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                    width: fit-content;
+                `;
+                sidebarUser.parentElement.appendChild(badge);
+                if (typeof feather !== 'undefined') feather.replace();
+            }
+        }
 
         const welcomeSubtext = document.querySelector('.hero-header-content p');
         if (welcomeSubtext) welcomeSubtext.innerText = `Welcome, ${username} (${role})`;
@@ -167,7 +194,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const startHeartbeat = () => {
             const beat = async () => {
                 try {
-                    const res = await fetch(`${API_BASE || 'http://localhost:3000'}/api/session/heartbeat`, {
+                    // Route to /api/session on production/Vercel, otherwise use Command Server
+                    const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/heartbeat`;
+                    const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, role })
@@ -222,7 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const updateOnlineList = async () => {
             try {
-                const res = await fetch(`${API_BASE || 'http://localhost:3000'}/api/session/online`);
+                // Route to /api/session on production/Vercel, otherwise use Command Server
+                const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/online`;
+                const res = await fetch(endpoint);
                 const data = await res.json();
                 const list = document.getElementById('online-users-list');
 
@@ -250,6 +281,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     `).join('');
                 }
             } catch (err) {
+                const list = document.getElementById('online-users-list');
+                if (list) {
+                    list.innerHTML = `
+                        <div style="text-align: center; padding: 20px; background: rgba(248, 113, 113, 0.05); border: 1px solid rgba(248, 113, 113, 0.2); border-radius: 12px;">
+                            <i data-feather="wifi-off" style="color: #f87171; margin-bottom: 10px;"></i>
+                            <p style="color: #f87171; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">Command Server Offline</p>
+                            <p style="color: var(--text-secondary); font-size: 0.55rem; margin-top: 5px; opacity: 0.7;">SESSION TRACKING RESTRICTED TO LOCAL HOST</p>
+                        </div>
+                    `;
+                    if (typeof feather !== 'undefined') feather.replace();
+                }
                 console.warn('Failed to fetch online users.');
             }
         };

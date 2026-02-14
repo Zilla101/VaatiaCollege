@@ -197,11 +197,11 @@ window.saveSectionChanges = async (sectionName) => {
         return;
     }
 
-    // Handle GitHub Sync Save (Universal Greedy Sync Mode)
-    if (API_BASE === 'GITHUB_SYNC') {
+    // --- STRATEGY: GitHub Direct Sync (Defined internally for reuse) ---
+    const executeGitHubSync = async () => {
         const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
-        const REPO_OWNER = 'Zilla101';
-        const REPO_NAME = 'VaatiaCollege';
+        const REPO_OWNER = localStorage.getItem('VAATIA_GH_OWNER') || 'Zilla101';
+        const REPO_NAME = localStorage.getItem('VAATIA_GH_REPO') || 'VaatiaCollege';
         const ALL_PAGES = [
             'index.html', 'admissions.html', 'boarding.html', 'club.html',
             'excursions.html', 'fees.html', 'skillsacquisition.html',
@@ -328,8 +328,15 @@ window.saveSectionChanges = async (sectionName) => {
             activeBtn.disabled = false;
             return;
         }
+    };
+
+    // Handle GitHub Sync Save (Universal Greedy Sync Mode)
+    if (API_BASE === 'GITHUB_SYNC') {
+        await executeGitHubSync();
+        return;
     }
 
+    // --- STRATEGY: Default Backend API ---
     try {
         const response = await fetch(`${API_BASE}/api/save-section`, {
             method: 'POST',
@@ -348,6 +355,8 @@ window.saveSectionChanges = async (sectionName) => {
                 if (typeof feather !== 'undefined') feather.replace();
             }, 2000);
         } else {
+            // If backend reports failure, try fallback?
+            // For now, respect the backend's explicit error
             alert(`⚠️ Protocol Error: ${result.error}`);
             activeBtn.innerHTML = originalContent;
             activeBtn.disabled = false;
@@ -355,10 +364,23 @@ window.saveSectionChanges = async (sectionName) => {
         }
     } catch (error) {
         console.error('❌ Sync Error:', error);
-        alert(`❌ Network Error: Could not reach the command server.`);
-        activeBtn.innerHTML = originalContent;
-        activeBtn.disabled = false;
-        if (typeof feather !== 'undefined') feather.replace();
+
+        // --- FAILSAFE: AUTO-SWITCH TO GITHUB SYNC ---
+        const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
+        if (ghToken) {
+            console.log('⚠️ Backend unreachable. Engaging Fail-Safe Protocol: DIRECT GITHUB SYNC.');
+            // Inform user via button state
+            activeBtn.innerHTML = '<i data-feather="upload-cloud"></i> FAILOVER SYNC...';
+            // Short delay to let user see 'FAILOVER SYNC'
+            setTimeout(async () => {
+                await executeGitHubSync();
+            }, 500);
+        } else {
+            alert(`❌ Network Error: Could not reach the command server.`);
+            activeBtn.innerHTML = originalContent;
+            activeBtn.disabled = false;
+            if (typeof feather !== 'undefined') feather.replace();
+        }
     }
 };
 

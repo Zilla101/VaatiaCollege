@@ -376,7 +376,8 @@ window.saveSectionChanges = async (sectionName) => {
                 await executeGitHubSync();
             }, 500);
         } else {
-            alert(`❌ Network Error: Could not reach the command server.`);
+            console.warn('❌ Failover denied: No GitHub Token.');
+            alert(`❌ CONNECTIVITY ERROR: \n\n1. The Command Server is unreachable.\n2. No GitHub Token found for failover.\n\nPlease ensure you are connected to the internet OR add your GitHub Token in 'Settings' to enable Universal Cloud Sync.`);
             activeBtn.innerHTML = originalContent;
             activeBtn.disabled = false;
             if (typeof feather !== 'undefined') feather.replace();

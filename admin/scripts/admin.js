@@ -229,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             username,
                             role: (role || '').trim(),
                             loginTime: sessionStorage.getItem('VAATIA_LOGIN_TIME'),
+                            lastEdit: sessionStorage.getItem('VAATIA_LAST_EDIT') || 'No edits yet',
                             timestamp: new Date().toISOString()
                         })
                     });
@@ -252,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             };
             beat();
-            setInterval(beat, 15000); // Pulse every 15s for stability
+            setInterval(beat, 10000); // Tactical Pulse: 10s for ASAP sync
         };
 
         startHeartbeat();
@@ -406,16 +407,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Network IP</span>
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Tactical Location</span>
                                     <span style="font-family: 'Courier New', monospace; font-size: 0.65rem; color: var(--accent-blue);">${u.ip}</span>
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
                                     <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Logon Time</span>
-                                    <span style="font-size: 0.65rem; color: white;">${u.loginTime || 'S-LEVEL CLASSIFIED'}</span>
+                                    <span style="font-size: 0.65rem; color: white;">${u.loginTime || 'CLASSIFIED'}</span>
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 4px; grid-column: span 2;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Current Directive</span>
-                                    <span style="font-size: 0.6rem; color: #10b981; font-weight: 600;">${u.lastAction || 'MONITORING STANDBY'}</span>
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Recent Intelligence (Last Edit)</span>
+                                    <span style="font-size: 0.6rem; color: #10b981; font-weight: 600;">${u.lastEdit || 'MONITORING STANDBY'}</span>
                                 </div>
                             </div>
                         </div>
@@ -1169,6 +1170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             if (result.success) {
+                sessionStorage.setItem('VAATIA_LAST_EDIT', `${page} > ${section}`);
                 body.innerHTML = `
                     <div style="text-align: center; padding: 60px;">
                         <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>

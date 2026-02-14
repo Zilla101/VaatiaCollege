@@ -71,6 +71,7 @@ export default async function handler(req, res) {
                     ...mockUsers[existingIndex],
                     role: userRole,
                     loginTime: mockUsers[existingIndex].loginTime || currentLoginTime,
+                    lastEdit: req.body.lastEdit || mockUsers[existingIndex].lastEdit || 'Monitoring',
                     lastSeen: new Date().toLocaleTimeString(),
                     timestamp: now,
                     lastAction: action || mockUsers[existingIndex].lastAction || 'Active'
@@ -80,6 +81,7 @@ export default async function handler(req, res) {
                     username,
                     role: userRole,
                     loginTime: currentLoginTime,
+                    lastEdit: req.body.lastEdit || 'Session Initialized',
                     ip: req.headers['x-forwarded-for'] || 'SERVER',
                     lastSeen: new Date().toLocaleTimeString(),
                     timestamp: now,

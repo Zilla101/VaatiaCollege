@@ -3021,15 +3021,17 @@ footer {
     position: sticky;
     left: 0;
     z-index: 2;
-    background: rgba(15, 15, 20, 0.85);
-    /* Darker to block scrolling text */
+    /* Glass Gradient + Dark Base */
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    background-color: rgba(5, 5, 5, 0.6);
+    /* Semi-transparent base to assist blocking */
+
     /* Liquid Glass Transparency */
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
     border-right: 1px solid rgba(255, 255, 255, 0.15);
-    /* Slightly stronger border */
-    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.3);
-    /* Stronger shadow for depth */
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4);
+    /* Enhanced shadow */
 }
 
 /* Custom "Classy" Scrollbar for Tables */

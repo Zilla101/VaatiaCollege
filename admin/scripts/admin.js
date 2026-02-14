@@ -310,6 +310,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }).catch(() => { });
         };
 
+        // 1.5 Update Protocol Version Display
+        const versionEl = document.getElementById('gh-sync-version');
+        if (versionEl) {
+            const updateVersion = async () => {
+                // Default fallback
+                let versionText = 'VERSION: v2.4 (STABLE)';
+                let versionColor = 'var(--text-secondary)';
+
+                // Try to get live commit hash if linked
+                const repo = localStorage.getItem('VAATIA_GH_REPO');
+                const owner = localStorage.getItem('VAATIA_GH_OWNER');
+                const token = localStorage.getItem('VAATIA_GH_TOKEN');
+
+                if (repo && owner && token) {
+                    try {
+                        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits/main`, {
+                            headers: { 'Authorization': `token ${token}` }
+                        });
+                        if (res.ok) {
+                            const data = await res.json();
+                            versionText = `VERSION: ${data.sha.substring(0, 7)} (LIVE)`;
+                            versionColor = '#10b981'; // Green for live
+                        }
+                    } catch (e) {
+                        console.warn('Version check failed, using stable fallback.');
+                    }
+                }
+
+                versionEl.innerText = versionText;
+                versionEl.style.color = versionColor;
+            };
+            updateVersion();
+        }
+
         // 2. Start Session Sync (Renamed from Heartbeat)
         const startSessionSync = () => {
             const sync = async () => {

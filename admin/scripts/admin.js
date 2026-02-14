@@ -164,12 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (welcomeSubtext) welcomeSubtext.innerText = `Welcome, ${username} (${role})`;
 
         // 1.1 Role-Based Visibility Restrictions
-        if (role !== 'Super Admin') {
-            // Hide Super Admin specific controls in Overview
+        if (role !== 'Super Admin' && role !== 'Admin') {
+            // Hide Super Admin specific controls in Overview for non-admins
             const syncPauseBtn = document.getElementById('sync-pause-btn');
             if (syncPauseBtn) syncPauseBtn.style.display = 'none';
 
-            // Also hide 'Manage Connection' for regular admins
             const overviewButtons = document.querySelectorAll('#overview .hero-header-content button');
             overviewButtons.forEach(btn => {
                 if (btn.innerText.includes('MANAGE CONNECTION')) {
@@ -177,11 +176,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Ensure they can't see the Settings nav item (though it's hidden by CSS/inline by default now)
             const settingsNav = document.getElementById('nav-item-settings');
             if (settingsNav) settingsNav.style.display = 'none';
         } else {
-            // Super Admin specifics
+            // Both Super Admin and Admin can see these
+            const syncPauseBtn = document.getElementById('sync-pause-btn');
+            if (syncPauseBtn) syncPauseBtn.style.display = 'block';
+
+            const overviewButtons = document.querySelectorAll('#overview .hero-header-content button');
+            overviewButtons.forEach(btn => {
+                if (btn.innerText.includes('MANAGE CONNECTION')) {
+                    btn.style.display = 'block';
+                }
+            });
+
             const settingsNav = document.getElementById('nav-item-settings');
             if (settingsNav) settingsNav.style.display = 'block';
         }

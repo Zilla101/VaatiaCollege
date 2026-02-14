@@ -190,16 +190,38 @@ document.addEventListener('DOMContentLoaded', () => {
             if (settingsNav) settingsNav.style.display = 'block';
         }
 
+        // 1.2 Setup Action Logging
+        window.logAdminAction = (action) => {
+            console.log(`[ACTION LOG] ${username}: ${action}`);
+            sessionStorage.setItem('VAATIA_LAST_ACTION', action);
+
+            // Send to backend for SuperAdmin visibility
+            const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/action`;
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, action, timestamp: new Date().toISOString() })
+            }).catch(() => { });
+        };
+
         // 2. Start Heartbeat
         const startHeartbeat = () => {
             const beat = async () => {
                 try {
-                    // Route to /api/session on production/Vercel, otherwise use Command Server
+                    // Update role-based status (Active if heartbeat is fresh)
+                    const now = new Date();
+                    sessionStorage.setItem('VAATIA_LAST_SEEN', now.toISOString());
+
                     const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/heartbeat`;
                     const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, role })
+                        body: JSON.stringify({
+                            username,
+                            role,
+                            timestamp: now.toISOString(),
+                            lastAction: sessionStorage.getItem('VAATIA_LAST_ACTION') || 'Dashboard Active'
+                        })
                     });
 
                     if (res.status === 403) {
@@ -224,27 +246,48 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCommandDeck();
         }
     };
-
     const renderCommandDeck = () => {
         const consolePoint = document.getElementById('super-admin-console');
         if (!consolePoint) return;
 
         const deckHTML = `
-            <div class="glass-card" style="margin-top: 20px; border-left: 4px solid var(--accent-blue); animation: slideInUp 0.5s ease-out;">
+            <div class="glass-card" style="margin-top: 20px; border-left: 4px solid var(--accent-blue); animation: slideInUp 0.5s ease-out; align-items: stretch; text-align: left; padding: 30px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                     <div>
                         <h2 class="text-gradient" style="font-weight: 800; margin: 0;">Command Radar</h2>
-                        <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7;">REAL-TIME SESSION MONITORING</p>
+                        <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7; letter-spacing: 0.2rem;">REAL-TIME SESSION MONITORING</p>
                     </div>
-                    <span style="font-size: 0.65rem; color: var(--accent-blue); letter-spacing: 0.2em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue);"></div>
+                        <span style="font-size: 0.65rem; color: var(--accent-blue); letter-spacing: 0.2em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
+                    </div>
                 </div>
-                <div id="online-users-list" style="display: flex; flex-direction: column; gap: 15px;">
-                    <div style="text-align: center; padding: 20px; opacity: 0.5;">
-                        <div class="loader-circle" style="width: 20px; height: 20px; border: 2px solid var(--accent-blue); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
-                        <p style="font-size: 0.6rem; letter-spacing: 0.1em;">SCANNING NETWORK...</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+                    <div>
+                        <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">AUTHORIZED PERSONNEL</p>
+                        <div id="online-users-list" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="text-align: center; padding: 20px; opacity: 0.5;">
+                                <div class="loader-circle" style="width: 20px; height: 20px; border: 2px solid var(--accent-blue); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">LIVE ACTION LOG</p>
+                        <div id="action-log-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
+                            <p style="font-size: 0.6rem; text-align: center; opacity: 0.5; padding: 20px;">WAITING FOR DATA...</p>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <style>
+                .pulse-dot { animation: pulse 2s infinite; }
+                @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+                #action-log-list::-webkit-scrollbar { width: 3px; }
+                #action-log-list::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
+            </style>
         `;
 
         consolePoint.innerHTML = deckHTML;
@@ -258,27 +301,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 const list = document.getElementById('online-users-list');
 
                 if (data.success && list) {
+                    const actionList = document.getElementById('action-log-list');
+
                     if (data.users.length === 0) {
                         list.innerHTML = '<p style="color: var(--text-secondary); opacity: 0.5;">No other active sessions detected.</p>';
-                        return;
+                    } else {
+                        // Render Users (Done below)
                     }
 
-                    list.innerHTML = data.users.map(u => `
-                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    // Render Action Log if available
+                    if (actionList && data.actions) {
+                        if (data.actions.length === 0) {
+                            actionList.innerHTML = '<p style="font-size: 0.6rem; opacity: 0.5; text-align: center; padding: 10px;">NO RECENT EDITS.</p>';
+                        } else {
+                            actionList.innerHTML = data.actions.map(a => `
+                                <div style="font-size: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; margin-bottom: 5px;">
+                                    <span style="color: var(--accent-blue); font-weight: 800;">${a.username}</span> 
+                                    <span style="color: white; opacity: 0.8;">${a.action}</span>
+                                    <div style="color: var(--text-secondary); opacity: 0.5; font-size: 0.5rem; margin-top: 2px;">${new Date(a.timestamp).toLocaleTimeString()}</div>
+                                </div>
+                            `).join('');
+                        }
+                    }
+
+                    list.innerHTML = data.users.map(u => {
+                        const lastSeenDate = new Date(u.timestamp || u.lastSeen);
+                        const diffSec = Math.floor((new Date() - lastSeenDate) / 1000);
+                        const isActive = diffSec < 60; // Active if seen in last 60s
+
+                        return `
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid ${isActive ? 'rgba(0, 242, 254, 0.3)' : 'rgba(255,255,255,0.1)'};">
                             <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="width: 32px; height: 32px; background: ${u.role === 'Super Admin' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a0a; font-size: 0.8rem;">
+                                <div style="width: 32px; height: 32px; background: ${u.role === 'Super Admin' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a0a; font-size: 0.8rem; position: relative;">
                                     ${u.username[0]}
+                                    ${isActive ? '<div style="position: absolute; bottom: 0; right: 0; width: 8px; height: 8px; background: #10b981; border-radius: 50%; border: 2px solid #0a0b1e;"></div>' : ''}
                                 </div>
                                 <div>
                                     <div style="color: white; font-weight: 700; font-size: 0.9rem;">${u.username} <span style="font-size: 0.6rem; color: var(--text-secondary); font-weight: 400; opacity: 0.7;">(${u.ip})</span></div>
-                                    <div style="color: var(--accent-blue); font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">${u.role} • LAST SEEN: ${u.lastSeen}</div>
+                                    <div style="color: ${isActive ? 'var(--accent-blue)' : 'var(--text-secondary)'}; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">
+                                        ${u.role} • ${isActive ? 'ACTIVE NOW' : `LAST SEEN: ${u.lastSeen}`}
+                                    </div>
+                                    ${u.lastAction ? `<div style="font-size: 0.55rem; color: #10b981; margin-top: 4px; opacity: 0.8;">Action: ${u.lastAction}</div>` : ''}
                                 </div>
                             </div>
-                            ${u.role !== 'Super Admin' ? `
+                            ${u.username !== username && u.role !== 'Super Admin' ? `
                                 <button onclick="terminateSession('${u.username}')" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 0.55rem; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase;">Terminate</button>
-                            ` : '<span style="color: var(--text-secondary); font-size: 0.6rem; font-weight: 800; text-transform: uppercase;">Protected</span>'}
+                            ` : (u.username === username ? '<span style="color: var(--accent-blue); font-size: 0.6rem; font-weight: 800;">YOU</span>' : '<span style="color: var(--text-secondary); font-size: 0.6rem; font-weight: 800; text-transform: uppercase;">Protected</span>')}
                         </div>
-                    `).join('');
+                    `}).join('');
                 }
             } catch (err) {
                 const list = document.getElementById('online-users-list');
@@ -300,21 +370,26 @@ document.addEventListener('DOMContentLoaded', () => {
         setInterval(updateOnlineList, 15000); // Refresh list every 15s
     };
 
-    window.terminateSession = async (username) => {
-        if (!confirm(`Are you sure you want to FORCE LOGOUT ${username}?`)) return;
+    window.terminateSession = async (targetUser) => {
+        if (!confirm(`🚨 PROTOCOL INITIATED: Are you sure you want to FORCE TERMINATE ${targetUser.toUpperCase()}?`)) return;
 
         try {
-            const res = await fetch(`${API_BASE || 'http://localhost:3000'}/api/session/terminate`, {
+            const username = sessionStorage.getItem('VAATIA_USER');
+            const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/terminate`;
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetUser: username })
+                body: JSON.stringify({ targetUser, initiator: username })
             });
 
             if (res.ok) {
-                alert(`Session for ${username} has been flagged for termination.`);
+                alert(`SUCCESS: Session for ${targetUser} has been terminated.`);
+                if (typeof updateOnlineList === 'function') updateOnlineList();
+            } else {
+                alert('ERROR: Target session could not be terminated.');
             }
         } catch (err) {
-            alert('Failed to execute termination command.');
+            alert('CRITICAL ERROR: Failed to execute termination protocol.');
         }
     };
 

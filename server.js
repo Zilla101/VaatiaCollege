@@ -42,53 +42,84 @@ const ALL_PAGES = [
 ];
 
 // --- Session Management Memory Store ---
-let activeSessions = {}; // { username: { lastSeen: timestamp, ip: string, role: string } }
-let killedSessions = new Set();
+let sessions = []; // [{ username, role, ip, lastSeen, timestamp, lastAction, killed }]
+let actionLog = []; // [{ username, action, timestamp }]
 
-// Session Heartbeat Endpoint
+// 1. Session Heartbeat
 app.post('/api/session/heartbeat', (req, res) => {
-    const { username, role } = req.body;
+    const { username, role, timestamp, lastAction } = req.body;
     if (!username) return res.status(400).json({ error: 'Username required' });
 
-    // Check if session was killed by a Super Admin
-    if (killedSessions.has(username)) {
-        killedSessions.delete(username); // Clean up
-        delete activeSessions[username];
-        return res.status(403).json({ killed: true, message: 'Session terminated by Super Admin' });
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const existingSession = sessions.find(s => s.username === username);
+
+    if (existingSession) {
+        if (existingSession.killed) {
+            return res.status(403).json({ killed: true, message: 'Session terminated' });
+        }
+        existingSession.lastSeen = new Date().toLocaleTimeString();
+        existingSession.timestamp = timestamp || new Date().toISOString();
+        existingSession.lastAction = lastAction || existingSession.lastAction || 'Active';
+        existingSession.ip = ip;
+    } else {
+        sessions.push({
+            username,
+            role: role || 'Admin',
+            ip,
+            lastSeen: new Date().toLocaleTimeString(),
+            timestamp: timestamp || new Date().toISOString(),
+            lastAction: lastAction || 'Active'
+        });
     }
 
-    activeSessions[username] = {
-        lastSeen: Date.now(),
-        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-        role: role || 'Admin'
-    };
+    // Cleanup old sessions (older than 2 minutes)
+    const now = new Date();
+    sessions = sessions.filter(s => {
+        const lastSeenDate = new Date(s.timestamp || 0);
+        return (now - lastSeenDate) < 120000;
+    });
 
     res.json({ success: true });
 });
 
-// Get Online Users (Super Admin Only)
+// 2. Get Online Users & Actions
 app.get('/api/session/online', (req, res) => {
-    const now = Date.now();
-    const onlineUsers = Object.keys(activeSessions)
-        .filter(user => (now - activeSessions[user].lastSeen) < 30000) // 30s timeout
-        .map(user => ({
-            username: user,
-            role: activeSessions[user].role,
-            ip: activeSessions[user].ip,
-            lastSeen: new Date(activeSessions[user].lastSeen).toLocaleTimeString()
-        }));
-
-    res.json({ success: true, users: onlineUsers });
+    res.json({
+        success: true,
+        users: sessions,
+        actions: actionLog.slice(-15).reverse() // Last 15 actions
+    });
 });
 
-// Terminate Session (Super Admin Only)
+// 3. Terminate Session
 app.post('/api/session/terminate', (req, res) => {
-    const { targetUser } = req.body;
+    const { targetUser, initiator } = req.body;
     if (!targetUser) return res.status(400).json({ error: 'Target user required' });
 
-    killedSessions.add(targetUser);
-    console.log(`🚨 SESSION TERMINATED: ${targetUser} by Super Admin`);
-    res.json({ success: true, message: `${targetUser} flagged for termination` });
+    const session = sessions.find(s => s.username === targetUser);
+    if (session) {
+        session.killed = true;
+        actionLog.push({
+            username: initiator || 'SYSTEM',
+            action: `TERMINATED session for ${targetUser}`,
+            timestamp: new Date().toISOString()
+        });
+        console.log(`🚨 SESSION TERMINATED: ${targetUser} by ${initiator || 'SYSTEM'}`);
+        res.json({ success: true, message: `${targetUser} session terminated` });
+    } else {
+        res.status(404).json({ error: 'Session not found' });
+    }
+});
+
+// 4. Record Action
+app.post('/api/session/action', (req, res) => {
+    const { username, action, timestamp } = req.body;
+    actionLog.push({ username, action, timestamp: timestamp || new Date().toISOString() });
+
+    const session = sessions.find(s => s.username === username);
+    if (session) session.lastAction = action;
+
+    res.json({ success: true });
 });
 
 // API endpoint to save section changes

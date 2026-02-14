@@ -162,6 +162,11 @@ window.saveSectionChanges = async (sectionName) => {
 
     console.log(`💾 Syncing ${sectionName} protocol for ${pageName}:`, values);
 
+    // Log action for SuperAdmin oversight
+    if (window.logAdminAction) {
+        window.logAdminAction(`Modified [${sectionName.toUpperCase()}] on ${pageName}`);
+    }
+
     // Visual feedback on button
     const activeBtn = document.activeElement;
     const originalContent = activeBtn.innerHTML;

@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.isLocalEnv = !!API_BASE && API_BASE !== 'GITHUB_SYNC';
     window.isSyncPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
 
-    // GitHub API Configuration
-    const REPO_OWNER = 'Zilla101';
-    const REPO_NAME = 'VaatiaCollege';
+    // GitHub API Configuration (Dossier Mode)
+    const REPO_OWNER = localStorage.getItem('VAATIA_GH_OWNER') || 'Zilla101';
+    const REPO_NAME = localStorage.getItem('VAATIA_GH_REPO') || 'VaatiaCollege';
     const GITHUB_TOKEN = localStorage.getItem('VAATIA_GH_TOKEN');
 
     const fetchFromGitHub = async (path) => {
@@ -371,15 +371,21 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 // Route to /api/session on production/Vercel, otherwise use Command Server
                 let endpoint;
-                // Force relative path for session tracking on any production-like domain
                 const isProdDomain = window.location.hostname.includes('vaatia') || window.location.hostname.includes('vercel.app');
+                const publicAPI = localStorage.getItem('VAATIA_PUBLIC_API');
 
-                if (isProdDomain || !API_BASE || API_BASE === 'GITHUB_SYNC') {
+                if (isProdDomain || (!API_BASE && !publicAPI)) {
                     endpoint = '/api/session';
+                } else if (publicAPI) {
+                    endpoint = `${publicAPI}/api/session`;
+                } else if (API_BASE === 'GITHUB_SYNC') {
+                    // If syncing to GitHub globally, fall-back to the Vercel API for Radar commands
+                    endpoint = 'https://vaatiacollege.vercel.app/api/session';
                 } else {
-                    endpoint = `${API_BASE}/api/session/online`;
+                    endpoint = `${API_BASE}/api/session`;
                 }
 
+                console.log('[RADAR] Scanning Frequency:', endpoint);
                 const res = await fetch(endpoint);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
@@ -1308,16 +1314,23 @@ function confirmLogout() {
 
 // --- Global Connection Settings ---
 window.setupGlobalCommand = () => {
-    // Local Access Logic Removed - Access is now managed dynamically via Command Radar
-    const mode = confirm("Activate Direct Cloud Sync?\n\nOK = Worldwide Access (GitHub Login)\nCancel = Local Command Mode Only");
+    const mode = confirm("Activate Worldwide Command?\n\nOK = Worldwide Access (GitHub Sync)\nCancel = Remote/Local API Mode");
 
     if (mode) {
-        const token = prompt("Enter your GitHub Personal Access Token:");
-        if (token) {
-            localStorage.setItem('VAATIA_GH_TOKEN', token);
-            localStorage.removeItem('VAATIA_PUBLIC_API');
-            alert("WORLDWIDE SYNC: ACTIVE. Reloading...");
-            location.reload();
+        const repoPath = prompt("Enter GitHub Repo Path (e.g. Owner/Repository):", `${REPO_OWNER}/${REPO_NAME}`);
+        if (repoPath && repoPath.includes('/')) {
+            const [owner, repo] = repoPath.split('/');
+            const token = prompt("Enter your GitHub Personal Access Token:");
+            if (token) {
+                localStorage.setItem('VAATIA_GH_OWNER', owner.trim());
+                localStorage.setItem('VAATIA_GH_REPO', repo.trim());
+                localStorage.setItem('VAATIA_GH_TOKEN', token.trim());
+                localStorage.removeItem('VAATIA_PUBLIC_API');
+                alert("WORLDWIDE SYNC: ACTIVE.\nTarget: " + owner + "/" + repo + "\nReloading...");
+                location.reload();
+            }
+        } else if (repoPath) {
+            alert("Invalid Format. Please use 'Owner/Repository'.");
         }
     } else {
         const url = prompt("Enter Public API URL (e.g. Render/Railway) or leave blank to reset to Local:");
@@ -1325,6 +1338,8 @@ window.setupGlobalCommand = () => {
             if (url.trim() === "") {
                 localStorage.removeItem('VAATIA_PUBLIC_API');
                 localStorage.removeItem('VAATIA_GH_TOKEN');
+                localStorage.removeItem('VAATIA_GH_OWNER');
+                localStorage.removeItem('VAATIA_GH_REPO');
                 alert("Settings Cleared. Using Local CMS.");
             } else {
                 localStorage.setItem('VAATIA_PUBLIC_API', url);

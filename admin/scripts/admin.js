@@ -343,13 +343,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const deckHTML = `
             <div class="glass-card" style="margin-top: 20px; border-left: 4px solid var(--accent-blue); animation: slideInUp 0.5s ease-out; align-items: stretch; text-align: left; padding: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
                     <div>
                         <h2 class="text-gradient" style="font-weight: 800; margin: 0;">Command Radar</h2>
                         <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7; letter-spacing: 0.2rem;">REAL-TIME SESSION MONITORING</p>
+                        <div id="tactical-link-status" style="margin-top: 8px; font-size: 0.5rem; color: var(--accent-blue); opacity: 0.8; font-family: monospace; display: flex; align-items: center; gap: 5px;">
+                            <i data-feather="activity" style="width: 10px; height: 10px;"></i>
+                            LINK: INITIALIZING...
+                        </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <button onclick="window.setupGlobalCommand()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 6px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="window.pulseRadar()" class="pulse-btn" style="background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 6px 12px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s;">
+                            <i data-feather="zap" style="width: 12px; height: 12px;"></i>
+                            SEND PING
+                        </button>
+                        <button onclick="window.setupGlobalCommand()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 6px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s;">
                             <i data-feather="settings" style="width: 12px; height: 12px;"></i>
                             SETUP
                         </button>
@@ -393,7 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const updateOnlineList = async () => {
             try {
                 const endpoint = window.getRadarEndpoint();
-                console.log('[RADAR] Scanning Frequency:', endpoint);
+                const statusLabel = document.getElementById('tactical-link-status');
+                if (statusLabel) {
+                    statusLabel.innerHTML = `<i data-feather="activity" style="width: 10px; height: 10px;"></i> LINK: <span style="color:white; opacity: 0.6;">${endpoint}</span> | ${new Date().toLocaleTimeString()}`;
+                    if (typeof feather !== 'undefined') feather.replace();
+                }
+
                 const res = await fetch(endpoint, {
                     method: 'GET',
                     mode: 'cors',
@@ -424,10 +437,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success && list) {
                     const actionList = document.getElementById('action-log-list');
 
-                    if (data.users.length === 0) {
-                        list.innerHTML = '<p style="color: var(--text-secondary); opacity: 0.5;">No other active sessions detected.</p>';
-                    } else {
-                        // Render Users (Done below)
+                    if (!data.users || data.users.length === 0) {
+                        list.innerHTML = '<p style="color: var(--text-secondary); opacity: 0.5; padding: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px;">No other active sessions detected.</p>';
+                        return; // Exit early if no users
                     }
 
                     // Render Action Log if available
@@ -566,6 +578,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Failed to update access state.');
                 if (btn) btn.innerText = isBlocked ? 'RESTORE ADMIN ACCESS' : 'DENY ADMIN ACCESS';
             }
+        };
+
+        window.pulseRadar = () => {
+            console.log('[RADAR] Manual Pulse Requested');
+            const btn = document.querySelector('.pulse-btn');
+            if (btn) {
+                btn.style.borderColor = 'white';
+                setTimeout(() => btn.style.borderColor = 'var(--accent-blue)', 500);
+            }
+            updateOnlineList();
         };
 
         updateOnlineList();

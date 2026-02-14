@@ -292,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const res = await fetch(endpoint, {
                         method: 'POST',
                         credentials: 'include',
+                        mode: 'cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             username,
@@ -351,24 +352,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>
                         <h2 class="text-gradient" style="font-weight: 800; margin: 0;">Command Radar</h2>
                         <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7; letter-spacing: 0.2rem;">REAL-TIME SESSION MONITORING</p>
-                        <div id="tactical-link-status" style="margin-top: 8px; font-size: 0.5rem; color: var(--accent-blue); opacity: 0.8; font-family: monospace; display: flex; align-items: center; gap: 5px;">
+                        <div id="tactical-link-status" style="margin-top: 8px; font-size: 0.5rem; color: var(--accent-blue); opacity: 0.8; font-family: monospace; display: flex; align-items: center; gap: 5px; background: rgba(0, 242, 254, 0.05); padding: 4px 8px; border-radius: 4px; width: fit-content;">
                             <i data-feather="activity" style="width: 10px; height: 10px;"></i>
                             LINK: INITIALIZING...
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
-                        <button onclick="window.pulseRadar()" class="pulse-btn" style="background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 6px 12px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s;">
-                            <i data-feather="zap" style="width: 12px; height: 12px;"></i>
+                    <div class="radar-action-stack" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="window.pulseRadar()" class="pulse-btn tactical-btn" style="background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 8px 16px; border-radius: 10px; font-size: 0.65rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; text-transform: uppercase;">
+                            <i data-feather="zap" style="width: 14px; height: 14px;"></i>
                             SEND PING
                         </button>
-                        <button onclick="window.setupGlobalCommand()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 6px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s;">
-                            <i data-feather="settings" style="width: 12px; height: 12px;"></i>
+                        <button onclick="window.setupGlobalCommand()" class="tactical-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 8px 12px; border-radius: 10px; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;">
+                            <i data-feather="settings" style="width: 14px; height: 14px;"></i>
                             SETUP
                         </button>
-                        <button id="access-toggle-btn" onclick="toggleAdminAccess()" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 15px; border-radius: 10px; font-size: 0.6rem; font-weight: 800; cursor: pointer; letter-spacing: 0.1em;">INITIALIZING...</button>
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                        <button id="access-toggle-btn" onclick="toggleAdminAccess()" class="tactical-btn" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 8px 20px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; cursor: pointer; letter-spacing: 0.1em; transition: 0.3s;">INITIALIZING...</button>
+                        <div class="active-status-badge" style="display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(0, 0, 0, 0.2); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
                             <div class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue);"></div>
-                            <span style="font-size: 0.65rem; color: var(--accent-blue); letter-spacing: 0.2em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
+                            <span style="font-size: 0.6rem; color: var(--accent-blue); letter-spacing: 0.15em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
                         </div>
                     </div>
                 </div>
@@ -397,6 +398,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
                 #action-log-list::-webkit-scrollbar { width: 3px; }
                 #action-log-list::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
+                .tactical-btn:active { transform: scale(0.95); opacity: 0.8; }
+                .tactical-btn:hover { filter: brightness(1.2); }
+                
+                @media (max-width: 1024px) {
+                    .command-radar-grid { grid-template-columns: 1fr !important; gap: 30px !important; }
+                    .glass-card { padding: 20px !important; }
+                    .radar-action-stack { margin-top: 20px; width: 100%; }
+                }
+                @media (max-width: 768px) {
+                    .text-gradient { font-size: 1.4rem !important; }
+                    .tactical-btn { width: 100%; flex: 1; min-width: 140px; }
+                    .radar-action-stack { justify-content: center !important; }
+                    .active-status-badge { width: 100%; justify-content: center; }
+                }
             </style>
         `;
 
@@ -464,6 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     list.innerHTML = data.users.map(u => {
                         const isActive = u.isActive; // Use server-side state to avoid clock drift issues
+                        const currentUser = (sessionStorage.getItem('VAATIA_USER') || '').toLowerCase();
 
                         let statusText = isActive ? 'ACTIVE NOW' : 'OFFLINE';
                         if (!isActive && u.timestamp) {
@@ -491,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         </div>
                                     </div>
                                 </div>
-                                ${u.username.toLowerCase() !== username.toLowerCase() && !u.role.includes('Super') ? `
+                                ${u.username.toLowerCase() !== currentUser && !u.role.includes('Super') ? `
                                     <button onclick="terminateSession('${u.username}')" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.05em;">Eject</button>
                                 ` : ''}
                             </div>
@@ -544,14 +560,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         window.terminateSession = async (targetUser) => {
+            const initiator = sessionStorage.getItem('VAATIA_USER');
             if (!confirm(`🚨 PROTOCOL INITIATED: Are you sure you want to FORCE TERMINATE ${targetUser.toUpperCase()}?`)) return;
 
             try {
-                const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/terminate`;
+                const endpoint = window.getRadarEndpoint();
                 const res = await fetch(endpoint, {
                     method: 'POST',
+                    credentials: 'include',
+                    mode: 'cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ targetUser, initiator: username })
+                    body: JSON.stringify({ targetUser, initiator })
                 });
 
                 if (res.ok) {
@@ -566,14 +585,17 @@ document.addEventListener('DOMContentLoaded', () => {
         window.toggleAdminAccess = async () => {
             const isBlocked = window.adminAccessBlocked;
             const btn = document.getElementById('access-toggle-btn');
+            const currentUser = sessionStorage.getItem('VAATIA_USER');
             if (btn) btn.innerText = 'PROCESSING...';
 
             try {
-                const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/access`;
+                const endpoint = window.getRadarEndpoint();
                 const res = await fetch(endpoint, {
                     method: 'POST',
+                    credentials: 'include',
+                    mode: 'cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ toggleAccess: !isBlocked })
+                    body: JSON.stringify({ toggleAccess: !isBlocked, initiator: currentUser })
                 });
 
                 if (res.ok) {

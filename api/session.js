@@ -7,10 +7,17 @@ let adminAccessBlocked = false;
 let mockActions = [];
 
 export default async function handler(req, res) {
-    // 🛡️ Enhanced CORS Handler
-    const origin = req.headers.origin || '*';
+    // 🛡️ Enhanced CORS Handler for Unified Command Hub
+    const origin = req.headers.origin;
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Origin', origin);
+
+    // If origin is present, echo it. If not (simple GET), default to production domain
+    if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    } else {
+        res.setHeader('Access-Control-Allow-Origin', 'https://vaatiacollege.vercel.app');
+    }
+
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader(
         'Access-Control-Allow-Headers',

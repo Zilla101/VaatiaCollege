@@ -1,39 +1,29 @@
-// Mock Session Data (In-memory for Vercel demo)
-let mockUsers = [
-    {
-        username: 'VaatiaAdmin',
-        role: 'Admin',
-        ip: '192.168.1.5',
-        lastSeen: new Date().toLocaleTimeString(),
-        timestamp: Date.now(),
-        lastAction: 'Reviewing Pages'
-    }
-];
+// Session Data (In-memory for Vercel — ephemeral per instance)
+let mockUsers = [];
 
-// Global Access State (Ephemeral for Vercel)
+// Global Access State
 let adminAccessBlocked = false;
 
-let mockActions = [
-    { username: 'VaatiaAdmin', action: 'Accessed Page Manager', timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString() }
-];
+let mockActions = [];
 
 export default async function handler(req, res) {
     const { method } = req;
+    const now = Date.now();
 
+    // GET: Return full state snapshot (used by Super Admin radar + regular admin access check)
     if (method === 'GET') {
         return res.status(200).json({
             success: true,
-            users: mockUsers || [],
-            actions: (mockActions || []).slice(-15).reverse(), // Show last 15 actions
-            adminAccessBlocked // Export the flag
+            users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 60000 })),
+            actions: (mockActions || []).slice(-15).reverse(),
+            adminAccessBlocked
         });
     }
 
     if (method === 'POST') {
-        const { username, targetUser, action, timestamp, role, toggleAccess } = req.body;
-        const now = Date.now();
+        const { username, targetUser, action, role, toggleAccess, device } = req.body;
 
-        // 0. Handle Admin Access Toggle (Super Admin only call)
+        // 0. Handle Admin Access Toggle (Super Admin only)
         if (toggleAccess !== undefined) {
             adminAccessBlocked = toggleAccess;
             mockActions.push({
@@ -57,14 +47,25 @@ export default async function handler(req, res) {
 
         // 2. Handle Heartbeat & Identity tracking
         if (username) {
-            // Block regular admins if flag is active
             const userRole = (role || '').trim() || 'Admin';
+
+            // Block regular admins if flag is active
             if (adminAccessBlocked && !userRole.includes('Super')) {
-                return res.status(403).json({ success: false, blocked: true, adminAccessBlocked: true, message: 'ACCESS RESTRICTED BY SUPER ADMIN' });
+                return res.status(403).json({
+                    success: false,
+                    blocked: true,
+                    adminAccessBlocked: true,
+                    message: 'ACCESS RESTRICTED BY SUPER ADMIN'
+                });
             }
 
+            const clientIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || 'Unknown';
             const existingIndex = mockUsers.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
             const currentLoginTime = req.body.loginTime || new Date().toLocaleTimeString();
+
+            // Parse device string into something readable
+            const rawDevice = device || req.headers['user-agent'] || 'Unknown Device';
+            const deviceShort = parseDevice(rawDevice);
 
             if (existingIndex > -1) {
                 mockUsers[existingIndex] = {
@@ -72,6 +73,8 @@ export default async function handler(req, res) {
                     role: userRole,
                     loginTime: mockUsers[existingIndex].loginTime || currentLoginTime,
                     lastEdit: req.body.lastEdit || mockUsers[existingIndex].lastEdit || 'Monitoring',
+                    device: deviceShort,
+                    ip: clientIP,
                     lastSeen: new Date().toLocaleTimeString(),
                     timestamp: now,
                     lastAction: action || mockUsers[existingIndex].lastAction || 'Active'
@@ -81,15 +84,16 @@ export default async function handler(req, res) {
                     username,
                     role: userRole,
                     loginTime: currentLoginTime,
-                    lastEdit: req.body.lastEdit || 'Session Initialized',
-                    ip: req.headers['x-forwarded-for'] || 'SERVER',
+                    lastEdit: req.body.lastEdit || 'Session Started',
+                    device: deviceShort,
+                    ip: clientIP,
                     lastSeen: new Date().toLocaleTimeString(),
                     timestamp: now,
-                    lastAction: action || 'Session Initialized'
+                    lastAction: action || 'Login'
                 });
             }
 
-            // 3. Handle Action Log Record
+            // Action Log
             if (action) {
                 mockActions.push({
                     username,
@@ -98,17 +102,36 @@ export default async function handler(req, res) {
                 });
             }
 
-            // 4. Cleanup stale sessions (Threshold: 5 mins)
+            // Cleanup stale sessions (5 min threshold)
             const STALE_THRESHOLD = 5 * 60 * 1000;
             mockUsers = mockUsers.filter(u => (now - u.timestamp) < STALE_THRESHOLD);
 
             return res.status(200).json({
                 success: true,
                 adminAccessBlocked,
-                users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 300000 }))
+                users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 60000 }))
             });
         }
     }
 
     return res.status(405).json({ message: 'Method Not Allowed' });
+}
+
+// Parse user-agent into friendly device name
+function parseDevice(ua) {
+    let browser = 'Browser';
+    let os = 'Device';
+
+    if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+    else if (ua.includes('Edg')) browser = 'Edge';
+    else if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+
+    if (ua.includes('Windows')) os = 'Windows';
+    else if (ua.includes('Mac')) os = 'macOS';
+    else if (ua.includes('iPhone')) os = 'iPhone';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('Linux')) os = 'Linux';
+
+    return `${browser} / ${os}`;
 }

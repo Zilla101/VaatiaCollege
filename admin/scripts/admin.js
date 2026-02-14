@@ -75,32 +75,50 @@ document.addEventListener('DOMContentLoaded', () => {
             const isAdmin = username.toLowerCase() === regularAdmin.toLowerCase();
 
             if ((isSuper || isAdmin) && password === validPass) {
-                btn.innerText = 'AUTHENTICATING...';
+                btn.innerText = 'VERIFYING ACCESS...';
                 btn.style.opacity = '0.7';
                 errorMsg.style.display = 'none';
 
-                // Set Session Data (Normalized Case)
                 const role = isSuper ? 'Super Admin' : 'Admin';
-                sessionStorage.setItem('VAATIA_USER', username);
-                sessionStorage.setItem('VAATIA_ROLE', role);
-                sessionStorage.setItem('VAATIA_LOGIN_TIME', new Date().toLocaleString());
 
-                // Trigger Security Alert via Vercel API
-                fetch('/api/admin-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user: username,
-                        device: navigator.userAgent,
-                        resolution: `${window.screen.width}x${window.screen.height}`,
-                        time: new Date().toLocaleString(),
-                        url: window.location.href
-                    })
-                }).catch(err => console.warn('Security alert bypass detected.'));
-
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
+                // GATE: Regular admins must pass access check before login
+                if (!isSuper) {
+                    fetch('/api/session')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.adminAccessBlocked) {
+                                // Access is denied by Super Admin — block login
+                                localStorage.setItem('VAATIA_BLOCKED', 'true');
+                                btn.innerText = 'ACCESS DENIED';
+                                btn.style.opacity = '1';
+                                errorMsg.style.display = 'block';
+                                errorMsg.textContent = '🔒 Access suspended by Super Admin. Contact your administrator.';
+                                errorMsg.classList.add('error-message-elite');
+                                setTimeout(() => {
+                                    errorMsg.style.display = 'none';
+                                    btn.innerText = 'LOGIN';
+                                }, 4000);
+                                return;
+                            }
+                            // Access is allowed — proceed with login
+                            localStorage.removeItem('VAATIA_BLOCKED');
+                            completeLogin(username, role);
+                        })
+                        .catch(() => {
+                            // If server unreachable, check localStorage fallback
+                            if (localStorage.getItem('VAATIA_BLOCKED') === 'true') {
+                                btn.innerText = 'ACCESS DENIED';
+                                errorMsg.style.display = 'block';
+                                errorMsg.textContent = '🔒 Access suspended by Super Admin.';
+                                setTimeout(() => { errorMsg.style.display = 'none'; btn.innerText = 'LOGIN'; }, 4000);
+                                return;
+                            }
+                            completeLogin(username, role);
+                        });
+                } else {
+                    // Super Admins always pass
+                    completeLogin(username, role);
+                }
             } else {
                 // Liquid Glass Haptic Error
                 const card = document.querySelector('.premium-card');
@@ -127,14 +145,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Login completion helper (extracted so gate check can call it)
+    const completeLogin = (username, role) => {
+        sessionStorage.setItem('VAATIA_USER', username);
+        sessionStorage.setItem('VAATIA_ROLE', role);
+        sessionStorage.setItem('VAATIA_LOGIN_TIME', new Date().toLocaleString());
+
+        // Trigger Security Alert
+        fetch('/api/admin-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user: username,
+                device: navigator.userAgent,
+                resolution: `${window.screen.width}x${window.screen.height}`,
+                time: new Date().toLocaleString(),
+                url: window.location.href
+            })
+        }).catch(() => { });
+
+        setTimeout(() => {
+            window.location.href = 'dashboard.html';
+        }, 800);
+    };
+
     // --- Session Pulse & Role-Based UI Init ---
     const initSession = () => {
         const username = sessionStorage.getItem('VAATIA_USER');
         const role = sessionStorage.getItem('VAATIA_ROLE');
 
-        // Robust path matching: Handle dashboard.html, /dashboard, /admin/dashboard, etc.
         const isDashboard = window.location.pathname.match(/dashboard(\.html)?$/i);
         if (!username || !isDashboard) return;
+
+        // IMMEDIATE LOCK: Check localStorage before anything else
+        if (localStorage.getItem('VAATIA_BLOCKED') === 'true' && !role.includes('Super')) {
+            showSecurityOverlay();
+        }
 
         // 1. Personalize UI
         const sidebarUser = document.querySelector('.sidebar-logo span');
@@ -222,24 +268,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const beat = async () => {
                 try {
                     const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/heartbeat`;
-                    console.log('[HEARTBEAT] Sending...', { username, role, endpoint });
                     const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             username,
                             role: (role || '').trim(),
+                            device: navigator.userAgent,
                             loginTime: sessionStorage.getItem('VAATIA_LOGIN_TIME'),
                             lastEdit: sessionStorage.getItem('VAATIA_LAST_EDIT') || 'Passive Monitoring',
                             timestamp: new Date().toISOString()
                         })
                     });
 
-                    console.log('[HEARTBEAT] Status:', res.status);
                     if (res.status === 403) {
                         const data = await res.json();
-                        console.log('[HEARTBEAT] BLOCKED:', data);
                         if (data.blocked) {
+                            localStorage.setItem('VAATIA_BLOCKED', 'true');
                             showSecurityOverlay();
                         } else if (data.killed) {
                             alert('🚨 SESSION TERMINATED\nA Super Admin has ended your session for security reasons.');
@@ -247,20 +292,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } else if (res.ok) {
                         const data = await res.json();
-                        console.log('[HEARTBEAT] OK:', { adminAccessBlocked: data.adminAccessBlocked, role });
-                        // Real-time access sync
-                        if (data.adminAccessBlocked === false || role.includes('Super')) {
+                        if (role.includes('Super')) {
+                            // Super Admin never gets locked
                             hideSecurityOverlay();
-                        } else if (data.adminAccessBlocked === true && !role.includes('Super')) {
+                        } else if (data.adminAccessBlocked === true) {
+                            localStorage.setItem('VAATIA_BLOCKED', 'true');
                             showSecurityOverlay();
+                        } else if (data.adminAccessBlocked === false) {
+                            localStorage.removeItem('VAATIA_BLOCKED');
+                            hideSecurityOverlay();
                         }
                     }
                 } catch (err) {
-                    console.warn('[HEARTBEAT] Connection lost:', err.message);
+                    console.warn('[HEARTBEAT] Connection issue:', err.message);
                 }
             };
             beat();
-            setInterval(beat, 10000); // Tactical Pulse: 10s
+            setInterval(beat, 5000); // Fast pulse: 5s
         };
 
         startHeartbeat();
@@ -414,16 +462,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Tactical Location</span>
-                                    <span style="font-family: 'Courier New', monospace; font-size: 0.65rem; color: var(--accent-blue);">${u.ip}</span>
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Network IP</span>
+                                    <span style="font-family: 'Courier New', monospace; font-size: 0.65rem; color: var(--accent-blue);">${u.ip || 'Unknown'}</span>
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Logon Time</span>
-                                    <span style="font-size: 0.65rem; color: white;">${u.loginTime || 'CLASSIFIED'}</span>
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Login Time</span>
+                                    <span style="font-size: 0.65rem; color: white;">${u.loginTime || 'N/A'}</span>
                                 </div>
-                                <div style="display: flex; flex-direction: column; gap: 4px; grid-column: span 2;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Recent Intelligence (Last Edit)</span>
-                                    <span style="font-size: 0.6rem; color: #10b981; font-weight: 600;">${u.lastEdit || 'MONITORING STANDBY'}</span>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Device</span>
+                                    <span style="font-size: 0.6rem; color: #a78bfa; font-weight: 600;">${u.device || 'Unknown'}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Last Activity</span>
+                                    <span style="font-size: 0.6rem; color: #10b981; font-weight: 600;">${u.lastEdit || u.lastAction || 'Idle'}</span>
                                 </div>
                             </div>
                         </div>

@@ -144,6 +144,8 @@ body::after {
     max-width: 95%;
     /* Perfect fit for mobile */
     margin: 0 auto;
+    width: 100%;
+    /* Ensure full width usage */
     box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.8);
     position: relative;
     overflow: hidden;
@@ -253,12 +255,31 @@ body::after {
     /* Prevent scrolling as requested */
     padding-bottom: 80px;
     z-index: 5000;
-    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: -40px 0 100px rgba(0, 0, 0, 0.9);
-    border-radius: 40px 0 0 40px;
-    /* Hide scrollbar */
-    scrollbar-width: none;
     -ms-overflow-style: none;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 85%;
+        /* Slightly narrower for better UX */
+        max-width: 320px;
+        box-shadow: 10px 0 50px rgba(0, 0, 0, 0.8);
+        /* Shadow on right */
+        border-right: 1px solid var(--glass-border);
+        border-left: none;
+        left: -100%;
+        /* Start off-screen left */
+        right: auto;
+        /* Reset right property */
+        border-radius: 0 40px 40px 0;
+        /* Rounded on right only */
+    }
+
+    .sidebar.active {
+        left: 0;
+        /* Slide in from left */
+        right: auto;
+    }
 }
 
 .sidebar::-webkit-scrollbar {
@@ -584,7 +605,8 @@ body::after {
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    /* Stack vertically on mobile by default */
     /* 2 columns on mobile by default */
     gap: 15px;
     margin-bottom: 30px;

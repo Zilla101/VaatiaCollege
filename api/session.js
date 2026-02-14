@@ -1,8 +1,71 @@
 // Session Data (In-memory for Vercel — ephemeral per instance)
 let mockUsers = [];
 
-// Global Access State
+// Global Access State (In-memory fallback)
 let adminAccessBlocked = false;
+
+// GitHub Persistence Configuration
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.VAATIA_GH_TOKEN; // Ensure this env var is set in Vercel
+const REPO_OWNER = 'Zilla101';
+const REPO_NAME = 'VaatiaCollege';
+const LOCK_FILE_PATH = 'admin-lock.json';
+
+// Helper: Fetch Lock State from GitHub
+async function getGitHubLockState() {
+    if (!GITHUB_TOKEN) return adminAccessBlocked; // Fallback to memory if no token
+    try {
+        const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${LOCK_FILE_PATH}`, {
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        if (!response.ok) return adminAccessBlocked;
+        const data = await response.json();
+        const content = JSON.parse(atob(data.content));
+        return content.adminAccessBlocked;
+    } catch (err) {
+        console.error('Failed to fetch lock state:', err);
+        return adminAccessBlocked;
+    }
+}
+
+// Helper: Update Lock State on GitHub
+async function setGitHubLockState(blocked, username) {
+    if (!GITHUB_TOKEN) return false;
+    try {
+        // 1. Get current SHA
+        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${LOCK_FILE_PATH}`, {
+            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+        });
+        const currentData = await getRes.json();
+        const sha = currentData.sha;
+
+        // 2. Update File
+        const newContent = JSON.stringify({
+            adminAccessBlocked: blocked,
+            lastUpdated: new Date().toISOString(),
+            updatedBy: username
+        }, null, 2);
+
+        const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${LOCK_FILE_PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `[SYSTEM] ${blocked ? 'LOCKDOWN' : 'UNLOCK'} by ${username}`,
+                content: btoa(newContent),
+                sha: sha
+            })
+        });
+        return putRes.ok;
+    } catch (err) {
+        console.error('Failed to update lock state:', err);
+        return false;
+    }
+}
 
 let mockActions = [];
 
@@ -34,6 +97,9 @@ export default async function handler(req, res) {
 
     // GET: Return full state snapshot (used by Super Admin radar + regular admin access check)
     if (method === 'GET') {
+        // Sync with GitHub before responding
+        adminAccessBlocked = await getGitHubLockState();
+
         return res.status(200).json({
             success: true,
             users: mockUsers.map(u => ({ ...u, isActive: (now - u.timestamp) < 90000 })),
@@ -48,6 +114,10 @@ export default async function handler(req, res) {
         // 0. Handle Admin Access Toggle (Super Admin only)
         if (toggleAccess !== undefined) {
             adminAccessBlocked = toggleAccess;
+
+            // Persist to GitHub
+            await setGitHubLockState(toggleAccess, username || 'SUPER_ADMIN');
+
             mockActions.push({
                 username: 'SYSTEM',
                 action: `${toggleAccess ? 'DENIED' : 'RESTORED'} access for regular admins`,
@@ -60,6 +130,10 @@ export default async function handler(req, res) {
         if (targetUser) {
             mockUsers = mockUsers.filter(u => u.username.toLowerCase() !== targetUser.toLowerCase());
             adminAccessBlocked = true; // Ejecting an admin now triggers a system-wide block
+
+            // Persist Lockdown
+            await setGitHubLockState(true, 'SYSTEM_TERMINATOR');
+
             mockActions.push({
                 username: 'SYSTEM',
                 action: `Terminated ${targetUser} session & INITIATED LOCKDOWN`,
@@ -85,6 +159,9 @@ export default async function handler(req, res) {
         }
 
         const userRole = (role || '').trim() || 'Admin';
+
+        // Re-sync lock state for login attempts
+        adminAccessBlocked = await getGitHubLockState();
 
         // Block regular admins if flag is active
         if (adminAccessBlocked && !userRole.includes('Super')) {

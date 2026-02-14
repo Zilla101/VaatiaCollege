@@ -80,9 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Set Session Data
                 const role = superAdmins.includes(username) ? 'Super Admin' : 'Admin';
-                localStorage.setItem('VAATIA_USER', username);
-                localStorage.setItem('VAATIA_ROLE', role);
-                localStorage.setItem('VAATIA_LOGIN_TIME', new Date().toLocaleString());
+                sessionStorage.setItem('VAATIA_USER', username);
+                sessionStorage.setItem('VAATIA_ROLE', role);
+                sessionStorage.setItem('VAATIA_LOGIN_TIME', new Date().toLocaleString());
 
                 // Trigger Security Alert via Vercel API
                 fetch('/api/admin-login', {
@@ -128,8 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Session Pulse & Role-Based UI Init ---
     const initSession = () => {
-        const username = localStorage.getItem('VAATIA_USER');
-        const role = localStorage.getItem('VAATIA_ROLE');
+        const username = sessionStorage.getItem('VAATIA_USER');
+        const role = sessionStorage.getItem('VAATIA_ROLE');
 
         // Robust path matching: Handle dashboard.html, /dashboard, /admin/dashboard, etc.
         const isDashboard = window.location.pathname.match(/dashboard(\.html)?$/i);
@@ -1015,6 +1015,11 @@ function confirmLogout() {
     if (btn) {
         btn.innerText = 'TERMINATING...';
         btn.style.opacity = '0.7';
+
+        // Clear Session Storage
+        sessionStorage.removeItem('VAATIA_USER');
+        sessionStorage.removeItem('VAATIA_ROLE');
+        sessionStorage.removeItem('VAATIA_LOGIN_TIME');
 
         setTimeout(() => {
             window.location.href = 'login.html';

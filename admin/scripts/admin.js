@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
             hostname.startsWith('10.') ||
             (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
 
+        // Priority 1: GitHub Global Sync (If token exists)
+        const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
+        if (ghToken) return 'GITHUB_SYNC';
+
         // Priority 3: Production/Cloud Detection
         if (!isLocal) {
             // If on Vercel or main domain, use relative paths
@@ -288,7 +292,10 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 // Route to /api/session on production/Vercel, otherwise use Command Server
                 let endpoint;
-                if (!API_BASE || API_BASE === 'GITHUB_SYNC') {
+                // Force relative path for session tracking on any production-like domain
+                const isProdDomain = window.location.hostname.includes('vaatia') || window.location.hostname.includes('vercel.app');
+
+                if (isProdDomain || !API_BASE || API_BASE === 'GITHUB_SYNC') {
                     endpoint = '/api/session';
                 } else {
                     endpoint = `${API_BASE}/api/session/online`;

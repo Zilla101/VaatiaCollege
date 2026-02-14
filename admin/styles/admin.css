@@ -304,13 +304,14 @@ body::after {
 .mobile-nav-toggle {
     display: flex;
     position: fixed;
-    top: 25px;
-    right: 25px;
+    top: 20px;
+    right: 20px;
     z-index: 9999;
     background: rgba(0, 0, 0, 0.8);
     border: 2px solid var(--accent-blue);
-    width: 60px;
-    height: 60px;
+    width: 42px;
+    /* reduced by 30% from 60px */
+    height: 42px;
     border-radius: 50%;
     /* Pure Circle */
     cursor: pointer;
@@ -350,16 +351,17 @@ body::after {
 
 .mobile-nav-toggle .bar {
     display: block;
-    width: 28px;
-    height: 3.5px;
-    /* Thicker bars */
+    width: 20px;
+    /* reduced from 28px */
+    height: 2.5px;
+    /* reduced from 3.5px */
     background: #fff;
     border-radius: 4px;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-nav-toggle.active .bar:nth-child(1) {
-    transform: translateY(9.5px) rotate(45deg);
+    transform: translateY(6.5px) rotate(45deg);
 }
 
 .mobile-nav-toggle.active .bar:nth-child(2) {
@@ -368,7 +370,7 @@ body::after {
 }
 
 .mobile-nav-toggle.active .bar:nth-child(3) {
-    transform: translateY(-9.5px) rotate(-45deg);
+    transform: translateY(-6.5px) rotate(-45deg);
 }
 
 @media (max-width: 1024px) {

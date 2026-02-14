@@ -174,22 +174,12 @@ window.saveSectionChanges = async (sectionName) => {
     activeBtn.disabled = true;
     if (typeof feather !== 'undefined') feather.replace();
 
-    // Determine Environment
-    const hostname = window.location.hostname;
-    const isLocal = hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
-        hostname.startsWith('192.168.') ||
-        hostname.startsWith('10.') ||
-        (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
+    if (typeof feather !== 'undefined') feather.replace();
 
-    let API_BASE = isLocal ? (window.location.port === '3000' ? '' : `http://${hostname}:3000`) : null;
+    // Determine Environment (Unified via admin.js)
+    let API_BASE = window.API_BASE;
 
-    // Check for Global Sync Priority
-    const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
-    const globalApi = localStorage.getItem('VAATIA_PUBLIC_API');
-
-    if (ghToken) API_BASE = 'GITHUB_SYNC';
-    else if (globalApi) API_BASE = globalApi;
+    // Handle Paused State
 
     // Handle Paused State
     const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';

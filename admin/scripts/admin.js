@@ -195,7 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem('VAATIA_LOGIN_TIME', new Date().toLocaleString());
 
         // Trigger Security Alert
-        fetch('/api/admin-login', {
+        const baseUrl = (window.API_BASE || '').replace(/\/$/, '');
+        fetch(`${baseUrl}/api/admin-login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

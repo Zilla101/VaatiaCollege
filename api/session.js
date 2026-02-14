@@ -215,7 +215,9 @@ export default async function handler(req, res) {
 
         // Parse device string into something readable
         const rawDevice = device || req.headers['user-agent'] || 'Unknown Device';
-        const deviceShort = parseDevice(rawDevice);
+        const platform = req.body.platform;
+        const touchPoints = req.body.touchPoints;
+        const deviceShort = parseDevice(rawDevice, platform, touchPoints);
 
         if (existingIndex > -1) {
             mockUsers[existingIndex] = {
@@ -266,9 +268,10 @@ export default async function handler(req, res) {
 }
 
 // Parse user-agent into friendly device name (Precise OS Intelligence)
-function parseDevice(ua) {
+function parseDevice(ua, platform, touchPoints) {
     let browser = 'Browser';
     let os = 'Unknown OS';
+    let deviceType = 'Desktop';
 
     // 1. Browser Detection
     if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
@@ -276,25 +279,36 @@ function parseDevice(ua) {
     else if (ua.includes('Firefox')) browser = 'Firefox';
     else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
 
-    // 2. OS Detection (Precise)
+    // 2. OS Detection (High Precision)
     if (ua.includes('Windows NT 10.0')) {
-        // Windows 11 uses NT 10.0 too, but some newer UAs might specify or we can infer
+        // Windows 11 uses NT 10.0, check for Win64/x64 usually implies modern hardware
         os = ua.includes('Windows NT 10.0; Win64; x64') ? 'Windows 11' : 'Windows 10';
     } else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
+    // iOS / macOS Logic
     else if (ua.includes('iPhone')) {
-        const version = ua.match(/OS (\d+)_/);
-        os = version ? `iPhone(iOS ${version[1]})` : 'iPhone';
+        const version = ua.match(/OS (\d+_\d+(_\d+)?)/);
+        os = version ? `iPhone (iOS ${version[1].replace(/_/g, '.')})` : 'iPhone';
+        deviceType = 'Mobile';
     } else if (ua.includes('iPad')) {
-        const version = ua.match(/OS (\d+)_/);
-        os = version ? `iPad(iOS ${version[1]})` : 'iPad';
+        const version = ua.match(/OS (\d+_\d+(_\d+)?)/);
+        os = version ? `iPad (iOS ${version[1].replace(/_/g, '.')})` : 'iPad';
+        deviceType = 'Tablet';
+    } else if (ua.includes('Macintosh')) {
+        // iPad Pro often reports as Macintosh (Intel Mac OS X) but has touch points
+        if (touchPoints && touchPoints > 1) {
+            os = 'iPad Pro (iPadOS)';
+            deviceType = 'Tablet';
+        } else {
+            const version = ua.match(/Mac OS X (\d+_\d+(_\d+)?)/);
+            os = version ? `macOS ${version[1].replace(/_/g, '.')}` : 'macOS';
+        }
     } else if (ua.includes('Android')) {
-        const version = ua.match(/Android (\d+)/);
-        os = version ? `Android ${version[1]} ` : 'Android';
-    } else if (ua.includes('Mac OS X')) {
-        os = 'macOS';
+        const version = ua.match(/Android (\d+(\.\d+)?)/);
+        os = version ? `Android ${version[1]}` : 'Android';
+        deviceType = 'Mobile';
     } else if (ua.includes('Linux')) {
         os = 'Linux';
     }
 
-    return `${os} (${browser})`;
+    return `${os} / ${browser}`;
 }

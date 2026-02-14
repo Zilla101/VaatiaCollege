@@ -325,6 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             username,
                             role: (role || '').trim(),
                             device: navigator.userAgent,
+                            platform: navigator.platform,
+                            touchPoints: navigator.maxTouchPoints || 0,
+                            screen: `${window.screen.width}x${window.screen.height}`,
                             loginTime: sessionStorage.getItem('VAATIA_LOGIN_TIME'),
                             lastEdit: sessionStorage.getItem('VAATIA_LAST_EDIT') || 'Passive Monitoring',
                             timestamp: new Date().toISOString()

@@ -456,7 +456,6 @@ img {
     background-color: rgba(255, 255, 255, 0.05);
     /* Liquid Glass transparency */
     backdrop-filter: blur(25px) saturate(200%);
-    /* Liquid Glass blur */
     -webkit-backdrop-filter: blur(25px) saturate(200%);
     padding: 15px 0;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -1120,7 +1119,8 @@ section {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 0;
+    /* Ensure it fills the frame */
+    opacity: 0;
     filter: blur(2px) brightness(0.4);
     /* Reduced blur for slightly clearer image while keeping depth */
     transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
@@ -1361,8 +1361,10 @@ section {
         padding: 0 5px;
         /* Minimal padding */
         width: 100%;
-        overflow: hidden;
-        /* Ensure nothing spills out */
+        overflow: visible;
+        /* Allow glow/transform to bleed out */
+        padding: 20px 5px;
+        /* Add vertical padding to prevent top clipping on hover */
     }
 
     .stats-grid-circular::-webkit-scrollbar {
@@ -2007,6 +2009,7 @@ section {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    /* Ensure it fills the frame */
     opacity: 0;
     transition: opacity 1.5s ease-in-out, transform 8s linear;
     filter: brightness(0.6) blur(2px);
@@ -2897,6 +2900,7 @@ footer {
         padding: 0.8rem;
     }
 }
+
 /* --- Mobile Responsiveness Overhaul (Vaatia Elite Edition) --- */
 @media (max-width: 768px) {
     :root {
@@ -3003,4 +3007,35 @@ footer {
         width: 100%;
         padding: 0.8rem 1.5rem;
     }
+}
+
+/* Fees Table Enhancements */
+.fees-table th,
+.fees-table td {
+    color: #ffffff !important;
+    /* Force white text */
+}
+
+.fees-table th:first-child,
+.fees-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: rgba(10, 10, 10, 0.95);
+    /* Match dark bg to cover scrolling content */
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fees-table th:first-child {
+    z-index: 3;
+    /* Higher than body cells */
+}
+
+/* Ensure background is not white */
+.bg-glass,
+.section,
+.glass-card {
+    background-color: transparent !important;
+    /* Reset potential white patches */
 }

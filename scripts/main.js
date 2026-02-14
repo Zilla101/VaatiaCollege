@@ -411,7 +411,16 @@ function setupSectionDots(containerSelector, indicatorsSelector) {
     grid.addEventListener('scroll', () => {
         const scrollWidth = grid.scrollWidth - grid.clientWidth;
         if (scrollWidth <= 0) return;
+
         const scrollLeft = grid.scrollLeft;
+
+        // Check if we are close to the end (allow 5px buffer)
+        if (Math.abs(scrollWidth - scrollLeft) < 5) {
+            indicators.forEach(dot => dot.classList.remove('active'));
+            indicators[indicators.length - 1].classList.add('active');
+            return;
+        }
+
         const index = Math.min(Math.round((scrollLeft / grid.scrollWidth) * indicators.length), indicators.length - 1);
         indicators.forEach((dot, i) => dot.classList.toggle('active', i === index));
     }, { passive: true });

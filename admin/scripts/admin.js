@@ -1477,7 +1477,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     pauseBtn.style.color = '#f87171';
                 }
             }
-        });
+        };
+    };
+});
 
 // Logout Modal Logic
 function openLogoutModal() {

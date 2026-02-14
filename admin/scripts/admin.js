@@ -1104,8 +1104,8 @@ function confirmLogout() {
 // --- Global Connection Settings ---
 window.setupGlobalCommand = () => {
     const role = sessionStorage.getItem('VAATIA_ROLE');
-    if (role !== 'Super Admin') {
-        alert("ACCESS DENIED: Restricted to Super Administrators.");
+    if (role !== 'Super Admin' && role !== 'Admin') {
+        alert("ACCESS DENIED: Restricted to Administrators.");
         return;
     }
     const mode = confirm("Activate Direct Cloud Sync?\n\nOK = Worldwide Access (GitHub Login)\nCancel = Local Command Mode Only");
@@ -1138,8 +1138,8 @@ window.setupGlobalCommand = () => {
 // Toggle Sync Pause Feature
 window.toggleSyncPause = () => {
     const role = sessionStorage.getItem('VAATIA_ROLE');
-    if (role !== 'Super Admin') {
-        alert("ACCESS DENIED: Restricted to Super Administrators.");
+    if (role !== 'Super Admin' && role !== 'Admin') {
+        alert("ACCESS DENIED: Restricted to Administrators.");
         return;
     }
     const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';

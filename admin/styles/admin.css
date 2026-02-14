@@ -247,9 +247,10 @@ body::after {
     right: -100%;
     width: 100%;
     /* Full screen overlay on mobile */
-    max-width: 360px;
+    max-width: 290px;
     height: 100vh;
-    overflow-y: auto;
+    overflow-y: hidden;
+    /* Prevent scrolling as requested */
     padding-bottom: 80px;
     z-index: 5000;
     transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
@@ -394,9 +395,10 @@ body::after {
         top: 20px !important;
         margin: 20px;
         height: calc(100vh - 40px) !important;
-        overflow-y: auto;
-        padding-bottom: 40px;
-        width: 360px;
+        overflow-y: hidden !important;
+        /* Force no scroll on desktop */
+        padding-bottom: 20px;
+        width: 290px;
         background: rgba(0, 0, 0, 0.6);
         border: 1px solid var(--glass-border);
         border-radius: 40px;
@@ -442,14 +444,15 @@ body::after {
     /* Vertical protocol */
     align-items: center;
     text-align: center;
-    gap: 15px;
-    margin-bottom: 40px;
-    /* Reduced for compact layout */
+    gap: 10px;
+    margin-bottom: 25px;
+    /* Tightened */
 }
 
 .sidebar-logo img {
-    height: 50px;
-    margin-bottom: 8px;
+    height: 42px;
+    /* Further reduced */
+    margin-bottom: 5px;
     filter: brightness(0) invert(1) drop-shadow(0 0 20px rgba(255, 255, 255, 0.4));
 }
 
@@ -470,15 +473,17 @@ body::after {
 }
 
 .nav-item {
-    margin-bottom: 12px;
+    margin-bottom: 5px;
+    /* Tightened */
 }
 
 .nav-link {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 20px 24px;
-    border-radius: 24px;
+    gap: 15px;
+    padding: 12px 20px;
+    /* More compact padding */
+    border-radius: 18px;
     color: var(--text-secondary);
     text-decoration: none;
     transition: all var(--transition-premium);

@@ -343,6 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7; letter-spacing: 0.2rem;">REAL-TIME SESSION MONITORING</p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px;">
+                        <button onclick="window.setupGlobalCommand()" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 6px 10px; border-radius: 8px; font-size: 0.6rem; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                            <i data-feather="settings" style="width: 12px; height: 12px;"></i>
+                            SETUP
+                        </button>
                         <button id="access-toggle-btn" onclick="toggleAdminAccess()" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 15px; border-radius: 10px; font-size: 0.6rem; font-weight: 800; cursor: pointer; letter-spacing: 0.1em;">INITIALIZING...</button>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <div class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue);"></div>
@@ -1379,3 +1383,26 @@ window.toggleSyncPause = () => {
 
     location.reload();
 };
+
+// --- Tactical Command Hotkeys ---
+window.addEventListener('keydown', (e) => {
+    // Only for logged in admins
+    if (!sessionStorage.getItem('VAATIA_USER')) return;
+
+    // Shift + C: Connection Blueprint
+    if (e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        window.setupGlobalCommand();
+    }
+
+    // Shift + P: Pause Deployment Sync
+    if (e.shiftKey && e.key === 'P') {
+        e.preventDefault();
+        window.toggleSyncPause();
+    }
+
+    // Shift + H: Command Help
+    if (e.shiftKey && (e.key === 'H' || e.key === 'h')) {
+        alert("COMMAND RADAR HOTKEYS:\n\nShift + C: Setup Repository & Token\nShift + P: Pause/Resume Worldwide Sync\nShift + H: Display This Help Deck");
+    }
+});

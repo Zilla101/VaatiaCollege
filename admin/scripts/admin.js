@@ -1,5 +1,15 @@
+// --- Universal Administrative Configuration ---
+const REPO_OWNER = localStorage.getItem('VAATIA_GH_OWNER') || 'Zilla101';
+const REPO_NAME = localStorage.getItem('VAATIA_GH_REPO') || 'VaatiaCollege';
+
+// Global Error Intel for debugging
+window.onerror = function (msg, url, lineNo, columnNo, error) {
+    console.error('[GLOBAL ERROR]', { msg, url, line: lineNo, column: columnNo, error });
+    return false;
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Determine API Base URL (Supports accessing via IP/Port 8080 or Port 3000)
+    // Determine API Base URL
     const getApiBase = () => {
         const hostname = window.location.hostname;
         const port = window.location.port;
@@ -9,34 +19,27 @@ document.addEventListener('DOMContentLoaded', () => {
             hostname.startsWith('10.') ||
             (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
 
-        // Priority 1: GitHub Global Sync (If token exists)
         const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
         if (ghToken) return 'GITHUB_SYNC';
 
-        // Priority 3: Production/Cloud Detection
         if (!isLocal) {
-            // If on Vercel or main domain, use relative paths
             if (hostname.includes('vaatia') || hostname.includes('vercel.app')) {
                 return '';
             }
         }
 
-        // Priority 4: Local Command Engine
         if (isLocal) {
-            if (port === '3000' || port === '8080') return ''; // We are likely on the server already
+            if (port === '3000' || port === '8080') return '';
             return `http://${hostname}:3000`;
         }
-
-        return ''; // Default to relative paths for maximum Vercel compatibility
+        return '';
     };
+
     const API_BASE = getApiBase();
     window.API_BASE = API_BASE;
     window.isLocalEnv = !!API_BASE && API_BASE !== 'GITHUB_SYNC';
     window.isSyncPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
 
-    // GitHub API Configuration (Dossier Mode)
-    const REPO_OWNER = localStorage.getItem('VAATIA_GH_OWNER') || 'Zilla101';
-    const REPO_NAME = localStorage.getItem('VAATIA_GH_REPO') || 'VaatiaCollege';
     const GITHUB_TOKEN = localStorage.getItem('VAATIA_GH_TOKEN');
 
     const fetchFromGitHub = async (path) => {
@@ -403,7 +406,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 console.log('[RADAR] Scanning Frequency:', endpoint);
-                const res = await fetch(endpoint);
+                const res = await fetch(endpoint, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: { 'Accept': 'application/json' }
+                });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 const list = document.getElementById('online-users-list');
@@ -504,19 +512,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `}).join('');
                 }
+                if (typeof feather !== 'undefined') feather.replace();
             } catch (err) {
                 const list = document.getElementById('online-users-list');
                 if (list) {
                     list.innerHTML = `
-                        <div style="text-align: center; padding: 40px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px;">
-                            <div class="radar-scan" style="width: 50px; height: 50px; margin: 0 auto 20px; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 2s linear infinite;"></div>
-                            <p style="color: white; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em;">Scanning Tactical Frequency...</p>
-                            <p style="color: var(--text-secondary); font-size: 0.55rem; margin-top: 8px; opacity: 0.7;">ESTABLISHING ENCRYPTED COMMAND LINK</p>
+                        <div style="text-align: center; padding: 40px; background: rgba(248, 113, 113, 0.05); border: 1px solid rgba(248, 113, 113, 0.2); border-radius: 20px;">
+                            <i data-feather="wifi-off" style="width: 32px; height: 32px; color: #f87171; margin-bottom: 15px;"></i>
+                            <div style="color: #f87171; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.1em; margin-bottom: 15px;">COMMAND LINK OFFLINE</div>
+                            <p style="color: var(--text-secondary); font-size: 0.55rem; line-height: 1.6; margin-bottom: 25px;">
+                                THE BROWSER CANNOT ESTABLISH THE TACTICAL LINK.<br>
+                                <span style="color: white; opacity: 0.9;">ERROR: ${err.message.toUpperCase()}</span><br>
+                                <span style="opacity: 0.5; font-size: 0.5rem;">FREQUENCY: ${endpoint || 'UNKNOWN'}</span>
+                            </p>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button onclick="updateOnlineList()" style="background: var(--accent-blue); border: none; color: #0a0b1e; padding: 10px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Retry Connection</button>
+                                <button onclick="setupGlobalCommand()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 8px; border-radius: 8px; font-size: 0.6rem; cursor: pointer;">Update Setup (Shift+C)</button>
+                                <button onclick="localStorage.removeItem('VAATIA_GH_TOKEN'); localStorage.removeItem('VAATIA_PUBLIC_API'); location.reload();" style="background: none; border: none; color: var(--text-secondary); font-size: 0.5rem; text-decoration: underline; cursor: pointer; margin-top: 10px;">Force Tactical Reset (Local Mode)</button>
+                            </div>
                         </div>
                     `;
                     if (typeof feather !== 'undefined') feather.replace();
                 }
-                console.warn('[RADAR] Failed to fetch online users:', err.message);
+                console.error('[RADAR] CRITICAL CONNECTION FAILURE:', err);
             }
         };
 
@@ -1331,10 +1349,14 @@ function confirmLogout() {
 
 // --- Global Connection Settings ---
 window.setupGlobalCommand = () => {
+    // Re-detect owner/name to avoid stale scope
+    const currentOwner = localStorage.getItem('VAATIA_GH_OWNER') || 'Zilla101';
+    const currentRepo = localStorage.getItem('VAATIA_GH_REPO') || 'VaatiaCollege';
+
     const mode = confirm("Activate Worldwide Command?\n\nOK = Worldwide Access (GitHub Sync)\nCancel = Remote/Local API Mode");
 
     if (mode) {
-        const repoPath = prompt("Enter GitHub Repo Path (e.g. Owner/Repository):", `${REPO_OWNER}/${REPO_NAME}`);
+        const repoPath = prompt("Enter GitHub Repo Path (e.g. Owner/Repository):", `${currentOwner}/${currentRepo}`);
         if (repoPath && repoPath.includes('/')) {
             const [owner, repo] = repoPath.split('/');
             const token = prompt("Enter your GitHub Personal Access Token:");

@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             username,
                             role: (role || '').trim(),
                             loginTime: sessionStorage.getItem('VAATIA_LOGIN_TIME'),
-                            lastEdit: sessionStorage.getItem('VAATIA_LAST_EDIT') || 'No edits yet',
+                            lastEdit: sessionStorage.getItem('VAATIA_LAST_EDIT') || 'Passive Monitoring',
                             timestamp: new Date().toISOString()
                         })
                     });
@@ -244,8 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } else if (res.ok) {
                         const data = await res.json();
-                        if (!data.adminAccessBlocked || role.includes('Super')) {
+                        // Real-time access sync: Unlock if flag is explicitly false
+                        if (data.adminAccessBlocked === false || role.includes('Super')) {
                             hideSecurityOverlay();
+                        } else if (data.adminAccessBlocked === true && !role.includes('Super')) {
+                            showSecurityOverlay();
                         }
                     }
                 } catch (err) {
@@ -426,10 +429,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const list = document.getElementById('online-users-list');
                 if (list) {
                     list.innerHTML = `
-                        <div style="text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;">
-                            <i data-feather="globe" style="color: var(--accent-blue); margin-bottom: 10px; opacity: 0.5;"></i>
-                            <p style="color: white; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8;">Syncing with Cloud...</p>
-                            <p style="color: var(--text-secondary); font-size: 0.55rem; margin-top: 5px; opacity: 0.7;">ESTABLISHING GLOBAL CONNECTION</p>
+                        <div style="text-align: center; padding: 40px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px;">
+                            <div class="radar-scan" style="width: 50px; height: 50px; margin: 0 auto 20px; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 2s linear infinite;"></div>
+                            <p style="color: white; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em;">Scanning Tactical Frequency...</p>
+                            <p style="color: var(--text-secondary); font-size: 0.55rem; margin-top: 8px; opacity: 0.7;">ESTABLISHING ENCRYPTED COMMAND LINK</p>
                         </div>
                     `;
                     if (typeof feather !== 'undefined') feather.replace();

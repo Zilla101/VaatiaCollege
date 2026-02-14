@@ -64,11 +64,13 @@ export default async function handler(req, res) {
             }
 
             const existingIndex = mockUsers.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+            const currentLoginTime = req.body.loginTime || new Date().toLocaleTimeString();
 
             if (existingIndex > -1) {
                 mockUsers[existingIndex] = {
                     ...mockUsers[existingIndex],
                     role: userRole,
+                    loginTime: mockUsers[existingIndex].loginTime || currentLoginTime,
                     lastSeen: new Date().toLocaleTimeString(),
                     timestamp: now,
                     lastAction: action || mockUsers[existingIndex].lastAction || 'Active'
@@ -77,6 +79,7 @@ export default async function handler(req, res) {
                 mockUsers.push({
                     username,
                     role: userRole,
+                    loginTime: currentLoginTime,
                     ip: req.headers['x-forwarded-for'] || 'SERVER',
                     lastSeen: new Date().toLocaleTimeString(),
                     timestamp: now,

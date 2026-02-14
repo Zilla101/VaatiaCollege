@@ -228,6 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({
                             username,
                             role: (role || '').trim(),
+                            loginTime: sessionStorage.getItem('VAATIA_LOGIN_TIME'),
                             timestamp: new Date().toISOString()
                         })
                     });
@@ -380,27 +381,46 @@ document.addEventListener('DOMContentLoaded', () => {
                         let statusText = 'ACTIVE NOW';
                         if (!isActive) {
                             const diffMin = Math.floor(diffSec / 60);
-                            statusText = diffMin > 0 ? `OFFLINE (${diffMin}m ago)` : `LAST SEEN: ${u.lastSeen}`;
+                            statusText = diffMin > 0 ? `OFFLINE (${diffMin}m ago)` : `OFFLINE`;
                         }
 
                         return `
-                        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid ${isActive ? 'rgba(0, 242, 254, 0.3)' : 'rgba(255,255,255,0.1)'};">
-                            <div style="display: flex; align-items: center; gap: 15px;">
-                                <div style="width: 32px; height: 32px; background: ${u.role.includes('Super') ? 'var(--accent-blue)' : 'rgba(255,255,255,0.2)'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a0a; font-size: 0.8rem; position: relative;">
-                                    ${u.username[0].toUpperCase()}
-                                    ${isActive ? '<div style="position: absolute; bottom: 0; right: 0; width: 8px; height: 8px; background: #10b981; border-radius: 50%; border: 2px solid #0a0b1e;"></div>' : ''}
-                                </div>
-                                <div>
-                                    <div style="color: white; font-weight: 700; font-size: 0.9rem;">${u.username} <span style="font-size: 0.6rem; color: var(--text-secondary); font-weight: 400; opacity: 0.7;">(${u.ip})</span></div>
-                                    <div style="color: ${isActive ? 'var(--accent-blue)' : 'var(--text-secondary)'}; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">
-                                        ${u.role} • ${statusText}
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid ${isActive ? 'rgba(0, 242, 254, 0.2)' : 'rgba(255,255,255,0.05)'}; border-radius: 16px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 42px; height: 42px; background: ${u.role.includes('Super') ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)'}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a0a; font-size: 1rem; position: relative; box-shadow: ${u.role.includes('Super') ? '0 0 15px rgba(0, 242, 254, 0.3)' : 'none'};">
+                                        ${u.username[0].toUpperCase()}
+                                        ${isActive ? '<div style="position: absolute; -top: 2px; -right: 2px; width: 10px; height: 10px; background: #10b981; border-radius: 50%; border: 2px solid #0a0b1e; box-shadow: 0 0 5px #10b981;"></div>' : ''}
                                     </div>
-                                    ${u.lastAction ? `<div style="font-size: 0.55rem; color: #10b981; margin-top: 4px; opacity: 0.8;">Action: ${u.lastAction}</div>` : ''}
+                                    <div>
+                                        <div style="color: white; font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 6px;">
+                                            ${u.username}
+                                            <span style="font-size: 0.55rem; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-secondary); font-weight: 400;">${u.role}</span>
+                                        </div>
+                                        <div style="color: ${isActive ? '#10b981' : 'var(--text-secondary)'}; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">
+                                            ${statusText}
+                                        </div>
+                                    </div>
+                                </div>
+                                ${u.username.toLowerCase() !== username.toLowerCase() && !u.role.includes('Super') ? `
+                                    <button onclick="terminateSession('${u.username}')" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.05em;">Eject</button>
+                                ` : ''}
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Network IP</span>
+                                    <span style="font-family: 'Courier New', monospace; font-size: 0.65rem; color: var(--accent-blue);">${u.ip}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Logon Time</span>
+                                    <span style="font-size: 0.65rem; color: white;">${u.loginTime || 'S-LEVEL CLASSIFIED'}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px; grid-column: span 2;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Current Directive</span>
+                                    <span style="font-size: 0.6rem; color: #10b981; font-weight: 600;">${u.lastAction || 'MONITORING STANDBY'}</span>
                                 </div>
                             </div>
-                            ${u.username.toLowerCase() !== username.toLowerCase() && !u.role.includes('Super') ? `
-                                <button onclick="terminateSession('${u.username}')" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 0.55rem; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase;">Terminate</button>
-                            ` : (u.username.toLowerCase() === username.toLowerCase() ? '<span style="color: var(--accent-blue); font-size: 0.6rem; font-weight: 800;">YOU</span>' : '<span style="color: var(--text-secondary); font-size: 0.6rem; font-weight: 800; text-transform: uppercase;">Protected</span>')}
                         </div>
                     `}).join('');
                 }
@@ -442,8 +462,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.toggleAdminAccess = async () => {
             const isBlocked = window.adminAccessBlocked;
-            const action = isBlocked ? 'RESTORE' : 'DENY';
-            if (!confirm(`🚨 PROTOCOL OVERRIDE: Are you sure you want to ${action} ACCESS for all regular admins?`)) return;
+            const btn = document.getElementById('access-toggle-btn');
+            if (btn) btn.innerText = 'PROCESSING...';
 
             try {
                 const endpoint = (!API_BASE || API_BASE === 'GITHUB_SYNC') ? '/api/session' : `${API_BASE}/api/session/access`;
@@ -454,11 +474,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (res.ok) {
-                    alert(`SUCCESS: Accessibility protocols have been ${isBlocked ? 'restored' : 'suspended'}.`);
-                    if (typeof updateOnlineList === 'function') updateOnlineList();
+                    if (typeof updateOnlineList === 'function') await updateOnlineList();
                 }
             } catch (err) {
-                alert('CRITICAL ERROR: Failed to update access state.');
+                console.error('Failed to update access state.');
+                if (btn) btn.innerText = isBlocked ? 'RESTORE ADMIN ACCESS' : 'DENY ADMIN ACCESS';
             }
         };
 

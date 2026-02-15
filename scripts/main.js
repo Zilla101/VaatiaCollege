@@ -297,6 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const portalModal = document.getElementById('portal-modal');
     const portalConfirm = document.getElementById('portal-confirm');
     const portalCancel = document.getElementById('portal-cancel');
+    const portalTitle = document.getElementById('portal-modal-title');
+    const portalDesc = document.getElementById('portal-modal-description');
     let pendingRedirectUrl = "";
 
     if (portalBtns.length > 0 && portalModal) {
@@ -304,6 +306,12 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 pendingRedirectUrl = btn.href;
+
+                // Set dynamic modal text if available
+                const portalName = btn.getAttribute('data-portal-redir') || "Portal";
+                if (portalTitle) portalTitle.textContent = `Navigating to ${portalName}`;
+                if (portalDesc) portalDesc.textContent = `You are about to be redirected to the secure Vaatia College ${portalName}. Would you like to continue?`;
+
                 portalModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
             });
@@ -321,7 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         portalConfirm.addEventListener('click', () => {
             if (pendingRedirectUrl) {
-                window.location.href = pendingRedirectUrl;
+                window.open(pendingRedirectUrl, '_blank');
+                closePortalModal();
             }
         });
     }

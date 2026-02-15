@@ -288,7 +288,8 @@
                         <li><a href="tuition.html">Payment Guide</a></li>
                         <li><a href="https://portal.vaatiacollege.com.ng/studentsview/login.aspx">Student Portal</a>
                         </li>
-                        <li><a href="admin/login.html" style="color: var(--accent-blue); font-weight: bold;">Admin
+                        <li><a href="admin/login.html" class="portal-redir" data-portal-redir="Admin Panel"
+                                target="_blank" style="color: var(--accent-blue); font-weight: bold;">Admin
                                 Panel</a></li>
                     </ul>
                 </div>
@@ -328,6 +329,21 @@
             </div>
         </div>
     </footer>
+
+    <div class="liquid-modal-overlay" id="portal-modal">
+        <div class="liquid-modal">
+            <div class="modal-content">
+                <h2 id="portal-modal-title">Navigating to Portal</h2>
+                <p id="portal-modal-description">You are about to be redirected to the secure Vaatia College Student
+                    Portal. Would you like to
+                    continue?</p>
+                <div class="modal-buttons">
+                    <button class="btn btn-primary" id="portal-confirm">Continue to Portal</button>
+                    <button class="btn btn-secondary" id="portal-cancel">Stay on Site</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="scripts/main.js?v=7"></script>

@@ -11,32 +11,31 @@ window.onerror = function (msg, url, lineNo, columnNo, error) {
 document.addEventListener('DOMContentLoaded', () => {
     // Determine API Base URL
     const getApiBase = () => {
-        const hostname = window.location.hostname;
-        const port = window.location.port;
         const savedAPI = localStorage.getItem('VAATIA_PUBLIC_API');
         const forceLocal = localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true';
+        const forceGH = localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true';
 
-        // 1. If user explicitly wants online server (or it's the default)
-        if (!forceLocal) {
-            if (savedAPI) return savedAPI.replace(/\/$/, '');
-            // Default Online Hub
-            return 'https://vaatiacollege.vercel.app';
+        // 1. Direct GitHub Mode (Priority)
+        if (forceGH) return 'GITHUB_SYNC';
+
+        // 2. Local Fallback logic (Explicitly for developers)
+        if (forceLocal) {
+            if (isLocalHost) {
+                if (port === '3000' || port === '8080') return '';
+                return `http://${hostname}:3000`;
+            }
         }
 
-        // 2. Local Fallback logic
-        const isLocalHost = hostname === 'localhost' ||
-            hostname === '127.0.0.1' ||
-            hostname.startsWith('192.168.') ||
-            hostname.startsWith('10.') ||
-            (hostname.startsWith('172.') && parseInt(hostname.split('.')[1]) >= 16 && parseInt(hostname.split('.')[1]) <= 31);
+        // 3. Online Server Priority
+        if (savedAPI) return savedAPI.replace(/\/$/, '');
 
-        if (isLocalHost) {
-            if (port === '3000' || port === '8080') return ''; // Use relative routes if on the same port
-            return `http://${hostname}:3000`; // Standard local backend port
-        }
-
-        return ''; // Default to relative
+        // Default Production Hub
+        return 'https://vaatiacollege.vercel.app';
     };
+
+    const isLocalHost = window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.startsWith('192.168.');
 
     const API_BASE = getApiBase();
     window.API_BASE = API_BASE;
@@ -344,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateVersion();
         }
 
-        // 2. Start Session Sync (Renamed from Heartbeat)
+        // 2. Start Session Sync
         const startSessionSync = () => {
             const sync = async () => {
                 try {
@@ -358,12 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({
                             username,
                             role: (role || '').trim(),
-                            device: navigator.userAgent,
-                            platform: navigator.platform,
-                            touchPoints: navigator.maxTouchPoints || 0,
-                            screen: `${window.screen.width}x${window.screen.height}`,
-                            loginTime: sessionStorage.getItem('VAATIA_LOGIN_TIME'),
-                            lastEdit: sessionStorage.getItem('VAATIA_LAST_EDIT') || 'Passive Monitoring',
                             timestamp: new Date().toISOString()
                         })
                     });
@@ -374,13 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             localStorage.setItem('VAATIA_BLOCKED', 'true');
                             showSecurityOverlay();
                         } else if (data.killed) {
-                            alert('🚨 SESSION TERMINATED\nA Super Admin has ended your session for security reasons.');
+                            alert('Session terminated for security reasons.');
                             confirmLogout();
                         }
                     } else if (res.ok) {
                         const data = await res.json();
-                        if (role.includes('Super')) {
-                            // Super Admin never gets locked
+                        if (role.toLowerCase().includes('super')) {
                             hideSecurityOverlay();
                         } else if (data.adminAccessBlocked === true) {
                             localStorage.setItem('VAATIA_BLOCKED', 'true');
@@ -390,357 +382,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             hideSecurityOverlay();
                         }
                     }
-                } catch (err) {
-                    // Silent fail to avoid annoying logs
-                }
+                } catch (err) { }
             };
             sync();
-            setInterval(sync, 5000); // 5s Sync Interval
+            setInterval(sync, 10000); // Increased interval to 10s for simplicity
         };
 
         startSessionSync();
-
-        // 3. Super Admin Specific Features
-        if (role === 'Super Admin') {
-            renderCommandDeck();
-        }
     };
 
-    function renderCommandDeck() {
-        const consolePoint = document.getElementById('super-admin-console');
-        if (!consolePoint) return;
 
-        const deckHTML = `
-            <div class="glass-card" style="margin-top: 20px; border-left: 4px solid var(--accent-blue); animation: slideInUp 0.5s ease-out; align-items: stretch; text-align: left; padding: 30px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
-                    <div>
-                        <h2 class="text-gradient" style="font-weight: 800; margin: 0;">Command Radar</h2>
-                        <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7; letter-spacing: 0.2rem;">REAL-TIME SESSION MONITORING</p>
-                        <div id="tactical-link-status" style="margin-top: 8px; font-size: 0.5rem; color: var(--accent-blue); opacity: 0.8; font-family: monospace; display: flex; align-items: center; gap: 5px; background: rgba(0, 242, 254, 0.05); padding: 4px 8px; border-radius: 4px; width: fit-content;">
-                            <i data-feather="activity" style="width: 10px; height: 10px;"></i>
-                            LINK: INITIALIZING...
-                        </div>
-                    </div>
-                    <div class="radar-action-stack" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
-                        <button onclick="window.pulseRadar()" class="pulse-btn tactical-btn" style="background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 8px 16px; border-radius: 10px; font-size: 0.65rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; text-transform: uppercase;">
-                            <i data-feather="zap" style="width: 14px; height: 14px;"></i>
-                            SEND PING
-                        </button>
-                        <button onclick="window.setupGlobalCommand()" class="tactical-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 8px 12px; border-radius: 10px; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;">
-                            <i data-feather="settings" style="width: 14px; height: 14px;"></i>
-                            SETUP
-                        </button>
-                        <button id="access-toggle-btn" onclick="toggleAdminAccess()" class="tactical-btn" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 8px 20px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; cursor: pointer; letter-spacing: 0.1em; transition: 0.3s;">INITIALIZING...</button>
-                        <div style="display: flex; gap: 5px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-                            <button onclick="window.setServerMode('online')" style="background: ${!localStorage.getItem('VAATIA_FORCE_LOCAL') ? 'var(--accent-blue)' : 'transparent'}; border: none; color: ${!localStorage.getItem('VAATIA_FORCE_LOCAL') ? '#0c0c0c' : 'rgba(255,255,255,0.4)'}; padding: 6px 10px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Online</button>
-                            <button onclick="window.setServerMode('local')" style="background: ${localStorage.getItem('VAATIA_FORCE_LOCAL') ? '#f87171' : 'transparent'}; border: none; color: ${localStorage.getItem('VAATIA_FORCE_LOCAL') ? 'white' : 'rgba(255,255,255,0.4)'}; padding: 6px 10px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Local</button>
-                        </div>
-                        <div class="active-status-badge" style="display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(0, 0, 0, 0.2); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
-                            <div class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue);"></div>
-                            <span style="font-size: 0.6rem; color: var(--accent-blue); letter-spacing: 0.15em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="command-radar-grid">
-                    <div>
-                        <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">ACTIVE SESSIONS</p>
-                        <div id="online-users-list" style="display: flex; flex-direction: column; gap: 12px;">
-                            <div style="text-align: center; padding: 20px; opacity: 0.5;">
-                                <div class="loader-circle" style="width: 20px; height: 20px; border: 2px solid var(--accent-blue); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">LIVE ACTION LOG</p>
-                        <div id="action-log-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
-                            <p style="font-size: 0.6rem; text-align: center; opacity: 0.5; padding: 20px;">WAITING FOR DATA...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <style>
-                .pulse-dot { animation: pulse 2s infinite; }
-                @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-                #action-log-list::-webkit-scrollbar { width: 3px; }
-                #action-log-list::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
-                .tactical-btn:active { transform: scale(0.95); opacity: 0.8; }
-                .tactical-btn:hover { filter: brightness(1.2); }
-                
-                @media (max-width: 1024px) {
-                    .command-radar-grid { grid-template-columns: 1fr !important; gap: 30px !important; }
-                    .glass-card { padding: 20px !important; }
-                    .radar-action-stack { margin-top: 20px; width: 100%; }
-                    .strategy-btn-container { margin-left: 0% !important; margin-top: 25px !important; }
-                }
-                @media (max-width: 768px) {
-                    .text-gradient { font-size: 1.4rem !important; }
-                    .tactical-btn { width: 100%; flex: 1; min-width: 140px; }
-                    .radar-action-stack { justify-content: center !important; }
-                    .active-status-badge { width: 100%; justify-content: center; }
-                }
-            </style>
-        `;
-
-        consolePoint.innerHTML = deckHTML;
-
-        const updateOnlineList = async () => {
-            try {
-                const endpoint = window.getRadarEndpoint();
-                const statusLabel = document.getElementById('tactical-link-status');
-                if (statusLabel) {
-                    statusLabel.innerHTML = `<i data-feather="activity" style="width: 10px; height: 10px;"></i> LINK: <span style="color:white; opacity: 0.6;">${endpoint}</span> | ${new Date().toLocaleTimeString()}`;
-                    if (typeof feather !== 'undefined') feather.replace();
-                }
-
-                const res = await fetch(endpoint, {
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    credentials: 'include',
-                    headers: { 'Accept': 'application/json' }
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                const list = document.getElementById('online-users-list');
-
-                // Update Access Control toggle state
-                window.adminAccessBlocked = data.adminAccessBlocked;
-                const toggleBtn = document.getElementById('access-toggle-btn');
-                if (toggleBtn) {
-                    if (data.adminAccessBlocked) {
-                        toggleBtn.innerText = 'RESTORE ADMIN ACCESS';
-                        toggleBtn.style.background = 'rgba(16, 185, 129, 0.1)';
-                        toggleBtn.style.color = '#10b981';
-                        toggleBtn.style.borderColor = '#10b981';
-                    } else {
-                        toggleBtn.innerText = 'DENY ADMIN ACCESS';
-                        toggleBtn.style.background = 'rgba(248, 113, 113, 0.1)';
-                        toggleBtn.style.color = '#f87171';
-                        toggleBtn.style.borderColor = '#f87171';
-                    }
-                }
-
-                if (data.success && list) {
-                    const actionList = document.getElementById('action-log-list');
-
-                    if (!data.users || data.users.length === 0) {
-                        list.innerHTML = '<p style="color: var(--text-secondary); opacity: 0.5; padding: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px;">No other active sessions detected.</p>';
-                        return; // Exit early if no users
-                    }
-
-                    // TACTICAL SORT: Active users first, then offline users
-                    const sortedUsers = [...data.users].sort((a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0));
-
-                    // Render Action Log if available
-                    if (actionList && data.actions) {
-                        if (data.actions.length === 0) {
-                            actionList.innerHTML = '<p style="font-size: 0.6rem; opacity: 0.5; text-align: center; padding: 10px;">NO RECENT EDITS.</p>';
-                        } else {
-                            actionList.innerHTML = data.actions.map(a => `
-                                <div style="font-size: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; margin-bottom: 5px;">
-                                    <span style="color: var(--accent-blue); font-weight: 800;">${a.username}</span> 
-                                    <span style="color: white; opacity: 0.8;">${a.action}</span>
-                                    <div style="color: var(--text-secondary); opacity: 0.5; font-size: 0.5rem; margin-top: 2px;">${new Date(a.timestamp).toLocaleTimeString()}</div>
-                                </div>
-                            `).join('');
-                        }
-                    }
-
-                    list.innerHTML = sortedUsers.map(u => {
-                        const isActive = u.isActive; // Use server-side state to avoid clock drift issues
-                        const currentUser = (sessionStorage.getItem('VAATIA_USER') || '').toLowerCase();
-
-                        let statusText = isActive ? 'ACTIVE NOW' : 'OFFLINE';
-                        if (!isActive && u.timestamp) {
-                            const ts = typeof u.timestamp === 'number' ? u.timestamp : new Date(u.timestamp).getTime();
-                            const diffSec = Math.floor((Date.now() - ts) / 1000);
-                            const diffMin = Math.floor(diffSec / 60);
-                            statusText = diffMin > 0 ? `OFFLINE (${diffMin}m ago)` : `OFFLINE`;
-                        }
-
-                        return `
-                        <div style="background: rgba(255,255,255,0.03); border: 1px solid ${isActive ? 'rgba(0, 242, 254, 0.2)' : 'rgba(255,255,255,0.05)'}; border-radius: 16px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div style="width: 42px; height: 42px; background: ${u.role.includes('Super') ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)'}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a0a; font-size: 1rem; position: relative; box-shadow: ${u.role.includes('Super') ? '0 0 15px rgba(0, 242, 254, 0.3)' : 'none'};">
-                                        ${u.username[0].toUpperCase()}
-                                        ${isActive ? '<div style="position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #10b981; border-radius: 50%; border: 2px solid #0a0b1e; box-shadow: 0 0 5px #10b981;"></div>' : ''}
-                                    </div>
-                                    <div>
-                                        <div style="color: white; font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 6px;">
-                                            ${u.username}
-                                            <span style="font-size: 0.55rem; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-secondary); font-weight: 400;">${u.role}</span>
-                                        </div>
-                                        <div style="color: ${isActive ? '#10b981' : 'var(--text-secondary)'}; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">
-                                            ${statusText}
-                                        </div>
-                                    </div>
-                                </div>
-                                ${u.username.toLowerCase() !== currentUser && !u.role.includes('Super') ? `
-                                    <button onclick="terminateSession('${u.username}')" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.05em;">Eject</button>
-                                ` : ''}
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Network IP</span>
-                                    <span style="font-family: 'Courier New', monospace; font-size: 0.65rem; color: var(--accent-blue);">${u.ip || 'Unknown'}</span>
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Login Time</span>
-                                    <span style="font-size: 0.65rem; color: white;">${u.loginTime || 'N/A'}</span>
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Device</span>
-                                    <span style="font-size: 0.6rem; color: #a78bfa; font-weight: 600;">${u.device || 'Unknown'}</span>
-                                </div>
-                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Last Activity</span>
-                                    <span style="font-size: 0.6rem; color: #10b981; font-weight: 600;">${u.lastEdit || u.lastAction || 'Idle'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `}).join('');
-                }
-                if (typeof feather !== 'undefined') feather.replace();
-            } catch (err) {
-                const list = document.getElementById('online-users-list');
-                if (list) {
-                    list.innerHTML = `
-                        <div style="text-align: center; padding: 40px; background: rgba(248, 113, 113, 0.05); border: 1px solid rgba(248, 113, 113, 0.2); border-radius: 20px;">
-                            <i data-feather="wifi-off" style="width: 32px; height: 32px; color: #f87171; margin-bottom: 15px;"></i>
-                            <div style="color: #f87171; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.1em; margin-bottom: 15px;">COMMAND LINK OFFLINE</div>
-                            <p style="color: var(--text-secondary); font-size: 0.55rem; line-height: 1.6; margin-bottom: 25px;">
-                                THE BROWSER CANNOT ESTABLISH THE TACTICAL LINK.<br>
-                                <span style="color: white; opacity: 0.9;">ERROR: ${err.message.toUpperCase()}</span><br>
-                                <span style="opacity: 0.5; font-size: 0.5rem;">FREQUENCY: ${endpoint || 'UNKNOWN'}</span>
-                            </p>
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                <button onclick="updateOnlineList()" style="background: var(--accent-blue); border: none; color: #0a0b1e; padding: 10px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Retry Connection</button>
-                                <button onclick="setupGlobalCommand()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 8px; border-radius: 8px; font-size: 0.6rem; cursor: pointer;">Update Setup (Shift+C)</button>
-                                <button onclick="localStorage.removeItem('VAATIA_GH_TOKEN'); localStorage.removeItem('VAATIA_PUBLIC_API'); location.reload();" style="background: none; border: none; color: var(--text-secondary); font-size: 0.5rem; text-decoration: underline; cursor: pointer; margin-top: 10px;">Force Tactical Reset (Local Mode)</button>
-                            </div>
-                        </div>
-                    `;
-                    if (typeof feather !== 'undefined') feather.replace();
-                }
-                console.error('[RADAR] CRITICAL CONNECTION FAILURE:', err);
-            }
-        };
-
-        window.terminateSession = async (targetUser) => {
-            const initiator = sessionStorage.getItem('VAATIA_USER');
-            if (!confirm(`🚨 PROTOCOL INITIATED: Are you sure you want to FORCE TERMINATE ${targetUser.toUpperCase()}?`)) return;
-
-            try {
-                const endpoint = window.getRadarEndpoint();
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    credentials: 'include',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ targetUser, initiator })
-                });
-
-                if (res.ok) {
-                    alert(`SUCCESS: Session for ${targetUser} has been terminated.`);
-                    if (typeof updateOnlineList === 'function') updateOnlineList();
-                }
-            } catch (err) {
-                alert('CRITICAL ERROR: Failed to execute termination protocol.');
-            }
-        };
-
-        window.toggleAdminAccess = async () => {
-            const btn = document.getElementById('access-toggle-btn');
-            const currentUser = sessionStorage.getItem('VAATIA_USER');
-
-            // 1. OPTIMISTIC UPDATE (INSTANT)
-            const previousState = window.adminAccessBlocked;
-            const newState = !previousState;
-            window.adminAccessBlocked = newState; // Commit to local state
-
-            if (btn) {
-                btn.innerText = 'UPDATING PROTOCOL...';
-                // Immediately calculate expected visual state
-                if (newState) {
-                    btn.innerText = 'RESTORE ADMIN ACCESS';
-                    btn.style.background = 'rgba(16, 185, 129, 0.1)';
-                    btn.style.color = '#10b981';
-                    btn.style.borderColor = '#10b981';
-                } else {
-                    btn.innerText = 'DENY ADMIN ACCESS';
-                    btn.style.background = 'rgba(248, 113, 113, 0.1)';
-                    btn.style.color = '#f87171';
-                    btn.style.borderColor = '#f87171';
-                }
-            }
-
-            try {
-                const endpoint = window.getRadarEndpoint();
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        toggleAccess: newState, // Send new state
-                        initiator: currentUser
-                    })
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    // Confirm server state matches our optimistic state
-                    if (data.adminAccessBlocked !== newState) {
-                        // Revert if server disagrees (Rare)
-                        window.adminAccessBlocked = data.adminAccessBlocked;
-                        revertButtonVisual(data.adminAccessBlocked);
-                    }
-                    if (typeof updateOnlineList === 'function') await updateOnlineList();
-                } else {
-                    throw new Error('Server rejected toggle');
-                }
-            } catch (err) {
-                console.error('Failed to update access state:', err);
-                // Revert on Error
-                window.adminAccessBlocked = previousState;
-                revertButtonVisual(previousState);
-                if (btn) btn.innerText = 'COMMAND FAILED';
-            }
-        };
-
-        function revertButtonVisual(state) {
-            const btn = document.getElementById('access-toggle-btn');
-            if (btn) {
-                if (state) {
-                    btn.innerText = 'RESTORE ADMIN ACCESS';
-                    btn.style.background = 'rgba(16, 185, 129, 0.1)';
-                    btn.style.color = '#10b981';
-                    btn.style.borderColor = '#10b981';
-                } else {
-                    btn.innerText = 'DENY ADMIN ACCESS';
-                    btn.style.background = 'rgba(248, 113, 113, 0.1)';
-                    btn.style.color = '#f87171';
-                    btn.style.borderColor = '#f87171';
-                }
-            }
-        }
-
-        window.pulseRadar = () => {
-            console.log('[RADAR] Manual Pulse Requested');
-            const btn = document.querySelector('.pulse-btn');
-            if (btn) {
-                btn.style.borderColor = 'white';
-                setTimeout(() => btn.style.borderColor = 'var(--accent-blue)', 500);
-            }
-            updateOnlineList();
-        };
-
-        updateOnlineList();
-        setInterval(updateOnlineList, 10000); // Pulse: 10s for ASAP tactical updates
-    };
 
     // --- Dynamic Security Interceptor ---
     window.showSecurityOverlay = () => {
@@ -1145,7 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Settings Logic (Functional Sync)
+    // --- Settings UI ---
     window.openSettings = () => {
         const title = document.getElementById('modal-title');
         const body = document.getElementById('modal-body');
@@ -1161,324 +812,253 @@ document.addEventListener('DOMContentLoaded', () => {
                     </p>
                 </div>
             `;
+        }
+    };
 
+    // Upload Logic
+    const uploadBtn = document.querySelector('.btn-premium.btn-compact');
+    if (uploadBtn && uploadBtn.innerText === '+ UPLOAD ASSET') {
+        uploadBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
 
+                if (window.logAdminAction) window.logAdminAction(`Uploading Asset: ${file.name}`);
 
-            // Upload Logic
-            const uploadBtn = document.querySelector('.btn-premium.btn-compact');
-            if (uploadBtn && uploadBtn.innerText === '+ UPLOAD ASSET') {
-                uploadBtn.addEventListener('click', () => {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.onchange = async (e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
-
-                        if (window.logAdminAction) window.logAdminAction(`Uploading Asset: ${file.name} `);
-
-                        if (!API_BASE) {
-                            showCustomAlert('Upload is only available in Local Command Mode.', 'Upload Restricted', true);
-                            return;
-                        }
-                        const formData = new FormData();
-                        formData.append('file', file);
-
-                        uploadBtn.innerText = 'UPLOADING...';
-                        uploadBtn.disabled = true;
-
-                        try {
-                            const response = await fetch(`${API_BASE} /api/upload`, {
-                                method: 'POST',
-                                body: formData
-                            });
-                            const result = await response.json();
-                            if (result.success) {
-                                loadMedia();
-                                updateStats();
-                                showPlacementDialogue(result.filePath);
-                                showCustomAlert('Asset uploaded successfully.', 'Upload Complete');
-                            } else {
-                                showCustomAlert('Upload failed: ' + result.error, 'Upload Error', true);
-                            }
-                        } catch (err) {
-                            showCustomAlert('Command server unreachable.', 'Connection Error', true);
-                        } finally {
-                            uploadBtn.innerText = '+ UPLOAD ASSET';
-                            uploadBtn.disabled = false;
-                        }
-                    };
-                    input.click();
-                });
-            }
-
-            // Post-Upload Placement Dialogue
-            window.showPlacementDialogue = (filePath) => {
-                const title = document.getElementById('modal-title');
-                const body = document.getElementById('modal-body');
-                const modal = document.getElementById('edit-modal');
-                if (!title || !body || !modal) return;
-
-                title.innerText = 'Protocol: Asset Placement';
-                body.innerHTML = `
-                < div style = "text-align: center; margin-bottom: 25px;" >
-                <img src="../${filePath}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 15px; border: 2px solid var(--accent-blue); margin-bottom: 10px;" class="image-fade-in">
-                <p style="color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 0.05em;">DEPLOYMENT DETECTED: SELECT SECTOR</p>
-            </div>
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch;">
-                <button class="btn-edit active" onclick="filterPlacement('all', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">ALL SECTORS</button>
-                <button class="btn-edit" onclick="filterPlacement('home', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">HOMEPAGE</button>
-                <button class="btn-edit" onclick="filterPlacement('inner', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">INTERNAL PAGES</button>
-                <button class="btn-edit" onclick="filterPlacement('global', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">GLOBAL ASSETS</button>
-            </div>
-
-            <div class="placement-options" id="placement-grid" style="max-height: 40vh; overflow-y: auto; padding-right: 5px;">
-                <!-- Home -->
-                <div class="placement-option" data-cat="home" onclick="applyAssetToSection('index.html', 'hero', 'image', '${filePath}')">
-                    <h4>Hero Background</h4>
-                    <p>Homepage > Elite Entry Sector</p>
-                </div>
-                <div class="placement-option" data-cat="home" onclick="applyAssetToSection('index.html', 'mgmt', 'principal-img', '${filePath}')">
-                    <h4>Principal Portrait</h4>
-                    <p>Management > Principal Asset</p>
-                </div>
-                <div class="placement-option" data-cat="home" onclick="applyAssetToSection('index.html', 'mgmt', 'vp1-img', '${filePath}')">
-                    <h4>VP Academic Portrait</h4>
-                    <p>Management > VP Academic Asset</p>
-                </div>
-                
-                <!-- Inner -->
-                <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('admissions.html', 'header', 'image', '${filePath}')">
-                    <h4>Admissions Header</h4>
-                    <p>Admissions > Blueprint Background</p>
-                </div>
-                <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('boarding.html', 'header', 'image', '${filePath}')">
-                    <h4>Boarding Header</h4>
-                    <p>Boarding > Hostel Lifecycle</p>
-                </div>
-                <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('club.html', 'activities', 'image', '${filePath}')">
-                    <h4>Clubs Header</h4>
-                    <p>Activities > Clubs & Society</p>
-                </div>
-                <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('sports.html', 'activities', 'image', '${filePath}')">
-                    <h4>Sports Header</h4>
-                    <p>Activities > Athletic Sector</p>
-                </div>
-                
-                <!-- Global -->
-                <div class="placement-option" data-cat="global" onclick="applyAssetToSection('index.html', 'brand', 'logo-img', '${filePath}')">
-                    <h4>Site Logo</h4>
-                    <p>Global > Brand Identity Asset</p>
-                </div>
-            </div>
-            
-            <div style="margin-top: 25px; text-align: center; display: flex; flex-direction: column; gap: 10px;">
-                <button class="btn-edit" onclick="closeModal()" style="width: 100%; border: 1px solid rgba(255,255,255,0.1);">SKIP AUTOMATIC PLACEMENT</button>
-            </div>
-            `;
-                modal.style.display = 'flex';
-                feather.replace();
-            };
-
-            window.filterPlacement = (cat, btn) => {
-                const options = document.querySelectorAll('.placement-option');
-                const buttons = btn.parentElement.querySelectorAll('button');
-
-                buttons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                options.forEach(opt => {
-                    if (cat === 'all' || opt.dataset.cat === cat) {
-                        opt.style.display = 'block';
-                    } else {
-                        opt.style.display = 'none';
-                    }
-                });
-            };
-
-            window.applyAssetToSection = async (page, section, key, filePath) => {
-                const data = {};
-                data[`${section} -${key} `] = filePath;
-
-                // Log Action for Radar Visibility
-                if (window.logAdminAction) {
-                    window.logAdminAction(`Placed Asset[${key}] in ${page} `);
+                if (!API_BASE) {
+                    showCustomAlert('Upload is only available in Local Command Mode.', 'Upload Restricted', true);
+                    return;
                 }
+                const formData = new FormData();
+                formData.append('file', file);
 
-                // Visual feedback
-                const modal = document.getElementById('edit-modal');
-                const body = document.getElementById('modal-body');
-                body.innerHTML = `
-                < div style = "text-align: center; padding: 60px;" >
-                <div class="loader-circle" style="width: 40px; height: 40px; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;"></div>
-                <p style="color: var(--accent-blue); font-size: 0.7rem; letter-spacing: 0.3em; font-weight: 800; text-transform: uppercase;">
-                    Executing Global Sync...
-                </p>
-            </div >
-                `;
-
-                if (API_BASE === 'GITHUB_SYNC') {
-                    const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
-                    const REPO_OWNER = 'Zilla101';
-                    const REPO_NAME = 'VaatiaCollege';
-                    const ALL_PAGES = [
-                        'index.html', 'admissions.html', 'boarding.html', 'club.html',
-                        'excursions.html', 'fees.html', 'skillsacquisition.html',
-                        'sports.html', 'students.html', 'tuition.html'
-                    ];
-
-                    try {
-                        let updatedCount = 0;
-                        for (const targetPage of ALL_PAGES) {
-                            try {
-                                // 1. Fetch current file from GitHub
-                                const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
-                                    headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
-                                });
-
-                                if (!getRes.ok) continue;
-                                const fileData = await getRes.json();
-
-                                // Robust UTF-8 Decoding
-                                const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(function (c) {
-                                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                                }).join(''));
-
-                                const sha = fileData.sha;
-
-                                // 2. Parse and Update (Greedy Mode)
-                                const parser = new DOMParser();
-                                const doc = parser.parseFromString(decodedContent, 'text/html');
-                                let pageModified = false;
-
-                                const targetId = `${section}-${key}`;
-                                const selectors = [`#${targetId}`, `#live-${targetId}`];
-
-                                selectors.forEach(selector => {
-                                    const elements = doc.querySelectorAll(selector);
-                                    elements.forEach(el => {
-                                        let currentVal;
-                                        if (el.tagName === 'IMG') {
-                                            currentVal = el.getAttribute('src');
-                                            if (currentVal !== filePath) {
-                                                el.src = filePath;
-                                                pageModified = true;
-                                            }
-                                        } else if (el.tagName === 'A') {
-                                            currentVal = el.getAttribute('href');
-                                            if (currentVal !== filePath) {
-                                                el.href = filePath;
-                                                pageModified = true;
-                                            }
-                                        } else {
-                                            currentVal = el.innerHTML;
-                                            if (currentVal !== filePath) {
-                                                el.innerHTML = filePath;
-                                                pageModified = true;
-                                            }
-                                        }
-                                    });
-                                });
-
-                                if (!pageModified) continue;
-
-                                // 3. Commit back to GitHub
-                                const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-                                const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
-                                    return String.fromCharCode('0x' + p1);
-                                }));
-
-                                const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
-                                    method: 'PUT',
-                                    headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        message: `admin: universal greedy asset deploy [${filePath}]`,
-                                        content: encodedContent,
-                                        sha: sha
-                                    })
-                                });
-
-                                if (putRes.ok) updatedCount++;
-                            } catch (err) {
-                                console.warn(`Asset sync failed for ${targetPage}:`, err);
-                            }
-                        }
-
-                        if (updatedCount > 0) {
-                            body.innerHTML = `
-                        <div style="text-align: center; padding: 60px;">
-                            <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
-                            <h3 style="color: white; margin-bottom: 10px;">WORLDWIDE DEPLOY SUCCESS</h3>
-                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Asset deployed to ${updatedCount} pages. Live on Vercel in ~30s.</p>
-                            <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">CONFIRM</button>
-                        </div>
-                    `;
-                            feather.replace();
-                        } else {
-                            alert('No matching elements found site-wide for this asset.');
-                            closeModal();
-                        }
-                        return;
-                    } catch (err) {
-                        console.error('Cloud Sync Error:', err);
-                        alert(`CLOUD SYNC FAILED: ${err.message}`);
-                        closeModal();
-                        return;
-                    }
-                }
+                uploadBtn.innerText = 'UPLOADING...';
+                uploadBtn.disabled = true;
 
                 try {
-                    const response = await fetch(`${API_BASE}/api/save-section`, {
+                    const response = await fetch(`${API_BASE}/api/upload`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ page: page, section: section, data: data })
+                        body: formData
                     });
-
                     const result = await response.json();
                     if (result.success) {
-                        sessionStorage.setItem('VAATIA_LAST_EDIT', `${page} > ${section}`);
-                        body.innerHTML = `
-                    <div style="text-align: center; padding: 60px;">
-                        <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
-                        <h3 style="color: white; margin-bottom: 10px;">PROTOCOL SUCCESS</h3>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Asset deployed to ${page} > ${section}.</p>
-                        <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">CONFIRM</button>
-                    </div>
-                `;
-                        feather.replace();
+                        if (typeof loadMedia === 'function') loadMedia();
+                        if (typeof updateStats === 'function') updateStats();
+                        window.showPlacementDialogue(result.filePath);
+                        showCustomAlert('Asset uploaded successfully.', 'Upload Complete');
                     } else {
-                        alert('Sync Error: ' + result.error);
-                        closeModal();
+                        showCustomAlert('Upload failed: ' + result.error, 'Upload Error', true);
                     }
                 } catch (err) {
-                    alert('Command server unreachable.');
-                    closeModal();
+                    showCustomAlert('Command server unreachable.', 'Connection Error', true);
+                } finally {
+                    uploadBtn.innerText = '+ UPLOAD ASSET';
+                    uploadBtn.disabled = false;
                 }
             };
+            input.click();
+        });
+    }
 
-            // Initial Load
-            updateStats();
-            loadMedia();
-            loadPages();
+    // Post-Upload Placement Dialogue
+    window.showPlacementDialogue = (filePath) => {
+        const title = document.getElementById('modal-title');
+        const body = document.getElementById('modal-body');
+        const modal = document.getElementById('edit-modal');
+        if (!title || !body || !modal) return;
 
-            // Update Sync Pause Button Text
-            const pauseBtn = document.getElementById('sync-pause-btn');
-            if (pauseBtn) {
-                if (window.isSyncPaused) {
-                    pauseBtn.innerText = 'RESUME SYNC';
-                    pauseBtn.style.background = 'rgba(16, 185, 129, 0.1)';
-                    pauseBtn.style.borderColor = '#10b981';
-                    pauseBtn.style.color = '#10b981';
-                } else {
-                    pauseBtn.innerText = 'PAUSE SYNC';
-                    pauseBtn.style.background = 'rgba(248, 113, 113, 0.1)';
-                    pauseBtn.style.borderColor = '#f87171';
-                    pauseBtn.style.color = '#f87171';
-                }
-            }
-        };
+        title.innerText = 'Asset Placement';
+        body.innerHTML = `
+        <div style="text-align: center; margin-bottom: 25px;">
+            <img src="../${filePath}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 15px; border: 2px solid var(--accent-blue); margin-bottom: 10px;" class="image-fade-in">
+            <p style="color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 0.05em;">ASSET READY: SELECT LOCATION</p>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch;">
+            <button class="btn-edit active" onclick="filterPlacement('all', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">ALL</button>
+            <button class="btn-edit" onclick="filterPlacement('home', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">HOMEPAGE</button>
+            <button class="btn-edit" onclick="filterPlacement('inner', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">INTERNAL</button>
+            <button class="btn-edit" onclick="filterPlacement('global', this)" style="padding: 8px 15px; font-size: 0.65rem; white-space: nowrap;">GLOBAL</button>
+        </div>
+
+        <div class="placement-options" id="placement-grid" style="max-height: 40vh; overflow-y: auto; padding-right: 5px;">
+            <div class="placement-option" data-cat="home" onclick="applyAssetToSection('index.html', 'hero', 'image', '${filePath}')">
+                <h4>Hero Background</h4>
+                <p>Homepage > Top Section</p>
+            </div>
+            <div class="placement-option" data-cat="home" onclick="applyAssetToSection('index.html', 'mgmt', 'principal-img', '${filePath}')">
+                <h4>Principal Portrait</h4>
+                <p>Management Team</p>
+            </div>
+            <div class="placement-option" data-cat="inner" onclick="applyAssetToSection('admissions.html', 'header', 'image', '${filePath}')">
+                <h4>Admissions Header</h4>
+                <p>Admissions Page</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 25px; text-align: center; display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn-edit" onclick="closeModal()" style="width: 100%; border: 1px solid rgba(255,255,255,0.1);">DONE</button>
+        </div>
+        `;
+        modal.style.display = 'flex';
+        if (typeof feather !== 'undefined') feather.replace();
     };
+
+    window.filterPlacement = (cat, btn) => {
+        const options = document.querySelectorAll('.placement-option');
+        const buttons = btn.parentElement.querySelectorAll('button');
+
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        options.forEach(opt => {
+            if (cat === 'all' || opt.dataset.cat === cat) {
+                opt.style.display = 'block';
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+    };
+
+    window.applyAssetToSection = async (page, section, key, filePath) => {
+        const data = {};
+        data[`${section}-${key}`] = filePath;
+
+        if (window.logAdminAction) window.logAdminAction(`Placed Asset [${key}] in ${page}`);
+
+        const body = document.getElementById('modal-body');
+        body.innerHTML = `
+        <div style="text-align: center; padding: 60px;">
+            <div class="loader-circle" style="width: 40px; height: 40px; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;"></div>
+            <p style="color: var(--accent-blue); font-size: 0.7rem; letter-spacing: 0.3em; font-weight: 800; text-transform: uppercase;">
+                Syncing Changes...
+            </p>
+        </div>
+        `;
+
+        if (API_BASE === 'GITHUB_SYNC') {
+            const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
+            const ALL_PAGES = ['index.html', 'admissions.html', 'boarding.html', 'club.html', 'excursions.html', 'fees.html', 'skillsacquisition.html', 'sports.html', 'students.html', 'tuition.html'];
+
+            try {
+                let updatedCount = 0;
+                for (const targetPage of ALL_PAGES) {
+                    try {
+                        const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+                            headers: { 'Authorization': `token ${ghToken}`, 'Accept': 'application/vnd.github.v3+json' }
+                        });
+
+                        if (!getRes.ok) continue;
+                        const fileData = await getRes.json();
+                        const decodedContent = decodeURIComponent(atob(fileData.content).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+
+                        const sha = fileData.sha;
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(decodedContent, 'text/html');
+                        let pageModified = false;
+
+                        const targetId = `${section}-${key}`;
+                        const selectors = [`#${targetId}`, `#live-${targetId}`];
+
+                        selectors.forEach(selector => {
+                            doc.querySelectorAll(selector).forEach(el => {
+                                if (el.tagName === 'IMG') {
+                                    if (el.getAttribute('src') !== filePath) { el.src = filePath; pageModified = true; }
+                                } else if (el.tagName === 'A') {
+                                    if (el.getAttribute('href') !== filePath) { el.href = filePath; pageModified = true; }
+                                } else {
+                                    if (el.innerHTML !== filePath) { el.innerHTML = filePath; pageModified = true; }
+                                }
+                            });
+                        });
+
+                        if (!pageModified) continue;
+
+                        const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+                        const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+
+                        const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${targetPage}`, {
+                            method: 'PUT',
+                            headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: `admin: asset update [${filePath}]`, content: encodedContent, sha: sha })
+                        });
+
+                        if (putRes.ok) updatedCount++;
+                    } catch (err) { }
+                }
+
+                if (updatedCount > 0) {
+                    body.innerHTML = `
+                    <div style="text-align: center; padding: 60px;">
+                        <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
+                        <h3 style="color: white; margin-bottom: 10px;">SUCCESS</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Asset updated on ${updatedCount} pages.</p>
+                        <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">DONE</button>
+                    </div>
+                `;
+                    if (typeof feather !== 'undefined') feather.replace();
+                } else {
+                    alert('No matching elements found.');
+                    closeModal();
+                }
+                return;
+            } catch (err) {
+                alert(`Sync Error: ${err.message}`);
+                closeModal();
+                return;
+            }
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/api/save-section`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ page, section, data })
+            });
+            const result = await response.json();
+            if (result.success) {
+                body.innerHTML = `
+                <div style="text-align: center; padding: 60px;">
+                    <i data-feather="check-circle" style="width: 64px; height: 64px; color: #10b981; margin-bottom: 20px;"></i>
+                    <h3 style="color: white; margin-bottom: 10px;">SUCCESS</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Changes synchronized.</p>
+                    <button class="btn-premium" onclick="closeModal()" style="margin-top: 30px; width: auto; padding: 12px 40px;">DONE</button>
+                </div>
+            `;
+                if (typeof feather !== 'undefined') feather.replace();
+            } else {
+                alert('Sync Error: ' + result.error);
+                closeModal();
+            }
+        } catch (err) {
+            alert('Server unreachable.');
+            closeModal();
+        }
+    };
+
+    // Initial Load
+    updateStats();
+    loadMedia();
+    loadPages();
+
+    // Update Sync Pause Button Text
+    const pauseBtn = document.getElementById('sync-pause-btn');
+    if (pauseBtn) {
+        if (window.isSyncPaused) {
+            pauseBtn.innerText = 'RESUME SYNC';
+            pauseBtn.style.background = 'rgba(16, 185, 129, 0.1)';
+            pauseBtn.style.borderColor = '#10b981';
+            pauseBtn.style.color = '#10b981';
+        } else {
+            pauseBtn.innerText = 'PAUSE SYNC';
+            pauseBtn.style.background = 'rgba(248, 113, 113, 0.1)';
+            pauseBtn.style.borderColor = '#f87171';
+            pauseBtn.style.color = '#f87171';
+        }
+    }
 });
 
 // Logout Modal Logic
@@ -1531,30 +1111,34 @@ function confirmLogout() {
 }
 
 // --- Global Connection Settings ---
-// --- Global Connection Settings ---
 window.setupGlobalCommand = () => {
     const modal = document.getElementById('edit-modal');
     const title = document.getElementById('modal-title');
     const body = document.getElementById('modal-body');
 
     if (title && body) {
-        title.innerText = 'Command Link Setup';
+        title.innerText = 'GitHub Settings';
         body.innerHTML = `
             <div style="text-align: center;">
-                <i data-feather="globe" style="width: 48px; height: 48px; color: var(--accent-blue); margin-bottom: 20px;"></i>
+                <i data-feather="github" style="width: 48px; height: 48px; color: var(--accent-blue); margin-bottom: 20px;"></i>
                 <p style="color: var(--text-secondary); margin-bottom: 30px;">
-                    Configure the connection protocol for the Administrative Command Centre.
+                    Link your GitHub account to enable direct site-wide updates.
                 </p>
                 
                 <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px;">
-                    <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: var(--accent-blue);">GitHub Satellite Link</h3>
-                    <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Enable Universal Cloud Sync to edit from anywhere (Required for Failover).</p>
+                    <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: var(--accent-blue);">GitHub Authentication</h3>
+                    <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Enter your Personal Access Token to edit files directly on GitHub.</p>
                     
-                    <input type="password" id="gh-token-input" placeholder="Paste GitHub Personal Access Token" value="${localStorage.getItem('VAATIA_GH_TOKEN') || ''}" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 15px;">
+                    <input type="password" id="gh-token-input" placeholder="Paste GitHub Token" value="${localStorage.getItem('VAATIA_GH_TOKEN') || ''}" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 15px;">
                     
-                    <button class="btn-edit" onclick="saveGitHubToken()" style="width: 100%; justify-content: center; background: rgba(0, 242, 254, 0.1); border-color: var(--accent-blue); color: var(--accent-blue);">
-                        <i data-feather="link" style="width: 14px; height: 14px; margin-right: 8px;"></i> LINK SATELLITE
+                    <button class="btn-edit" onclick="saveGitHubToken()" style="width: 100%; justify-content: center; background: rgba(0, 242, 254, 0.1); border-color: var(--accent-blue); color: var(--accent-blue); margin-bottom: 20px;">
+                        <i data-feather="link" style="width: 14px; height: 14px; margin-right: 8px;"></i> SAVE GITHUB TOKEN
                     </button>
+
+                    <div style="display: flex; gap: 10px; flex-direction: column;">
+                         <button onclick="window.setAdminMode('github')" class="tactical-btn" style="width: 100%; background: ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)'}; color: ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? '#0c0c0c' : 'white'}; padding: 12px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; cursor: pointer;">USE DIRECT GITHUB MODE (EASY)</button>
+                         <button onclick="window.setAdminMode('local')" class="tactical-btn" style="width: 100%; background: ${localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true' && localStorage.getItem('VAATIA_FORCE_GH_MODE') !== 'true' ? '#f87171' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true' && localStorage.getItem('VAATIA_FORCE_GH_MODE') !== 'true' ? '#f87171' : 'rgba(255,255,255,0.1)'}; color: white; padding: 12px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; cursor: pointer;">USE LOCAL SERVER MODE (ADVANCED)</button>
+                    </div>
                 </div>
 
                 <div style="text-align: right;">
@@ -1563,15 +1147,29 @@ window.setupGlobalCommand = () => {
             </div>
         `;
 
-        // Helper to save token (Attached globally for onclick access)
+        window.setAdminMode = (mode) => {
+            if (mode === 'github') {
+                localStorage.setItem('VAATIA_FORCE_GH_MODE', 'true');
+                localStorage.removeItem('VAATIA_FORCE_LOCAL');
+            } else if (mode === 'local') {
+                localStorage.removeItem('VAATIA_FORCE_GH_MODE');
+                localStorage.setItem('VAATIA_FORCE_LOCAL', 'true');
+            } else {
+                localStorage.removeItem('VAATIA_FORCE_GH_MODE');
+                localStorage.removeItem('VAATIA_FORCE_LOCAL');
+            }
+            location.reload();
+        };
+
+        // Helper to save token
         window.saveGitHubToken = () => {
             const token = document.getElementById('gh-token-input').value.trim();
             if (token) {
                 localStorage.setItem('VAATIA_GH_TOKEN', token);
-                showCustomAlert('Reference: Satellite Linked! Universal Cloud Sync is now ACTIVE.', 'Link Established');
+                showCustomAlert('GitHub token linked successfully!', 'Success');
             } else {
                 localStorage.removeItem('VAATIA_GH_TOKEN');
-                showCustomAlert('Satellite Link Severed.', 'Link Terminataed', true);
+                showCustomAlert('GitHub token removed.', 'Info', true);
             }
         };
 
@@ -1678,6 +1276,6 @@ window.addEventListener('keydown', (e) => {
 
     // Shift + H: Command Help
     if (e.shiftKey && (e.key === 'H' || e.key === 'h')) {
-        alert("COMMAND RADAR HOTKEYS:\n\nShift + C: Setup Repository & Token\nShift + P: Pause/Resume Worldwide Sync\nShift + H: Display This Help Deck");
+        alert("SHORTCUTS:\n\nShift + C: GitHub Settings\nShift + P: Pause/Resume Sync\nShift + H: Display Help");
     }
 });

@@ -74,15 +74,15 @@
             <section id="overview" class="tab-content active">
                 <header class="section-header">
                     <div class="hero-header-content">
-                        <h1 class="text-gradient">Command Strategy</h1>
+                        <h1 class="text-gradient">Admin Dashboard</h1>
                         <p
                             style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.8rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-top: 10px;">
                             Vaatia College Elite Access</p>
                         <div class="strategy-btn-container"
                             style="display: flex; gap: 10px; margin-top: 15px; margin-left: 10%;">
                             <button onclick="setupGlobalCommand()"
-                                style="background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 8px 15px; border-radius: 12px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.1em; cursor: pointer;">MANAGE
-                                CONNECTION</button>
+                                style="background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 8px 15px; border-radius: 12px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.1em; cursor: pointer;">GITHUB
+                                SETTINGS</button>
                             <button id="sync-pause-btn" onclick="toggleSyncPause()"
                                 style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 8px 15px; border-radius: 12px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.1em; cursor: pointer;">PAUSE
                                 SYNC</button>
@@ -97,13 +97,13 @@
                     <div class="glass-card">
                         <div
                             style="color: var(--text-secondary); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
-                            Blueprint Assets</div>
+                            Pages</div>
                         <div class="stat-val" id="stat-pages">--</div>
                     </div>
                     <div class="glass-card">
                         <div
                             style="color: var(--text-secondary); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;">
-                            Central Media Bank</div>
+                            Media Library</div>
                         <div class="stat-val" id="stat-media">--</div>
                     </div>
                     <div class="glass-card">
@@ -123,10 +123,10 @@
 
                 <div class="glass-card" style="margin-top: 20px;">
                     <h2 style="margin-bottom: 25px; font-weight: 800;" class="text-gradient directives-title">Quick
-                        Directives</h2>
+                        Actions</h2>
                     <div class="directives-wrapper">
-                        <button class="btn-premium" onclick="switchTab('pages')">Modify Blueprint</button>
-                        <button class="btn-edit" onclick="switchTab('media')">Sync New Media</button>
+                        <button class="btn-premium" onclick="switchTab('pages')">Edit Pages</button>
+                        <button class="btn-edit" onclick="switchTab('media')">Upload Media</button>
                     </div>
                 </div>
             </section>
@@ -154,7 +154,7 @@
                         <h1 class="text-gradient">Page Manager</h1>
                         <p
                             style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.8rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-top: 10px;">
-                            Structural Management</p>
+                            Manage Pages</p>
                     </div>
                 </header>
                 <div class="page-list" id="main-page-list">
@@ -176,7 +176,7 @@
                     <p style="color: var(--text-secondary); opacity: 0.7;">Centralized control for API protocols, global
                         variables, and security keys.</p>
                     <div style="margin-top: 30px; display: grid; gap: 20px;">
-                        <button class="btn-edit" onclick="setupGlobalCommand()">Manage API Connection</button>
+                        <button class="btn-edit" onclick="setupGlobalCommand()">GitHub Settings</button>
                         <button class="btn-edit" onclick="openSettings()">Advanced Security Panel</button>
                     </div>
                 </div>

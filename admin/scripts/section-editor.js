@@ -141,7 +141,7 @@ function renderSectionEditor(page, htmlContent) {
             <div style="text-align: center; margin-top: 20px; padding: 15px; background: rgba(0, 242, 254, 0.05); border-radius: 12px; border: 1px solid rgba(0, 242, 254, 0.1);">
                 <p style="color: var(--accent-blue); font-size: 0.8rem; font-weight: 700; margin: 0;">
                     <i data-feather="zap" style="width: 12px; height: 12px; margin-right: 5px;"></i> 
-                    LIFESYNC ACTIVE: Changes will propagate to all 10 site blueprints.
+                    SITE-WIDE SYNC: Changes will update all pages.
                 </p>
             </div>
         </div>
@@ -160,11 +160,11 @@ window.saveSectionChanges = async (sectionName) => {
     const pageMatch = modalTitle?.innerText.match(/Edit Page: (\w+)/);
     const pageName = pageMatch ? pageMatch[1].toLowerCase() + '.html' : 'index.html';
 
-    console.log(`💾 Syncing ${sectionName} protocol for ${pageName}:`, values);
+    console.log(`💾 Saving changes for ${sectionName} in ${pageName}:`, values);
 
     // Log action for SuperAdmin oversight
     if (window.logAdminAction) {
-        window.logAdminAction(`Modified [${sectionName.toUpperCase()}] on ${pageName}`);
+        window.logAdminAction(`Edited [${sectionName.toUpperCase()}] on ${pageName}`);
     }
 
     // Visual feedback on button
@@ -184,14 +184,14 @@ window.saveSectionChanges = async (sectionName) => {
     // Handle Paused State
     const isPaused = localStorage.getItem('VAATIA_SYNC_PAUSED') === 'true';
     if (isPaused && API_BASE === 'GITHUB_SYNC') {
-        showCustomAlert('Protocol Interrupted: SYNC IS PAUSED. Please resume sync from the dashboard to push changes to GitHub/Vercel.', 'Sync Paused', true);
+        showCustomAlert('Sync Interrupted: SYNC IS PAUSED. Please resume sync from the dashboard to push changes to GitHub/Vercel.', 'Sync Paused', true);
         activeBtn.innerHTML = originalContent;
         activeBtn.disabled = false;
         return;
     }
 
     if (!API_BASE) {
-        showCustomAlert('Protocol Interrupted: Command server unreachable. Link your GitHub Token for Worldwide access or use Local Command Mode.', 'Connection Error', true);
+        showCustomAlert('Sync Interrupted: Command server unreachable. Link your GitHub Token for direct access or use Local Mode.', 'Connection Error', true);
         activeBtn.innerHTML = originalContent;
         activeBtn.disabled = false;
         return;
@@ -209,7 +209,7 @@ window.saveSectionChanges = async (sectionName) => {
         ];
 
         try {
-            activeBtn.innerHTML = '<span class="loader-mini"></span> GLOBAL SYNC...';
+            activeBtn.innerHTML = '<span class="loader-mini"></span> SYNCING...';
             let updatedCount = 0;
 
             for (const targetPage of ALL_PAGES) {
@@ -267,7 +267,7 @@ window.saveSectionChanges = async (sectionName) => {
 
                     if (!pageModified) continue;
 
-                    activeBtn.innerHTML = `<span class="loader-mini"></span> PUSHING ${targetPage.toUpperCase()}...`;
+                    activeBtn.innerHTML = `<span class="loader-mini"></span> UPDATING ${targetPage.toUpperCase()}...`;
                     const updatedHTML = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
 
                     const encodedContent = btoa(encodeURIComponent(updatedHTML).replace(/%([0-9A-F]{2})/g, function (match, p1) {
@@ -278,7 +278,7 @@ window.saveSectionChanges = async (sectionName) => {
                         method: 'PUT',
                         headers: { 'Authorization': `token ${ghToken}`, 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            message: `admin: universal greedy sync [${sectionName}]`,
+                            message: `admin: content update [${sectionName}]`,
                             content: encodedContent,
                             sha: sha
                         })
@@ -305,7 +305,7 @@ window.saveSectionChanges = async (sectionName) => {
                         activeBtn.style.background = 'linear-gradient(135deg, #00f2fe, #4facfe)';
 
                         setTimeout(() => {
-                            showCustomConfirm(`Universal Greedy Sync Complete! ${updatedCount} pages updated.\n\nWould you like to reload the page to verify?`, () => {
+                            showCustomConfirm(`Site update complete! ${updatedCount} pages updated.\n\nWould you like to view the live site?`, () => {
                                 window.open('../' + pageName, '_blank');
                             }, "Sync Complete");
 
@@ -369,10 +369,10 @@ window.saveSectionChanges = async (sectionName) => {
         // --- FAILSAFE: AUTO-SWITCH TO GITHUB SYNC ---
         const ghToken = localStorage.getItem('VAATIA_GH_TOKEN');
         if (ghToken) {
-            console.log('⚠️ Backend unreachable. Engaging Fail-Safe Protocol: DIRECT GITHUB SYNC.');
+            console.log('⚠️ Backend unreachable. Starting Fail-Safe Sync: DIRECT GITHUB PUSH.');
             // Inform user via button state
-            activeBtn.innerHTML = '<i data-feather="upload-cloud"></i> FAILOVER SYNC...';
-            // Short delay to let user see 'FAILOVER SYNC'
+            activeBtn.innerHTML = '<i data-feather="upload-cloud"></i> FAILOVER PUSH...';
+            // Short delay to let user see status
             setTimeout(async () => {
                 await executeGitHubSync();
             }, 500);
@@ -399,7 +399,7 @@ window.openSimplePageEditor = async (page) => {
         <div style="text-align: center; padding: 60px;">
             <div class="loader-circle" style="width: 40px; height: 40px; border: 3px solid rgba(0, 242, 254, 0.1); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;"></div>
             <p style="color: var(--accent-blue); font-size: 0.7rem; letter-spacing: 0.3em; font-weight: 800; text-transform: uppercase;">
-                Loading Sector Data...
+                Loading Page Data...
             </p>
         </div>
     `;
@@ -413,6 +413,6 @@ window.openSimplePageEditor = async (page) => {
         if (typeof feather !== 'undefined') feather.replace();
     } catch (err) {
         console.error('Sector Fetch Error:', err);
-        editorBody.innerHTML = '<p style="color: #f87171; text-align: center; padding: 40px;">CRITICAL: Failed to load sector blueprint.</p>';
+        editorBody.innerHTML = '<p style="color: #f87171; text-align: center; padding: 40px;">ERROR: Failed to load page content.</p>';
     }
 };

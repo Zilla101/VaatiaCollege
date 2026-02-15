@@ -1514,11 +1514,13 @@ section {
 }
 
 .house-grid .glass-card img {
+    position: relative;
+    opacity: 1;
+    filter: none;
     width: 100%;
     height: 220px;
     object-fit: cover;
     border-radius: 0;
-    /* Align with card top edges */
     margin-bottom: 0;
 }
 
@@ -3162,7 +3164,9 @@ footer {
     .navbar.scrolled,
     .dropdown-menu,
     .liquid-modal,
-    .stat-circle {
+    .stat-circle,
+    .fees-table th:first-child,
+    .fees-table td:first-child {
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
     }

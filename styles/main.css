@@ -3021,42 +3021,14 @@ footer {
     position: sticky;
     left: 0;
     z-index: 2;
+    /* Heavy blur to smear any text scrolling behind */
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Sticky header: same as normal th */
 .fees-table th:first-child {
     z-index: 3;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
-        rgba(64, 0, 77, 0.4);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-}
-
-/* Sticky body cells: glass card gradient on solid dark base */
-.fees-table td:first-child {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
-        var(--surface-color, #0f0f0f);
-}
-
-/* Group header sticky */
-.fees-table .table-group-header td:first-child {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
-        rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-}
-
-/* Total row sticky */
-.fees-table .table-total-row td:first-child {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
-        rgba(64, 0, 77, 0.15);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-}
-
-.fees-table .table-session-total td:first-child {
-    background: var(--accent-color);
 }
 
 /* Custom "Classy" Scrollbar for Tables */

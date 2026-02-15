@@ -33,6 +33,8 @@ body {
     margin: 0;
     padding: 0;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    /* Faster touch response */
 }
 
 html {
@@ -88,6 +90,23 @@ img {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+h1 {
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    font-size: clamp(2rem, 5vh, 3rem);
+    line-height: 1.2;
+    margin-bottom: 1.2rem;
+}
+
+h3 {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    line-height: 1.3;
 }
 
 /* Liquid Display Background */
@@ -2903,6 +2922,42 @@ footer {
     }
 }
 
+/* === TABLET OPTIMIZATIONS (768px - 1024px) === */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: 0 4rem;
+    }
+
+    .hero-content {
+        max-width: 85%;
+    }
+
+    .bento-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 1.5rem !important;
+    }
+
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 3rem;
+    }
+
+    .nav-container {
+        padding: 0 2rem;
+    }
+}
+
+/* === LARGE SCREEN REFINEMENT (1400px+) === */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1300px;
+    }
+
+    body {
+        font-size: 1.1rem;
+    }
+}
+
 /* --- Mobile Responsiveness Overhaul (Vaatia Elite Edition) --- */
 @media (max-width: 768px) {
     :root {
@@ -3028,6 +3083,39 @@ footer {
     backdrop-filter: blur(15px) saturate(180%);
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Fade zone: texts blur and fade as they approach the sticky column */
+.fees-table th:first-child::after,
+.fees-table td:first-child::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -40px;
+    /* Wider transition zone */
+    width: 40px;
+    height: 100%;
+    /* Multi-stop gradient for smoother "liquid" fade */
+    background: linear-gradient(to right,
+            rgba(5, 5, 5, 0.95) 0%,
+            rgba(5, 5, 5, 0.5) 50%,
+            transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Horizontal scroll fade mask on the table container */
+.table-responsive {
+    -webkit-mask-image: linear-gradient(to right,
+            black 0%,
+            black 25%,
+            black 90%,
+            transparent 100%);
+    mask-image: linear-gradient(to right,
+            black 0%,
+            black 25%,
+            black 90%,
+            transparent 100%);
 }
 
 /* Custom "Classy" Scrollbar for Tables */

@@ -19,15 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const animatedElements = document.querySelectorAll('.animate-on-scroll');
     animatedElements.forEach(el => observer.observe(el));
 
-    // Navbar scroll effect
+    // Navbar scroll effect (throttled for performance)
     const navbar = document.querySelector('.navbar');
+    let ticking = false;
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                ticking = false;
+            });
+            ticking = true;
         }
-    });
+    }, { passive: true });
 
     // Dropdown Blur Effect
     const dropdowns = document.querySelectorAll('.dropdown');

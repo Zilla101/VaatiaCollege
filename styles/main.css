@@ -107,10 +107,12 @@ img {
     width: 600px;
     height: 600px;
     background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
-    filter: blur(120px);
+    filter: blur(80px);
     border-radius: 50%;
-    opacity: 0.4;
+    opacity: 0.35;
     animation: move-blob 20s infinite alternate;
+    will-change: transform;
+    contain: layout style;
 }
 
 .blob-1 {
@@ -172,7 +174,7 @@ img {
     width: 200%;
     height: 200%;
     background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
-    animation: pulse-glow 10s infinite alternate;
+    animation: pulse-glow 10s 1 alternate;
 }
 
 .hero-content {
@@ -455,8 +457,8 @@ img {
 .navbar.scrolled {
     background-color: rgba(255, 255, 255, 0.05);
     /* Liquid Glass transparency */
-    backdrop-filter: blur(25px) saturate(200%);
-    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     padding: 15px 0;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -591,8 +593,8 @@ img {
     min-width: 220px;
     background: rgba(255, 255, 255, 0.05);
     /* Very transparent */
-    backdrop-filter: blur(50px) saturate(200%);
-    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
     padding: 0.75rem 0;
@@ -985,8 +987,8 @@ body.dropdown-active footer {
 .liquid-modal {
     background: rgba(255, 255, 255, 0.05);
     /* Very transparent */
-    backdrop-filter: blur(50px) saturate(200%);
-    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 40px;
     padding: 3rem;
@@ -1106,8 +1108,8 @@ section {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 30px;
     padding: 3rem;
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
 }
@@ -1189,8 +1191,8 @@ section {
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5),
@@ -1248,8 +1250,8 @@ section {
 
 .stat-item {
     background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     padding: 2.5rem 1.5rem;
     border-radius: 30px;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1314,8 +1316,8 @@ section {
     width: 220px;
     height: 220px;
     background: linear-gradient(165deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.01) 100%);
-    backdrop-filter: blur(60px) saturate(250%);
-    -webkit-backdrop-filter: blur(60px) saturate(250%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-bottom-color: rgba(255, 255, 255, 0.1);
     border-right-color: rgba(255, 255, 255, 0.1);
@@ -1925,8 +1927,8 @@ section {
     padding: 3rem;
     border-radius: 35px;
     background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(40px) saturate(250%);
-    -webkit-backdrop-filter: blur(40px) saturate(250%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     flex-direction: column;
@@ -1988,8 +1990,8 @@ section {
     background-color: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -2501,8 +2503,8 @@ footer {
     margin-left: auto;
     margin-right: auto;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -3021,14 +3023,11 @@ footer {
     position: sticky;
     left: 0;
     z-index: 2;
-    /* Heavy blur to smear any text scrolling behind */
-    backdrop-filter: blur(50px) saturate(200%);
-    -webkit-backdrop-filter: blur(50px) saturate(200%);
+    /* Match the navbar scrolled style: semi-transparent glass */
+    background-color: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.fees-table th:first-child {
-    z-index: 3;
 }
 
 /* Custom "Classy" Scrollbar for Tables */
@@ -3066,4 +3065,26 @@ footer {
 .glass-card {
     background-color: transparent !important;
     /* Reset potential white patches */
+}
+
+/* === MOBILE PERFORMANCE OVERRIDE === */
+@media (max-width: 768px) {
+
+    .glass-card,
+    .navbar.scrolled,
+    .dropdown-menu,
+    .liquid-modal,
+    .stat-circle {
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+    }
+
+    .blob {
+        filter: blur(60px);
+        opacity: 0.25;
+    }
+
+    .hero::before {
+        animation: none;
+    }
 }

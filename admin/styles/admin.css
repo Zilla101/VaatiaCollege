@@ -1562,4 +1562,3 @@ body::after {
     transform: translateY(0);
     animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-}

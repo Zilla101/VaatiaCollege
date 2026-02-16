@@ -348,7 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const sync = async () => {
                 try {
                     const endpoint = window.getRadarEndpoint();
-
                     const res = await fetch(endpoint, {
                         method: 'POST',
                         credentials: 'include',
@@ -357,6 +356,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({
                             username,
                             role: (role || '').trim(),
+                            device: navigator.userAgent,
+                            platform: navigator.platform,
+                            touchPoints: navigator.maxTouchPoints || 0,
+                            screen: `${window.screen.width}x${window.screen.height}`,
+                            loginTime: sessionStorage.getItem('VAATIA_LOGIN_TIME'),
+                            lastEdit: sessionStorage.getItem('VAATIA_LAST_EDIT') || 'Passive Monitoring',
                             timestamp: new Date().toISOString()
                         })
                     });
@@ -367,12 +372,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             localStorage.setItem('VAATIA_BLOCKED', 'true');
                             showSecurityOverlay();
                         } else if (data.killed) {
-                            alert('Session terminated for security reasons.');
+                            alert('🚨 SESSION TERMINATED\nA Super Admin has ended your session for security reasons.');
                             confirmLogout();
                         }
                     } else if (res.ok) {
                         const data = await res.json();
-                        if (role.toLowerCase().includes('super')) {
+                        if (role.includes('Super')) {
+                            // Super Admin never gets locked
                             hideSecurityOverlay();
                         } else if (data.adminAccessBlocked === true) {
                             localStorage.setItem('VAATIA_BLOCKED', 'true');
@@ -385,10 +391,351 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (err) { }
             };
             sync();
-            setInterval(sync, 10000); // Increased interval to 10s for simplicity
+            setInterval(sync, 5000); // 5s Sync Interval
         };
 
         startSessionSync();
+
+        // 3. Super Admin Specific Features
+        if (role === 'Super Admin') {
+            renderCommandDeck();
+        }
+    };
+
+    function renderCommandDeck() {
+        const consolePoint = document.getElementById('super-admin-console');
+        if (!consolePoint) return;
+
+        const deckHTML = `
+            <div class="glass-card" style="margin-top: 20px; border-left: 4px solid var(--accent-blue); animation: slideInUp 0.5s ease-out; align-items: stretch; text-align: left; padding: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+                    <div>
+                        <h2 class="text-gradient" style="font-weight: 800; margin: 0;">Command Radar</h2>
+                        <p style="font-size: 0.6rem; color: var(--text-secondary); margin-top: 4px; opacity: 0.7; letter-spacing: 0.2rem;">REAL-TIME SESSION MONITORING</p>
+                        <div id="tactical-link-status" style="margin-top: 8px; font-size: 0.5rem; color: var(--accent-blue); opacity: 0.8; font-family: monospace; display: flex; align-items: center; gap: 5px; background: rgba(0, 242, 254, 0.05); padding: 4px 8px; border-radius: 4px; width: fit-content;">
+                            <i data-feather="activity" style="width: 10px; height: 10px;"></i>
+                            LINK: INITIALIZING...
+                        </div>
+                    </div>
+                    <div class="radar-action-stack" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end;">
+                        <button onclick="window.pulseRadar()" class="pulse-btn tactical-btn" style="background: rgba(0, 242, 254, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 8px 16px; border-radius: 10px; font-size: 0.65rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; text-transform: uppercase;">
+                            <i data-feather="zap" style="width: 14px; height: 14px;"></i>
+                            SEND PING
+                        </button>
+                        <button onclick="window.setupGlobalCommand()" class="tactical-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 8px 12px; border-radius: 10px; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;">
+                            <i data-feather="settings" style="width: 14px; height: 14px;"></i>
+                            SETUP
+                        </button>
+                        <button id="access-toggle-btn" onclick="toggleAdminAccess()" class="tactical-btn" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 8px 20px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; cursor: pointer; letter-spacing: 0.1em; transition: 0.3s;">INITIALIZING...</button>
+                        <div style="display: flex; gap: 5px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                            <button onclick="window.setServerMode('online')" style="background: ${!localStorage.getItem('VAATIA_FORCE_LOCAL') ? 'var(--accent-blue)' : 'transparent'}; border: none; color: ${!localStorage.getItem('VAATIA_FORCE_LOCAL') ? '#0c0c0c' : 'rgba(255,255,255,0.4)'}; padding: 6px 10px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Online</button>
+                            <button onclick="window.setServerMode('local')" style="background: ${localStorage.getItem('VAATIA_FORCE_LOCAL') ? '#f87171' : 'transparent'}; border: none; color: ${localStorage.getItem('VAATIA_FORCE_LOCAL') ? 'white' : 'rgba(255,255,255,0.4)'}; padding: 6px 10px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Local</button>
+                        </div>
+                        <div class="active-status-badge" style="display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(0, 0, 0, 0.2); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div class="pulse-dot" style="width: 8px; height: 8px; background: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 10px var(--accent-blue);"></div>
+                            <span style="font-size: 0.6rem; color: var(--accent-blue); letter-spacing: 0.15em; font-weight: 800; text-transform: uppercase;">Active Protocols</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="command-radar-grid">
+                    <div>
+                        <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">ACTIVE SESSIONS</p>
+                        <div id="online-users-list" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="text-align: center; padding: 20px; opacity: 0.5;">
+                                <div class="loader-circle" style="width: 20px; height: 20px; border: 2px solid var(--accent-blue); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <p style="font-size: 0.65rem; font-weight: 800; color: var(--text-secondary); margin-bottom: 15px; opacity: 0.6;">LIVE ACTION LOG</p>
+                        <div id="action-log-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
+                            <p style="font-size: 0.6rem; text-align: center; opacity: 0.5; padding: 20px;">WAITING FOR DATA...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                .pulse-dot { animation: pulse 2s infinite; }
+                @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+                #action-log-list::-webkit-scrollbar { width: 3px; }
+                #action-log-list::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 10px; }
+                .tactical-btn:active { transform: scale(0.95); opacity: 0.8; }
+                .tactical-btn:hover { filter: brightness(1.2); }
+                
+                @media (max-width: 1024px) {
+                    .command-radar-grid { grid-template-columns: 1fr !important; gap: 30px !important; }
+                    .glass-card { padding: 20px !important; }
+                    .radar-action-stack { margin-top: 20px; width: 100%; }
+                    .strategy-btn-container { margin-left: 0% !important; margin-top: 25px !important; }
+                }
+                @media (max-width: 768px) {
+                    .text-gradient { font-size: 1.4rem !important; }
+                    .tactical-btn { width: 100%; flex: 1; min-width: 140px; }
+                    .radar-action-stack { justify-content: center !important; }
+                    .active-status-badge { width: 100%; justify-content: center; }
+                }
+            </style>
+        `;
+
+        consolePoint.innerHTML = deckHTML;
+
+        const updateOnlineList = async () => {
+            try {
+                const endpoint = window.getRadarEndpoint();
+                const statusLabel = document.getElementById('tactical-link-status');
+                if (statusLabel) {
+                    statusLabel.innerHTML = `<i data-feather="activity" style="width: 10px; height: 10px;"></i> LINK: <span style="color:white; opacity: 0.6;">${endpoint}</span> | ${new Date().toLocaleTimeString()}`;
+                    if (typeof feather !== 'undefined') feather.replace();
+                }
+
+                const res = await fetch(endpoint, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    credentials: 'include',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const list = document.getElementById('online-users-list');
+
+                // Update Access Control toggle state
+                window.adminAccessBlocked = data.adminAccessBlocked;
+                const toggleBtn = document.getElementById('access-toggle-btn');
+                if (toggleBtn) {
+                    if (data.adminAccessBlocked) {
+                        toggleBtn.innerText = 'RESTORE ADMIN ACCESS';
+                        toggleBtn.style.background = 'rgba(16, 185, 129, 0.1)';
+                        toggleBtn.style.color = '#10b981';
+                        toggleBtn.style.borderColor = '#10b981';
+                    } else {
+                        toggleBtn.innerText = 'DENY ADMIN ACCESS';
+                        toggleBtn.style.background = 'rgba(248, 113, 113, 0.1)';
+                        toggleBtn.style.color = '#f87171';
+                        toggleBtn.style.borderColor = '#f87171';
+                    }
+                }
+
+                if (data.success && list) {
+                    const actionList = document.getElementById('action-log-list');
+
+                    if (!data.users || data.users.length === 0) {
+                        list.innerHTML = '<p style="color: var(--text-secondary); opacity: 0.5; padding: 20px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px;">No other active sessions detected.</p>';
+                        return; // Exit early if no users
+                    }
+
+                    // TACTICAL SORT: Active users first, then offline users
+                    const sortedUsers = [...data.users].sort((a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0));
+
+                    // Render Action Log if available
+                    if (actionList && data.actions) {
+                        if (data.actions.length === 0) {
+                            actionList.innerHTML = '<p style="font-size: 0.6rem; opacity: 0.5; text-align: center; padding: 10px;">NO RECENT EDITS.</p>';
+                        } else {
+                            actionList.innerHTML = data.actions.map(a => `
+                                <div style="font-size: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; margin-bottom: 5px;">
+                                    <span style="color: var(--accent-blue); font-weight: 800;">${a.username}</span> 
+                                    <span style="color: white; opacity: 0.8;">${a.action}</span>
+                                    <div style="color: var(--text-secondary); opacity: 0.5; font-size: 0.5rem; margin-top: 2px;">${new Date(a.timestamp).toLocaleTimeString()}</div>
+                                </div>
+                            `).join('');
+                        }
+                    }
+
+                    list.innerHTML = sortedUsers.map(u => {
+                        const isActive = u.isActive; // Use server-side state to avoid clock drift issues
+                        const currentUser = (sessionStorage.getItem('VAATIA_USER') || '').toLowerCase();
+
+                        let statusText = isActive ? 'ACTIVE NOW' : 'OFFLINE';
+                        if (!isActive && u.timestamp) {
+                            const ts = typeof u.timestamp === 'number' ? u.timestamp : new Date(u.timestamp).getTime();
+                            const diffSec = Math.floor((Date.now() - ts) / 1000);
+                            const diffMin = Math.floor(diffSec / 60);
+                            statusText = diffMin > 0 ? `OFFLINE (${diffMin}m ago)` : `OFFLINE`;
+                        }
+
+                        return `
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid ${isActive ? 'rgba(0, 242, 254, 0.2)' : 'rgba(255,255,255,0.05)'}; border-radius: 16px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 42px; height: 42px; background: ${u.role.includes('Super') ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)'}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a0a; font-size: 1rem; position: relative; box-shadow: ${u.role.includes('Super') ? '0 0 15px rgba(0, 242, 254, 0.3)' : 'none'};">
+                                        ${u.username[0].toUpperCase()}
+                                        ${isActive ? '<div style="position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #10b981; border-radius: 50%; border: 2px solid #0a0b1e; box-shadow: 0 0 5px #10b981;"></div>' : ''}
+                                    </div>
+                                    <div>
+                                        <div style="color: white; font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 6px;">
+                                            ${u.username}
+                                            <span style="font-size: 0.55rem; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: var(--text-secondary); font-weight: 400;">${u.role}</span>
+                                        </div>
+                                        <div style="color: ${isActive ? '#10b981' : 'var(--text-secondary)'}; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;">
+                                            ${statusText}
+                                        </div>
+                                    </div>
+                                </div>
+                                ${u.username.toLowerCase() !== currentUser && !u.role.includes('Super') ? `
+                                    <button onclick="terminateSession('${u.username}')" style="background: rgba(248, 113, 113, 0.1); border: 1px solid #f87171; color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 0.55rem; font-weight: 900; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.05em;">Eject</button>
+                                ` : ''}
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Network IP</span>
+                                    <span style="font-family: 'Courier New', monospace; font-size: 0.65rem; color: var(--accent-blue);">${u.ip || 'Unknown'}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Login Time</span>
+                                    <span style="font-size: 0.65rem; color: white;">${u.loginTime || 'N/A'}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Device</span>
+                                    <span style="font-size: 0.6rem; color: #a78bfa; font-weight: 600;">${u.device || 'Unknown'}</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <span style="font-size: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em;">Last Activity</span>
+                                    <span style="font-size: 0.6rem; color: #10b981; font-weight: 600;">${u.lastEdit || u.lastAction || 'Idle'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `}).join('');
+                }
+                if (typeof feather !== 'undefined') feather.replace();
+            } catch (err) {
+                const list = document.getElementById('online-users-list');
+                if (list) {
+                    list.innerHTML = `
+                        <div style="text-align: center; padding: 40px; background: rgba(248, 113, 113, 0.05); border: 1px solid rgba(248, 113, 113, 0.2); border-radius: 20px;">
+                            <i data-feather="wifi-off" style="width: 32px; height: 32px; color: #f87171; margin-bottom: 15px;"></i>
+                            <div style="color: #f87171; font-weight: 800; font-size: 0.7rem; letter-spacing: 0.1em; margin-bottom: 15px;">COMMAND LINK OFFLINE</div>
+                            <p style="color: var(--text-secondary); font-size: 0.55rem; line-height: 1.6; margin-bottom: 25px;">
+                                THE BROWSER CANNOT ESTABLISH THE TACTICAL LINK.<br>
+                                <span style="color: white; opacity: 0.9;">ERROR: ${err.message.toUpperCase()}</span><br>
+                                <span style="opacity: 0.5; font-size: 0.5rem;">FREQUENCY: ${endpoint || 'UNKNOWN'}</span>
+                            </p>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <button onclick="updateOnlineList()" style="background: var(--accent-blue); border: none; color: #0a0b1e; padding: 10px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; cursor: pointer; text-transform: uppercase;">Retry Connection</button>
+                                <button onclick="setupGlobalCommand()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 8px; border-radius: 8px; font-size: 0.6rem; cursor: pointer;">Update Setup (Shift+C)</button>
+                                <button onclick="localStorage.removeItem('VAATIA_GH_TOKEN'); localStorage.removeItem('VAATIA_PUBLIC_API'); location.reload();" style="background: none; border: none; color: var(--text-secondary); font-size: 0.5rem; text-decoration: underline; cursor: pointer; margin-top: 10px;">Force Tactical Reset (Local Mode)</button>
+                            </div>
+                        </div>
+                    `;
+                    if (typeof feather !== 'undefined') feather.replace();
+                }
+                console.error('[RADAR] CRITICAL CONNECTION FAILURE:', err);
+            }
+        };
+
+        window.terminateSession = async (targetUser) => {
+            const initiator = sessionStorage.getItem('VAATIA_USER');
+            if (!confirm(`🚨 PROTOCOL INITIATED: Are you sure you want to FORCE TERMINATE ${targetUser.toUpperCase()}?`)) return;
+
+            try {
+                const endpoint = window.getRadarEndpoint();
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    credentials: 'include',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ targetUser, initiator })
+                });
+
+                if (res.ok) {
+                    alert(`SUCCESS: Session for ${targetUser} has been terminated.`);
+                    if (typeof updateOnlineList === 'function') updateOnlineList();
+                }
+            } catch (err) {
+                alert('CRITICAL ERROR: Failed to execute termination protocol.');
+            }
+        };
+
+        window.toggleAdminAccess = async () => {
+            const btn = document.getElementById('access-toggle-btn');
+            const currentUser = sessionStorage.getItem('VAATIA_USER');
+
+            // 1. OPTIMISTIC UPDATE (INSTANT)
+            const previousState = window.adminAccessBlocked;
+            const newState = !previousState;
+            window.adminAccessBlocked = newState; // Commit to local state
+
+            if (btn) {
+                btn.innerText = 'UPDATING PROTOCOL...';
+                // Immediately calculate expected visual state
+                if (newState) {
+                    btn.innerText = 'RESTORE ADMIN ACCESS';
+                    btn.style.background = 'rgba(16, 185, 129, 0.1)';
+                    btn.style.color = '#10b981';
+                    btn.style.borderColor = '#10b981';
+                } else {
+                    btn.innerText = 'DENY ADMIN ACCESS';
+                    btn.style.background = 'rgba(248, 113, 113, 0.1)';
+                    btn.style.color = '#f87171';
+                    btn.style.borderColor = '#f87171';
+                }
+            }
+
+            try {
+                const endpoint = window.getRadarEndpoint();
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        toggleAccess: newState, // Send new state
+                        initiator: currentUser
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    // Confirm server state matches our optimistic state
+                    if (data.adminAccessBlocked !== newState) {
+                        // Revert if server disagrees (Rare)
+                        window.adminAccessBlocked = data.adminAccessBlocked;
+                        revertButtonVisual(data.adminAccessBlocked);
+                    }
+                    if (typeof updateOnlineList === 'function') await updateOnlineList();
+                } else {
+                    throw new Error('Server rejected toggle');
+                }
+            } catch (err) {
+                console.error('Failed to update access state:', err);
+                // Revert on Error
+                window.adminAccessBlocked = previousState;
+                revertButtonVisual(previousState);
+                if (btn) btn.innerText = 'COMMAND FAILED';
+            }
+        };
+
+        function revertButtonVisual(state) {
+            const btn = document.getElementById('access-toggle-btn');
+            if (btn) {
+                if (state) {
+                    btn.innerText = 'RESTORE ADMIN ACCESS';
+                    btn.style.background = 'rgba(16, 185, 129, 0.1)';
+                    btn.style.color = '#10b981';
+                    btn.style.borderColor = '#10b981';
+                } else {
+                    btn.innerText = 'DENY ADMIN ACCESS';
+                    btn.style.background = 'rgba(248, 113, 113, 0.1)';
+                    btn.style.color = '#f87171';
+                    btn.style.borderColor = '#f87171';
+                }
+            }
+        }
+
+        window.pulseRadar = () => {
+            console.log('[RADAR] Manual Pulse Requested');
+            const btn = document.querySelector('.pulse-btn');
+            if (btn) {
+                btn.style.borderColor = 'white';
+                setTimeout(() => btn.style.borderColor = 'var(--accent-blue)', 500);
+            }
+            updateOnlineList();
+        };
+
+        updateOnlineList();
+        setInterval(updateOnlineList, 10000); // Pulse: 10s for ASAP tactical updates
     };
 
 
@@ -1276,6 +1623,6 @@ window.addEventListener('keydown', (e) => {
 
     // Shift + H: Command Help
     if (e.shiftKey && (e.key === 'H' || e.key === 'h')) {
-        alert("SHORTCUTS:\n\nShift + C: GitHub Settings\nShift + P: Pause/Resume Sync\nShift + H: Display Help");
+        alert("COMMAND RADAR HOTKEYS:\n\nShift + C: Setup Repository & Token\nShift + P: Pause/Resume Worldwide Sync\nShift + H: Display This Help Deck");
     }
 });

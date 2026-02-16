@@ -4,18 +4,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Scroll Observer for Fade Up Animations
     const observerOptions = {
         threshold: 0.1,
-        rootMargin: "0px 0px -50px 0px" // Trigger slightly before element is in view
+        rootMargin: "0px 0px -100px 0px" // Trigger slightly before element is in view for better perceived performance
     };
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-                observer.unobserve(entry.target); // Only animate once
+                observer.unobserve(entry.target); // Stop observing once visible
             }
         });
     }, observerOptions);
 
+    // Efficiently observe all elements flagged for scroll animation
     const animatedElements = document.querySelectorAll('.animate-on-scroll');
     animatedElements.forEach(el => observer.observe(el));
 

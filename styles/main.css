@@ -130,7 +130,7 @@ h3 {
     border-radius: 50%;
     opacity: 0.35;
     animation: move-blob 20s infinite alternate;
-    will-change: transform;
+    will-change: transform, opacity;
     contain: layout style;
 }
 
@@ -1059,6 +1059,7 @@ body.dropdown-active footer {
     opacity: 0;
     transform: translateY(30px);
     transition: all 0.8s var(--transition-slow);
+    will-change: transform, opacity;
 }
 
 .animate-on-scroll.visible {
@@ -1131,6 +1132,7 @@ section {
     -webkit-backdrop-filter: blur(15px) saturate(180%);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+    will-change: transform, box-shadow;
 }
 
 .glass-card img {
@@ -1141,7 +1143,7 @@ section {
     height: 100%;
     object-fit: cover;
     /* Ensure it fills the frame */
-    opacity: 0;
+    opacity: 1;
     filter: blur(2px) brightness(0.4);
     /* Reduced blur for slightly clearer image while keeping depth */
     transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);

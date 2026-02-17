@@ -293,6 +293,8 @@ h3 {
     position: relative;
     z-index: 20;
     margin-top: 2rem;
+    margin-bottom: -30px;
+    /* Push following elements upwards by 30px */
     animation: fade-up 1s var(--transition-slow) 0.4s forwards;
 }
 

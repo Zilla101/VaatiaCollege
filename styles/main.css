@@ -231,16 +231,16 @@ h3 {
     z-index: 10;
     text-align: center;
     max-width: 1000px;
-    padding-top: 96px;
-    /* Reduced by 20% from 120px */
+    padding-top: 84px;
+    /* Reduced by 30% from 120px */
 }
 
 .hero h1 {
-    font-size: 4.4rem;
-    /* Reduced by 20% from 5.5rem */
+    font-size: 3.85rem;
+    /* Reduced by 30% from 5.5rem */
     line-height: 1.1;
     font-weight: 800;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.4rem;
     /* Adjusted margin */
     background: linear-gradient(135deg, #ffffff 0%, #3b82f6 50%, #8b5cf6 100%);
     -webkit-background-clip: text;
@@ -266,13 +266,13 @@ h3 {
 }
 
 .hero p {
-    font-size: 1.28rem;
-    /* Reduced by 20% from 1.6rem */
+    font-size: 1.12rem;
+    /* Reduced by 30% from 1.6rem */
     color: #ffffff;
-    margin-top: 1.5rem;
+    margin-top: 1.4rem;
     /* Adjusted margin */
-    margin-bottom: 2.8rem;
-    /* Reduced by 20% from 3.5rem */
+    margin-bottom: 2.45rem;
+    /* Reduced by 30% from 3.5rem */
     font-weight: 500;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     opacity: 0.95;
@@ -295,12 +295,12 @@ h3 {
 }
 
 .btn {
-    padding: 0.96rem 2.24rem;
-    /* Reduced by 20% */
+    padding: 0.84rem 1.96rem;
+    /* Reduced by 30% */
     border-radius: 50px;
     font-weight: 700;
-    font-size: 0.88rem;
-    /* Reduced by 20% */
+    font-size: 0.77rem;
+    /* Reduced by 30% */
     cursor: pointer;
     transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     border: 1px solid transparent;
@@ -363,8 +363,8 @@ h3 {
     }
 
     .hero h1 {
-        font-size: 2.8rem;
-        /* Reduced by 20% from 3.5rem */
+        font-size: 2.45rem;
+        /* Reduced by 30% from 3.5rem */
         word-wrap: break-word;
     }
 
@@ -401,15 +401,15 @@ h3 {
     }
 
     .hero h1 {
-        font-size: 2.56rem;
-        /* Reduced by 20% from 3.2rem */
-        margin-bottom: 1rem;
+        font-size: 2.24rem;
+        /* Reduced by 30% from 3.2rem */
+        margin-bottom: 0.84rem;
         /* Adjusted margin */
     }
 
     .hero p {
-        font-size: 0.92rem;
-        /* Reduced by 20% from 1.15rem */
+        font-size: 0.8rem;
+        /* Reduced by 30% from 1.15rem */
         max-width: 90%;
         margin: 0 auto;
     }

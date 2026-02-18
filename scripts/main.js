@@ -151,7 +151,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const viewport = carousel.querySelector('.carousel-viewport');
             const indicatorsContainer = carousel.querySelector('.carousel-indicators');
             let currentSlide = 0;
-            const interval = parseInt(carousel.dataset.interval) || 6000;
+            const intervalDuration = parseInt(carousel.dataset.interval) || 6000;
+            let slideInterval;
+            let isAnimating = false; // Debounce flag
 
             // Bulk Load and Shuffle for House Gallery
             if (carousel.classList.contains('house-gallery')) {
@@ -177,7 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (indicatorsContainer) {
                         const dot = document.createElement('div');
                         dot.className = 'indicator' + (i === 0 ? ' active' : '');
-                        dot.addEventListener('click', () => updateCarousel(i));
+                        dot.addEventListener('click', () => {
+                            if (!isAnimating && currentSlide !== i) updateCarousel(i);
+                        });
                         indicatorsContainer.appendChild(dot);
                     }
                 });
@@ -187,14 +191,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const indicators = carousel.querySelectorAll('.indicator');
 
             function updateCarousel(index) {
+                if (isAnimating) return; // Prevent interaction during animation
+                isAnimating = true;
+
                 slides.forEach((slide, i) => {
                     slide.classList.toggle('active', i === index);
 
-                    // Handle 3D Stacked Classes (prev/next) for Cinematic Sliders
                     if (carousel.classList.contains('slideshow-hero')) {
                         const n = slides.length;
-                        slide.classList.toggle('prev', i === (index - 1 + n) % n);
-                        slide.classList.toggle('next', i === (index + 1) % n);
+                        slide.classList.remove('prev', 'next'); // Clean up first
+
+                        // Calculate positions
+                        if (i === (index - 1 + n) % n) slide.classList.add('prev');
+                        if (i === (index + 1) % n) slide.classList.add('next');
                     }
                 });
                 indicators.forEach((ind, i) => ind.classList.toggle('active', i === index));
@@ -212,48 +221,94 @@ document.addEventListener('DOMContentLoaded', () => {
                         activeImg.complete ? adjustHeight() : activeImg.addEventListener('load', adjustHeight, { once: true });
                     }
                 }
+
                 currentSlide = index;
+
+                // Unlock after transition
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 800); // Matches CSS transition duration
             }
 
             function nextSlide() {
+                if (isAnimating) return;
                 let next = (currentSlide + 1) % slides.length;
                 updateCarousel(next);
             }
 
+            function startInterval() {
+                if (slideInterval) clearInterval(slideInterval);
+                slideInterval = setInterval(() => {
+                    // Only auto-advance if not currently animating (though updateCarousel checks too)
+                    if (!isAnimating) nextSlide();
+                }, intervalDuration);
+            }
+
+            function stopInterval() {
+                if (slideInterval) clearInterval(slideInterval);
+            }
+
             indicators.forEach((ind, index) => {
                 ind.addEventListener('click', () => {
-                    updateCarousel(index);
+                    if (!isAnimating && currentSlide !== index) updateCarousel(index);
                 });
             });
 
-            // Touch Gestures for Mobile
+            const prevBtn = carousel.querySelector('.control-btn.prev');
+            const nextBtn = carousel.querySelector('.control-btn.next');
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (isAnimating) return;
+                    let prev = (currentSlide - 1 + slides.length) % slides.length;
+                    updateCarousel(prev);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (isAnimating) return;
+                    nextSlide();
+                });
+            }
+
+            // Touch Logic
             let touchStartX = 0;
             let touchEndX = 0;
 
             if (viewport) {
                 viewport.addEventListener('touchstart', e => {
                     touchStartX = e.changedTouches[0].screenX;
+                    stopInterval(); // Pause on touch
                 }, { passive: true });
 
                 viewport.addEventListener('touchend', e => {
                     touchEndX = e.changedTouches[0].screenX;
                     handleGesture();
+                    startInterval(); // Resume
                 }, { passive: true });
 
                 function handleGesture() {
-                    const threshold = 50; // pixels
+                    if (isAnimating) return;
+                    const threshold = 50;
                     if (touchEndX < touchStartX - threshold) {
-                        nextSlide(); // Swipe Left -> Next
+                        nextSlide();
                     }
                     if (touchEndX > touchStartX + threshold) {
                         let prev = (currentSlide - 1 + slides.length) % slides.length;
-                        updateCarousel(prev); // Swipe Right -> Prev
+                        updateCarousel(prev);
                     }
                 }
             }
 
+            // Pause on Hover
+            carousel.addEventListener('mouseenter', stopInterval);
+            carousel.addEventListener('mouseleave', startInterval);
+
             updateCarousel(0);
-            setInterval(nextSlide, interval);
+            startInterval(); // Start auto-scroll
         });
     }
 

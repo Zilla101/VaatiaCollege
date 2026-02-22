@@ -313,10 +313,10 @@ h3 {
     letter-spacing: 0.05em;
 }
 
-/* Hero buttons — 30% larger than base */
+/* Hero buttons — 56% larger than base (30% + 20%) */
 .hero .btn {
-    padding: 0.65rem 1.625rem;
-    font-size: 0.78rem;
+    padding: 0.78rem 1.95rem;
+    font-size: 0.936rem;
     letter-spacing: 0.07em;
 }
 
@@ -445,14 +445,14 @@ h3 {
         width: 100%;
     }
 
-    /* Hero buttons — 30% larger on mobile too */
+    /* Hero buttons — 56% larger on mobile too */
     .hero .btn {
-        padding: 0.78rem 1.56rem;
-        font-size: 0.845rem;
+        padding: 0.936rem 1.872rem;
+        font-size: 1rem;
     }
 
     .hero .btn-group {
-        max-width: 300px;
+        max-width: 320px;
     }
 }
 

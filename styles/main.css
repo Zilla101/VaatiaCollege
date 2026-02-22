@@ -176,16 +176,6 @@ h3 {
     }
 }
 
-/* Hero Section */
-.hero {
-    position: relative;
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050505 100%);
-}
 
 .hero::before {
     content: '';
@@ -196,12 +186,6 @@ h3 {
     animation: pulse-glow 10s 1 alternate;
 }
 
-.hero-content {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    max-width: 900px;
-}
 
 .hero {
     position: relative;
@@ -242,8 +226,8 @@ h3 {
     /* Reduced by 30% from 3.85rem */
     line-height: 1.1;
     font-weight: 800;
-    margin-bottom: 1.4rem;
-    /* Adjusted from 2rem proportional to size */
+    margin-bottom: 1.2rem;
+    /* Reduced from 1.4rem for tighter spacing */
     background: linear-gradient(135deg, #ffffff 0%, #3b82f6 50%, #8b5cf6 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -251,6 +235,18 @@ h3 {
     background-size: 200% auto;
     animation: liquid-gradient 8s ease infinite;
     text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+}
+
+.hero-skills {
+    background: url('../Media Content/SKILLS ACQUISITION/SKILLS ACQUISITION/EYZ09724.jpg') no-repeat center center/cover !important;
+}
+
+.hero-students {
+    background: url('../Media Content/ACADEMICS/ACADEMIC PHOTOS/EYZ09145.jpg') no-repeat center center/cover !important;
+}
+
+.hero-boarding {
+    background: url('../Media Content/BOARDING/IMG_0948.JPG') no-repeat center center/cover !important;
 }
 
 @keyframes liquid-gradient {
@@ -281,18 +277,26 @@ h3 {
 }
 
 /* Buttons */
+.btn-row {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
 .btn-group {
     display: flex;
-    gap: 1.5rem;
+    gap: 1.2rem;
+    /* Consistently tighter spacing */
     justify-content: center;
     flex-wrap: wrap;
     opacity: 1 !important;
-    /* Force visibility */
     transform: none !important;
-    /* Reset transform to ensure it is not hidden */
     position: relative;
     z-index: 20;
-    margin-top: 2rem;
+    margin-top: 1.8rem;
+    /* Reduced from 2rem */
     animation: fade-up 1s var(--transition-slow) 0.4s forwards;
 }
 

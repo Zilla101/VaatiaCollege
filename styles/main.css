@@ -1443,8 +1443,9 @@ section {
     .stat-circle svg .progress-ring__background {
         r: 90;
         /* Inner orbit */
-        stroke-width: 8;
-        stroke: rgba(255, 255, 255, 0.1);
+        stroke-width: 0;
+        stroke: transparent;
+        fill: transparent;
     }
 
     /* Ultra-Compact Typography for Perfect Fit */
@@ -2047,7 +2048,7 @@ section {
 
 .slideshow-hero .carousel-indicators {
     position: absolute;
-    bottom: 30px;
+    bottom: -40px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -2334,11 +2335,11 @@ section {
     position: relative;
     border-radius: 32px;
     overflow: hidden;
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: transparent;
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -2411,25 +2412,13 @@ section {
     z-index: 1;
 }
 
-/* Abstract Gradients for placeholders */
-.bg-1 {
-    background: linear-gradient(45deg, #FF6B6B, #556270);
-}
-
-.bg-2 {
-    background: linear-gradient(to right, #8e44ad, #3498db);
-}
-
-.bg-3 {
-    background: linear-gradient(to top, #00c6ff, #0072ff);
-}
-
-.bg-4 {
-    background: linear-gradient(120deg, #f093fb 0%, #f5576c 100%);
-}
-
+/* Abstract Gradients for placeholders — removed to use page bg */
+.bg-1,
+.bg-2,
+.bg-3,
+.bg-4,
 .bg-5 {
-    background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+    background: transparent;
 }
 
 .bento-content {
@@ -2439,8 +2428,8 @@ section {
     width: 100%;
     padding: 2rem;
     z-index: 2;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-    transform: translateY(20px);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
+    transform: translateY(0);
     transition: transform 0.3s ease;
 }
 
@@ -2702,7 +2691,8 @@ footer {
 .carousel-section {
     position: relative;
     padding: 6rem 0;
-    overflow: hidden;
+    overflow: visible;
+    background: transparent;
 }
 
 .carousel-viewport {
@@ -2758,8 +2748,8 @@ footer {
     /* Centered via translate */
     border-radius: 30px;
     /* More modern radius */
-    background: rgba(255, 255, 255, 0.05);
-    /* Glass base */
+    background: transparent;
+    /* Removed glass base to use page bg */
     overflow: hidden;
     /* Contain the image */
     display: flex;
@@ -2877,8 +2867,8 @@ footer {
 /* Indicators (Moved Below Deck) */
 .carousel-indicators {
     position: absolute;
-    bottom: 20px;
-    /* Pushed to bottom of container */
+    bottom: -40px;
+    /* Pushed 30% further down below the carousel */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -3024,7 +3014,7 @@ footer {
     }
 
     .carousel-indicators {
-        bottom: 10px;
+        bottom: -30px;
         gap: 10px;
     }
 

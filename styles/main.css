@@ -313,6 +313,13 @@ h3 {
     letter-spacing: 0.05em;
 }
 
+/* Hero buttons — 30% larger than base */
+.hero .btn {
+    padding: 0.65rem 1.625rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.07em;
+}
+
 .btn-primary {
     background: rgba(21, 0, 26, 0.85);
     color: #fff;
@@ -436,6 +443,16 @@ h3 {
         font-size: 0.65rem;
         /* Increased by 20% from 0.55rem */
         width: 100%;
+    }
+
+    /* Hero buttons — 30% larger on mobile too */
+    .hero .btn {
+        padding: 0.78rem 1.56rem;
+        font-size: 0.845rem;
+    }
+
+    .hero .btn-group {
+        max-width: 300px;
     }
 }
 

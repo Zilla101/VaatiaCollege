@@ -192,7 +192,7 @@ h3 {
     position: absolute;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
     animation: pulse-glow 10s 1 alternate;
 }
 
@@ -205,9 +205,9 @@ h3 {
 
 .hero {
     position: relative;
-    min-height: 135vh;
-    min-height: 135dvh;
-    /* Increased by 35% from 100vh/100dvh */
+    min-height: 95vh;
+    min-height: 95dvh;
+    /* Reduced by 30% from 135vh/135dvh */
     /* Dynamic viewport height for modern browsers */
     overflow: hidden;
     display: flex;
@@ -238,12 +238,12 @@ h3 {
 }
 
 .hero h1 {
-    font-size: 3.85rem;
-    /* Reduced by 30% from 5.5rem */
+    font-size: 2.7rem;
+    /* Reduced by 30% from 3.85rem */
     line-height: 1.1;
     font-weight: 800;
     margin-bottom: 1.4rem;
-    /* Adjusted margin */
+    /* Adjusted from 2rem proportional to size */
     background: linear-gradient(135deg, #ffffff 0%, #3b82f6 50%, #8b5cf6 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -268,13 +268,13 @@ h3 {
 }
 
 .hero p {
-    font-size: 1.12rem;
-    /* Reduced by 30% from 1.6rem */
+    font-size: 0.8rem;
+    /* Reduced by 30% from 1.12rem */
     color: #ffffff;
-    margin-top: 1.4rem;
-    /* Adjusted margin */
-    margin-bottom: 2.45rem;
-    /* Reduced by 30% from 3.5rem */
+    margin-top: 0.75rem;
+    /* Reduced proportional to size */
+    margin-bottom: 1.7rem;
+    /* Reduced proportional to size */
     font-weight: 500;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     opacity: 0.95;
@@ -293,18 +293,16 @@ h3 {
     position: relative;
     z-index: 20;
     margin-top: 2rem;
-    margin-bottom: -30px;
-    /* Push following elements upwards by 30px */
     animation: fade-up 1s var(--transition-slow) 0.4s forwards;
 }
 
 .btn {
-    padding: 0.84rem 1.96rem;
-    /* Reduced by 30% */
+    padding: 0.6rem 1.4rem;
+    /* Reduced by 30% from 0.84rem 1.96rem */
     border-radius: 50px;
     font-weight: 700;
-    font-size: 0.77rem;
-    /* Reduced by 30% */
+    font-size: 0.7rem;
+    /* Reduced by 30% from 1rem base */
     cursor: pointer;
     transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     border: 1px solid transparent;
@@ -313,10 +311,11 @@ h3 {
 }
 
 .btn-primary {
-    background: #2a0033;
-    /* 50% darker than previous #4d0059 */
+    background: rgba(42, 0, 51, 0.4);
     color: #fff;
-    box-shadow: 0 8px 32px rgba(42, 0, 51, 0.4);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(42, 0, 51, 0.3);
 }
 
 .btn-primary:hover {
@@ -367,8 +366,8 @@ h3 {
     }
 
     .hero h1 {
-        font-size: 2.45rem;
-        /* Reduced by 30% from 3.5rem */
+        font-size: 1.7rem;
+        /* Reduced by 30% from 2.45rem */
         word-wrap: break-word;
     }
 
@@ -383,8 +382,8 @@ h3 {
     }
 
     .hero {
-        min-height: 135dvh;
-        /* Increased by 35% from 100dvh */
+        min-height: 95dvh;
+        /* Reduced from 135dvh */
         height: auto;
         /* Allow growth if content is long */
         align-items: flex-start;
@@ -406,15 +405,15 @@ h3 {
     }
 
     .hero h1 {
-        font-size: 2.24rem;
-        /* Reduced by 30% from 3.2rem */
-        margin-bottom: 0.84rem;
-        /* Adjusted margin */
+        font-size: 1.6rem;
+        /* Reduced by 30% from 2.24rem */
+        margin-bottom: 0.5rem;
+        /* Reduced proportional to size */
     }
 
     .hero p {
-        font-size: 0.8rem;
-        /* Reduced by 30% from 1.15rem */
+        font-size: 0.6rem;
+        /* Reduced by 30% from 0.8rem */
         max-width: 90%;
         margin: 0 auto;
     }
@@ -429,10 +428,10 @@ h3 {
     }
 
     .btn {
-        padding: 1rem 2rem;
-        /* Increased (+20%) */
-        font-size: 1.05rem;
-        /* Increased (+20%) */
+        padding: 0.7rem 1.4rem;
+        /* Reduced from 1rem 2rem */
+        font-size: 0.8rem;
+        /* Reduced from 1.05rem */
         width: 100%;
     }
 }
@@ -488,12 +487,12 @@ h3 {
 }
 
 .navbar.scrolled {
-    background-color: rgba(255, 255, 255, 0.05);
-    /* Liquid Glass transparency */
-    backdrop-filter: blur(15px) saturate(180%);
-    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Darker Liquid Glass transparency */
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     padding: 15px 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     /* Subtle edge */
 }
@@ -623,9 +622,8 @@ h3 {
     left: 0;
     min-width: 220px;
     background: rgba(255, 255, 255, 0.05);
-    /* Very transparent */
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(25px) saturate(200%);
+    -webkit-backdrop-filter: blur(25px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
     padding: 0.75rem 0;
@@ -633,7 +631,7 @@ h3 {
     visibility: hidden;
     transform: translateY(-10px);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
     z-index: 1000;
 }
 
@@ -749,30 +747,24 @@ h3 {
         position: absolute;
         top: 110%;
         right: 0;
-        /* Align perfectly to the right */
         background: rgba(255, 255, 255, 0.05);
-        /* Premium Liquid Transparency */
-        backdrop-filter: blur(50px) saturate(210%);
-        -webkit-backdrop-filter: blur(50px) saturate(210%);
+        backdrop-filter: blur(30px) saturate(210%);
+        -webkit-backdrop-filter: blur(30px) saturate(210%);
         padding: 2.5rem;
         border-radius: 40px 0 0 40px;
-        /* Rounded focus on left side */
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-right: none;
-        /* Seamless right edge */
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
-        width: 300px;
+        width: 280px;
         opacity: 0;
         visibility: hidden;
         transform: translateX(50px) scale(0.95);
-        /* Slide from right */
         transform-origin: center right;
         transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         box-shadow: -20px 40px 80px rgba(0, 0, 0, 0.6),
             inset 0 0 30px rgba(255, 255, 255, 0.05);
-        /* Inner Glow */
         z-index: 2000;
     }
 
@@ -869,7 +861,6 @@ h3 {
 
     .mobile-dropdown-menu {
         display: flex;
-        /* Always flex but hidden via height */
         flex-direction: column;
         width: 90%;
         max-height: 0;
@@ -878,15 +869,10 @@ h3 {
         margin-top: 0;
         margin-bottom: 0;
         padding: 0;
-        /* Animate padding to avoid jump */
-
-        /* Initial Liquid Glass Base */
         background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(50px) saturate(200%);
-        -webkit-backdrop-filter: blur(50px) saturate(200%);
-        border: 1px solid rgba(255, 255, 255, 0);
-        /* Hide border when closed */
-        box-shadow: none;
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
         overflow: hidden;
         transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
@@ -958,16 +944,14 @@ h3 {
     }
 
     .hero h1 {
-        font-size: 4.1rem;
-        /* Reduced from 5.5rem (25%) */
+        font-size: 5.5rem;
         margin-bottom: 1.5rem;
     }
 
     .hero p {
-        font-size: 1.2rem;
-        /* Reduced from 1.6rem (25%) */
+        font-size: 1.6rem;
         margin-top: 1.5rem;
-        margin-bottom: 2.5rem;
+        margin-bottom: 3.5rem;
     }
 
     .btn-group {
@@ -1017,9 +1001,8 @@ body.dropdown-active footer {
 
 .liquid-modal {
     background: rgba(255, 255, 255, 0.05);
-    /* Very transparent */
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 40px;
     padding: 3rem;
@@ -1028,8 +1011,7 @@ body.dropdown-active footer {
     text-align: center;
     transform: scale(0.8) translateY(20px);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5),
-        inset 0 0 30px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
 .liquid-modal-overlay.active .liquid-modal {
@@ -1091,6 +1073,11 @@ section {
     font-weight: 700;
 }
 
+.slideshow-hero .section-title {
+    margin-top: -100px;
+    z-index: 25;
+}
+
 /* About Section */
 #about {
     background-color: transparent;
@@ -1136,14 +1123,14 @@ section {
 .glass-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 30px;
     padding: 3rem;
-    backdrop-filter: blur(15px) saturate(180%);
-    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05);
     will-change: transform, box-shadow;
 }
 
@@ -1154,24 +1141,19 @@ section {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Ensure it fills the frame */
-    opacity: 1;
-    filter: blur(2px) brightness(0.4);
-    /* Reduced blur for slightly clearer image while keeping depth */
-    transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    opacity: 0.15;
+    z-index: -1;
+    transition: transform 0.6s ease;
 }
 
 .glass-card:hover {
     transform: translateY(-12px) scale(1.02);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 50px 100px rgba(0, 0, 0, 0.6);
 }
 
 .glass-card:hover img {
     transform: scale(1.1);
-    filter: blur(0px) brightness(0.5);
-    /* Image clears up on hover */
+    opacity: 0.45;
 }
 
 .glass-card h3 {
@@ -1477,10 +1459,9 @@ section {
     }
 
     .stat-circle-content p {
-        font-size: clamp(0.45rem, 2vw, 0.6rem);
-        /* Tiny but legible */
+        font-size: clamp(0.6rem, 2.5vw, 0.75rem);
+        /* Slightly larger for legibility */
         letter-spacing: 0px;
-        /* Tighter spacing */
         margin-top: 2px;
         line-height: 1;
         white-space: nowrap;
@@ -1516,8 +1497,18 @@ section {
     display: flex;
     flex-direction: column;
     padding: 0;
-    /* Remove padding to let image bleed to edges */
     overflow: hidden;
+    transform: none;
+    /* Removed scaling to prevent blur and gaps */
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.house-grid .glass-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
 
 .house-grid .glass-card img {
@@ -1525,18 +1516,31 @@ section {
     opacity: 1;
     filter: none;
     width: 100%;
-    height: 220px;
+    height: 240px;
+    /* Consistent image height */
     object-fit: cover;
+    /* Perfect fit into frame */
     border-radius: 0;
     margin-bottom: 0;
+    z-index: 1;
 }
 
 .house-grid .glass-card h3 {
     padding: 1.5rem 1.5rem 0.5rem;
+    font-size: 1.4rem;
+    font-weight: 850;
+    /* Super bold as requested */
+    color: #fff;
+    letter-spacing: -0.02em;
 }
 
 .house-grid .glass-card p {
-    padding: 0 1.5rem 1.5rem;
+    padding: 0 1.5rem 1.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    /* Bolder text */
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.5;
 }
 
 .house-grid .glass-card.blue:hover {
@@ -1568,6 +1572,13 @@ section {
 @media (max-width: 600px) {
     .house-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 10px;
+    }
+
+    .house-grid .glass-card img {
+        height: 200px;
+        /* Slightly shorter on mobile */
     }
 }
 
@@ -1694,8 +1705,14 @@ section {
 .split-layout {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
-    gap: 4rem;
+    gap: 0.5rem;
+    /* Maximum proximity */
     align-items: center;
+}
+
+.split-layout.reverse {
+    grid-template-columns: 1.2fr 1.8fr;
+    /* Balanced 40/60 split for natural sizing */
 }
 
 @media (max-width: 992px) {
@@ -1736,16 +1753,18 @@ section {
     border: 1px solid rgba(255, 50, 50, 0.2);
     padding: 1.5rem;
     border-radius: 15px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px) saturate(200%);
     color: #ff9999;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .glass-frame {
     padding: 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .section-subtitle {
@@ -1779,38 +1798,233 @@ section {
 
 .slideshow-hero {
     position: relative;
-    min-height: 45vh !important;
-    min-height: 45dvh !important;
+    min-height: 80vh !important;
+    min-height: 80dvh !important;
+    display: flex;
+    flex-direction: column;
+    padding: 6rem 0;
     overflow: hidden;
 }
 
 .slideshow-hero .carousel-viewport {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 450px;
+    z-index: 1;
+    overflow: visible;
+    /* Critical for 3D side cards */
+}
+
+.slideshow-hero .carousel-container {
+    position: relative;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    transform-style: preserve-3d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .slideshow-hero .slide {
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 50%;
-    width: 300px;
-    height: 100%;
-    margin-left: 0;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.05);
+    width: 448px;
+    /* 320 * 1.4 */
+    height: 672px;
+    /* 480 * 1.4 */
+    transform: translateX(-50%) translateY(-50%) translate3d(0, 0, -300px);
+    opacity: 0;
+    z-index: 0;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease, filter 0.6s ease;
+    border-radius: 30px;
     overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    /* Liquid glass base */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-    opacity: 0;
-    transform: translateX(-50%) translate3d(0, 0, -200px);
-    z-index: 0;
+}
+
+.slideshow-hero .slide::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(105deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.05) 40%,
+            rgba(255, 255, 255, 0.15) 50%,
+            rgba(255, 255, 255, 0.05) 60%,
+            transparent 100%);
+    transform: translateX(-110%) skewX(-15deg);
+    transition: transform 1s ease;
     pointer-events: none;
+    z-index: 2;
+}
+
+.slideshow-hero .slide.active::after {
+    transform: translateX(110%) skewX(-15deg);
+    transition-delay: 0.5s;
+}
+
+.slideshow-hero .slide-content-wrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 2.5rem 1.5rem 1.5rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+    color: #fff;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.slideshow-hero .slide-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.02em;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.slideshow-hero .slide-text {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    font-weight: 500;
+    color: #a1a1aa;
+}
+
+.slideshow-hero .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    opacity: 0.9;
+    transition: opacity 0.6s ease;
+}
+
+/* Active slide — centered, popped forward with glass glow */
+.slideshow-hero .slide.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-50%) translate3d(0, 0, 0) scale(1);
+    z-index: 10;
+    pointer-events: auto;
+    filter: none;
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.slideshow-hero .slide.active img {
+    opacity: 1;
+}
+
+/* Prev slide — symmetric stacked look with clear peek */
+.slideshow-hero .slide.prev {
+    opacity: 0.6;
+    transform: translateX(-110%) translateY(-50%) translate3d(0, 0, -200px) rotateY(30deg) scale(0.8);
+    z-index: 5;
+    filter: blur(2px) brightness(0.8);
+}
+
+/* Next slide — symmetric stacked look with clear peek */
+.slideshow-hero .slide.next {
+    opacity: 0.6;
+    transform: translateX(10%) translateY(-50%) translate3d(0, 0, -200px) rotateY(-30deg) scale(0.8);
+    z-index: 5;
+    filter: blur(2px) brightness(0.8);
+}
+
+/* Card image fills the slide */
+.slideshow-hero .slide .card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+}
+
+/* Text overlay at bottom of card */
+.slideshow-hero .slide .slide-content-wrapper {
+    padding: 1rem 1.2rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+    flex-shrink: 0;
+}
+
+.slideshow-hero .slide .slide-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.2rem;
+}
+
+.slideshow-hero .slide .slide-text {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+/* Prev/Next control buttons */
+.carousel-controls {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 1rem;
+    z-index: 20;
+    pointer-events: none;
+}
+
+.control-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.control-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: #fff;
+}
+
+/* Carousel section — clip overflow so side cards don't bleed */
+.carousel-section {
+    overflow: hidden;
+}
+
+/* Carousel viewport needs perspective for 3D */
+.carousel-section .carousel-viewport {
+    perspective: 1200px;
+    transform-style: preserve-3d;
 }
 
 .slideshow-hero .hero-content {
@@ -1832,6 +2046,41 @@ section {
     z-index: 10;
 }
 
+/* Mobile carousel adjustments */
+@media (max-width: 768px) {
+    .slideshow-hero {
+        min-height: 600px !important;
+        padding: 4rem 0;
+    }
+
+    .slideshow-hero .carousel-viewport {
+        min-height: 480px;
+        perspective: 1000px;
+    }
+
+    .slideshow-hero .slide {
+        width: 392px;
+        /* 280 * 1.4 */
+        height: 560px;
+        /* 400 * 1.4 */
+    }
+
+    .slideshow-hero .slide.prev {
+        transform: translateX(-105%) translateY(-50%) translate3d(0, 0, -150px) rotateY(20deg) scale(0.75);
+        opacity: 0.5;
+    }
+
+    .slideshow-hero .slide.next {
+        transform: translateX(5%) translateY(-50%) translate3d(0, 0, -150px) rotateY(-20deg) scale(0.75);
+        opacity: 0.5;
+    }
+
+    .control-btn {
+        width: 36px;
+        height: 36px;
+    }
+}
+
 /* House Gallery Styles */
 .house-gallery-container {
     padding: 10px;
@@ -1845,44 +2094,90 @@ section {
 
 .house-gallery {
     position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    /* More standard aspect ratio for smart zoom out */
+    min-height: 400px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     overflow: hidden;
-    transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    background: rgba(0, 0, 0, 0.1);
-    width: 100%;
-    min-height: 300px;
+    background: transparent;
+    /* Glass base instead of black */
 }
 
 .house-gallery .carousel-viewport {
     width: 100%;
     height: 100%;
+    background: transparent;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+}
+
+.house-gallery .carousel-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .house-gallery .slide {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
     width: 100%;
     height: 100%;
+    transform: translate(-50%, -50%) translate3d(0, 0, -300px);
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 1.2s ease-in-out;
-    z-index: 1;
+    z-index: 0;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease, filter 0.6s ease;
+    border-radius: 20px;
+    overflow: hidden;
+    background: transparent;
+    /* No background flashes */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
 }
 
 .house-gallery .slide.active {
     opacity: 1;
-    visibility: visible;
-    z-index: 2;
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1);
+    z-index: 10;
+    pointer-events: auto;
+    filter: none;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.house-gallery .slide.prev {
+    opacity: 0.6;
+    transform: translate(-105%, -50%) translate3d(0, 0, -200px) rotateY(25deg) scale(0.85);
+    z-index: 5;
+    filter: blur(2px) brightness(0.8);
+}
+
+.house-gallery .slide.next {
+    opacity: 0.6;
+    transform: translate(5%, -50%) translate3d(0, 0, -200px) rotateY(-25deg) scale(0.85);
+    z-index: 5;
+    filter: blur(2px) brightness(0.8);
 }
 
 .house-gallery .slide img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    /* Prevent cropping as requested */
-    background: rgba(0, 0, 0, 0.2);
-    /* Subtle backdrop for aspect ratio gaps */
+    min-width: 100%;
+    /* Guaranteed fill */
+    min-height: 100%;
+    /* Guaranteed fill */
+    object-fit: cover;
+    /* Fill the box properly */
     display: block;
 }
 
@@ -1912,6 +2207,24 @@ section {
     background: #fff;
     transform: scale(1.3);
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+/* Compact Stacked Style for Sidebars/Columns */
+.compact-stacked {
+    min-height: 350px !important;
+}
+
+.compact-stacked .slide {
+    width: 280px !important;
+    height: 380px !important;
+}
+
+.compact-stacked .slide.prev {
+    transform: translate(-115%, -50%) translate3d(0, 0, -150px) rotateY(20deg) scale(0.8) !important;
+}
+
+.compact-stacked .slide.next {
+    transform: translate(15%, -50%) translate3d(0, 0, -150px) rotateY(-20deg) scale(0.8) !important;
 }
 
 @media (max-width: 768px) {
@@ -2015,8 +2328,8 @@ section {
     background-color: rgba(255, 255, 255, 0.02);
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
-    backdrop-filter: blur(15px) saturate(180%);
-    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -2149,7 +2462,8 @@ section {
 
     .bento-item {
         grid-column: auto !important;
-        height: 300px;
+        height: 180px;
+        /* 300 * 0.6 */
     }
 }
 
@@ -2198,7 +2512,7 @@ section {
     /* Cinematic Hover Out */
     z-index: 10;
     pointer-events: auto;
-    backdrop-filter: blur(40px) saturate(200%);
+    backdrop-filter: blur(40px);
     /* iOS 26.2 Glass */
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: 0 50px 100px rgba(0, 0, 0, 0.8),
@@ -2251,8 +2565,8 @@ section {
 /* Footer Section */
 footer {
     background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(30px) saturate(150%);
-    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
     padding: 6rem 0 2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
@@ -2693,11 +3007,11 @@ footer {
     }
 
     .slide-title {
-        font-size: clamp(1rem, 4vw, 1.2rem);
+        font-size: clamp(1.2rem, 5vw, 1.5rem);
     }
 
     .slide-text {
-        font-size: clamp(0.75rem, 3vw, 0.85rem);
+        font-size: clamp(0.85rem, 4vw, 1rem);
     }
 
     .carousel-indicators {
@@ -3229,4 +3543,16 @@ footer {
     .hero::before {
         animation: none;
     }
+}
+
+/* Students Page Slideshow Layout - Controlled via grid now */
+@media (max-width: 992px) {
+    .student-slideshow {
+        width: 100% !important;
+    }
+}
+
+.student-slideshow {
+    width: 100% !important;
+}
 }

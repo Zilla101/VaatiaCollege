@@ -142,10 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Generic Carousel Initialization
     function initCarousels() {
-        // Find all carousel containers
-        const carousels = document.querySelectorAll('.slideshow-hero, .house-gallery');
+        // Find all carousel containers - Only Homepage Management Carousel currently uses this
+        const carousels = document.querySelectorAll('.slideshow-hero');
 
         carousels.forEach(carousel => {
             const viewport = carousel.querySelector('.carousel-viewport');
@@ -155,8 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let slideInterval;
             let isAnimating = false; // Debounce flag
 
-            // Bulk Load and Shuffle for House Gallery
-            if (carousel.classList.contains('house-gallery')) {
+            // Bulk Load and Shuffle ONLY for the main House Gallery page element
+            if (carousel.classList.contains('house-gallery') && carousel.id === 'house-gallery-main') {
                 const folder = 'Media Content/HOUSE WEAR/HOUSE WEAR/';
                 const allImages = ["EYZ09312.jpg", "EYZ09331.jpg", "EYZ09359.jpg", "EYZ09378.jpg", "EYZ09391.jpg", "EYZ09414.jpg", "EYZ09434.jpg", "EYZ09450.jpg", "EYZ09493.jpg"];
 
@@ -173,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 allImages.forEach((imgName, i) => {
                     const slide = document.createElement('div');
                     slide.className = 'slide' + (i === 0 ? ' active' : '');
-                    slide.innerHTML = `<img src="${folder}${imgName}" alt="House Wear ${i + 1}">`;
+                    slide.innerHTML = `<img src="${folder}${imgName}" alt="House Wear ${i + 1}" class="card-image">`;
                     if (viewport) viewport.appendChild(slide);
 
                     if (indicatorsContainer) {
@@ -188,46 +187,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const slides = carousel.querySelectorAll('.slide');
-            const indicators = carousel.querySelectorAll('.indicator');
+            const indicators = carousel.querySelectorAll('.indicator, .carousel-indicators .indicator');
 
             function updateCarousel(index) {
-                if (isAnimating) return; // Prevent interaction during animation
+                if (isAnimating) return;
                 isAnimating = true;
 
                 slides.forEach((slide, i) => {
+                    slide.classList.remove('active', 'prev', 'next');
                     slide.classList.toggle('active', i === index);
 
-                    if (carousel.classList.contains('slideshow-hero')) {
+                    if (carousel.classList.contains('slideshow-hero') || carousel.classList.contains('house-gallery')) {
                         const n = slides.length;
-                        slide.classList.remove('prev', 'next'); // Clean up first
-
-                        // Calculate positions
                         if (i === (index - 1 + n) % n) slide.classList.add('prev');
                         if (i === (index + 1) % n) slide.classList.add('next');
                     }
                 });
                 indicators.forEach((ind, i) => ind.classList.toggle('active', i === index));
 
-                if (carousel.classList.contains('house-gallery')) {
-                    const activeSlide = slides[index];
-                    const activeImg = activeSlide.querySelector('img');
-                    if (activeImg) {
-                        const adjustHeight = () => {
-                            const containerWidth = carousel.clientWidth;
-                            const targetHeight = (activeImg.naturalHeight / activeImg.naturalWidth) * containerWidth;
-                            const finalHeight = Math.min(Math.max(targetHeight, 300), 800);
-                            carousel.style.height = `${finalHeight}px`;
-                        };
-                        activeImg.complete ? adjustHeight() : activeImg.addEventListener('load', adjustHeight, { once: true });
-                    }
-                }
-
                 currentSlide = index;
 
-                // Unlock after transition
+                // Robust transition lock release
                 setTimeout(() => {
                     isAnimating = false;
-                }, 800); // Matches CSS transition duration
+                }, 900); // Slightly longer than CSS transition (0.8s) to be perfectly safe
             }
 
             function nextSlide() {
@@ -237,11 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             function startInterval() {
-                if (slideInterval) clearInterval(slideInterval);
-                slideInterval = setInterval(() => {
-                    // Only auto-advance if not currently animating (though updateCarousel checks too)
-                    if (!isAnimating) nextSlide();
-                }, intervalDuration);
+                stopInterval();
+                slideInterval = setInterval(nextSlide, intervalDuration);
             }
 
             function stopInterval() {
@@ -250,19 +230,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             indicators.forEach((ind, index) => {
                 ind.addEventListener('click', () => {
-                    if (!isAnimating && currentSlide !== index) updateCarousel(index);
+                    if (!isAnimating && currentSlide !== index) {
+                        stopInterval();
+                        updateCarousel(index);
+                        startInterval();
+                    }
                 });
             });
 
-            const prevBtn = carousel.querySelector('.control-btn.prev');
-            const nextBtn = carousel.querySelector('.control-btn.next');
+            const prevBtn = carousel.querySelector('.control-btn.prev, .control-btn.prev-btn');
+            const nextBtn = carousel.querySelector('.control-btn.next, .control-btn.next-btn');
 
             if (prevBtn) {
                 prevBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (isAnimating) return;
+                    stopInterval();
                     let prev = (currentSlide - 1 + slides.length) % slides.length;
                     updateCarousel(prev);
+                    startInterval();
                 });
             }
 
@@ -270,45 +256,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 nextBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     if (isAnimating) return;
+                    stopInterval();
                     nextSlide();
+                    startInterval();
                 });
             }
 
             // Touch Logic
             let touchStartX = 0;
-            let touchEndX = 0;
 
             if (viewport) {
                 viewport.addEventListener('touchstart', e => {
                     touchStartX = e.changedTouches[0].screenX;
-                    stopInterval(); // Pause on touch
+                    stopInterval();
                 }, { passive: true });
 
                 viewport.addEventListener('touchend', e => {
-                    touchEndX = e.changedTouches[0].screenX;
-                    handleGesture();
-                    startInterval(); // Resume
-                }, { passive: true });
-
-                function handleGesture() {
-                    if (isAnimating) return;
+                    const touchEndX = e.changedTouches[0].screenX;
                     const threshold = 50;
-                    if (touchEndX < touchStartX - threshold) {
-                        nextSlide();
+                    if (!isAnimating) {
+                        if (touchEndX < touchStartX - threshold) nextSlide();
+                        else if (touchEndX > touchStartX + threshold) {
+                            let prev = (currentSlide - 1 + slides.length) % slides.length;
+                            updateCarousel(prev);
+                        }
                     }
-                    if (touchEndX > touchStartX + threshold) {
-                        let prev = (currentSlide - 1 + slides.length) % slides.length;
-                        updateCarousel(prev);
-                    }
-                }
+                    startInterval();
+                }, { passive: true });
             }
 
-            // Pause on Hover
             carousel.addEventListener('mouseenter', stopInterval);
             carousel.addEventListener('mouseleave', startInterval);
 
             updateCarousel(0);
-            startInterval(); // Start auto-scroll
+            startInterval();
         });
     }
 
@@ -391,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Bento Dynamic All-Image Slideshows
+    // Bento Dynamic All-Image Slideshows (Optimized)
     const bentoData = {
         'academics': {
             folder: 'Media Content/ACADEMICS/ACADEMIC PHOTOS/',
@@ -411,42 +392,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const bentoSlideshows = document.querySelectorAll('.bento-slideshow');
-    bentoSlideshows.forEach(slideshow => {
+    document.querySelectorAll('.bento-slideshow').forEach(slideshow => {
         const type = slideshow.dataset.type;
-        if (!bentoData[type]) return;
-
         const data = bentoData[type];
+        if (!data) return;
+
         const inner = slideshow.querySelector('.slideshow-inner');
         const interval = parseInt(slideshow.dataset.interval) || 4000;
         let currentIdx = 0;
 
-        function createImg(idx) {
+        // Preload first two images
+        const createImg = (idx) => {
             const img = document.createElement('img');
             img.src = data.folder + data.images[idx];
-            if (idx === 0) img.classList.add('active');
             inner.appendChild(img);
             return img;
-        }
+        };
 
         let currentImg = createImg(0);
-        let nextImg = createImg(1);
+        currentImg.classList.add('active');
 
         setInterval(() => {
             currentIdx = (currentIdx + 1) % data.images.length;
-            const nextIdx = (currentIdx + 1) % data.images.length;
+            const nextImg = createImg(currentIdx);
 
-            currentImg.classList.remove('active');
-            nextImg.classList.add('active');
+            // Trigger transition
+            requestAnimationFrame(() => {
+                nextImg.classList.add('active');
+                currentImg.classList.remove('active');
 
-            setTimeout(() => {
+                // Cleanup old image after transition
                 const oldImg = currentImg;
+                setTimeout(() => {
+                    if (inner.contains(oldImg)) inner.removeChild(oldImg);
+                }, 2000);
                 currentImg = nextImg;
-                if (inner.contains(oldImg)) inner.removeChild(oldImg);
-                nextImg = createImg(nextIdx);
-            }, 1500);
+            });
         }, interval);
     });
+
 
     // Cinematic Stacked Marquee Logic
     const marqueeItems = document.querySelectorAll('.marquee-item');

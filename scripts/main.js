@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         'skills': {
             folder: 'Media Content/SKILLS ACQUISITION/SKILLS ACQUISITION/',
-            images: ["EYZ01402.jpg", "EYZ01423.jpg", "EYZ09679.jpg", "EYZ09724.jpg", "EYZ09817.jpg"]
+            images: ["Automobile 1.jpg", "Carpentry 1.jpg", "Graphics 1.jpg", "Photography.jpg", "Tailoring 1.jpg", "Leather Works.jpg"]
         },
         'sports': {
             folder: 'Media Content/SPORTS/SPORTS WEAR/',

@@ -2338,7 +2338,7 @@ section {
     position: relative;
     border-radius: 32px;
     overflow: hidden;
-    background-color: transparent;
+    background-color: #1a1a1a; /* Neutral dark placeholder */
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     backdrop-filter: none;
@@ -2353,6 +2353,7 @@ section {
     width: 100%;
     height: 100%;
     z-index: 0;
+    background-color: #0c0c0c; /* Deep dark placeholder */
 }
 
 .bento-slideshow .slideshow-inner img {

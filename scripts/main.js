@@ -394,43 +394,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const bentoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const slideshow = entry.target;
+                const type = slideshow.dataset.type;
+                const data = bentoData[type];
+                if (!data) return;
+
+                const inner = slideshow.querySelector('.slideshow-inner');
+                const interval = parseInt(slideshow.dataset.interval) || 4000;
+                let currentIdx = 0;
+
+                // Preload first image
+                const createImg = (idx, isInitial = false) => {
+                    const img = document.createElement('img');
+                    img.src = data.folder + data.images[idx];
+                    img.decoding = 'async';
+                    if (!isInitial) img.loading = 'lazy';
+                    inner.appendChild(img);
+                    return img;
+                };
+
+                let currentImg = createImg(0, true);
+                currentImg.classList.add('active');
+
+                const slideTimer = setInterval(() => {
+                    currentIdx = (currentIdx + 1) % data.images.length;
+                    const nextImg = createImg(currentIdx);
+
+                    requestAnimationFrame(() => {
+                        nextImg.classList.add('active');
+                        currentImg.classList.remove('active');
+
+                        const oldImg = currentImg;
+                        setTimeout(() => {
+                            if (inner.contains(oldImg)) inner.removeChild(oldImg);
+                        }, 2000);
+                        currentImg = nextImg;
+                    });
+                }, interval);
+
+                slideshow.dataset.timerId = slideTimer;
+                bentoObserver.unobserve(slideshow);
+            }
+        });
+    }, { rootMargin: '200px' });
+
     document.querySelectorAll('.bento-slideshow').forEach(slideshow => {
-        const type = slideshow.dataset.type;
-        const data = bentoData[type];
-        if (!data) return;
-
-        const inner = slideshow.querySelector('.slideshow-inner');
-        const interval = parseInt(slideshow.dataset.interval) || 4000;
-        let currentIdx = 0;
-
-        // Preload first two images
-        const createImg = (idx) => {
-            const img = document.createElement('img');
-            img.src = data.folder + data.images[idx];
-            inner.appendChild(img);
-            return img;
-        };
-
-        let currentImg = createImg(0);
-        currentImg.classList.add('active');
-
-        setInterval(() => {
-            currentIdx = (currentIdx + 1) % data.images.length;
-            const nextImg = createImg(currentIdx);
-
-            // Trigger transition
-            requestAnimationFrame(() => {
-                nextImg.classList.add('active');
-                currentImg.classList.remove('active');
-
-                // Cleanup old image after transition
-                const oldImg = currentImg;
-                setTimeout(() => {
-                    if (inner.contains(oldImg)) inner.removeChild(oldImg);
-                }, 2000);
-                currentImg = nextImg;
-            });
-        }, interval);
+        bentoObserver.observe(slideshow);
     });
 
 

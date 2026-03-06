@@ -455,51 +455,53 @@ document.addEventListener('DOMContentLoaded', () => {
         updateMarquee();
         setInterval(updateMarquee, 4000);
     }
-});
-// Link Section Scroll to Indicators (Philosophy & Highlights)
-function setupSectionDots(containerSelector, indicatorsSelector) {
-    const grid = document.querySelector(containerSelector);
-    const indicators = document.querySelectorAll(indicatorsSelector);
-    if (!grid || !indicators.length) return;
-    const cards = Array.from(grid.children);
 
-    // Handle Scroll Sync
-    grid.addEventListener('scroll', () => {
-        const scrollWidth = grid.scrollWidth - grid.clientWidth;
-        if (scrollWidth <= 0) return;
+    // Link Section Scroll to Indicators (Philosophy & Highlights)
+    function setupSectionDots(containerSelector, indicatorsSelector) {
+        const grid = document.querySelector(containerSelector);
+        const indicators = document.querySelectorAll(indicatorsSelector);
+        if (!grid || !indicators.length) return;
+        const cards = Array.from(grid.children);
 
-        const scrollLeft = grid.scrollLeft;
+        // Handle Scroll Sync
+        grid.addEventListener('scroll', () => {
+            const scrollWidth = grid.scrollWidth - grid.clientWidth;
+            if (scrollWidth <= 0) return;
 
-        // Check if we are close to the end (allow 5px buffer)
-        if (Math.abs(scrollWidth - scrollLeft) < 5) {
-            indicators.forEach(dot => dot.classList.remove('active'));
-            indicators[indicators.length - 1].classList.add('active');
-            return;
-        }
+            const scrollLeft = grid.scrollLeft;
 
-        const index = Math.min(Math.round((scrollLeft / grid.scrollWidth) * indicators.length), indicators.length - 1);
-        indicators.forEach((dot, i) => dot.classList.toggle('active', i === index));
-    }, { passive: true });
+            // Check if we are close to the end (allow 5px buffer)
+            if (Math.abs(scrollWidth - scrollLeft) < 5) {
+                indicators.forEach(dot => dot.classList.remove('active'));
+                indicators[indicators.length - 1].classList.add('active');
+                return;
+            }
 
-    // Handle Dot Click Scroll
-    indicators.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            const card = cards[index];
-            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            const index = Math.min(Math.round((scrollLeft / grid.scrollWidth) * indicators.length), indicators.length - 1);
+            indicators.forEach((dot, i) => dot.classList.toggle('active', i === index));
+        }, { passive: true });
+
+        // Handle Dot Click Scroll
+        indicators.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                const card = cards[index];
+                if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            });
         });
-    });
-}
+    }
 
-function initPhilosophyIndicators() {
-    setupSectionDots('#about .cards-grid', '.philosophy-indicators .indicator');
-}
+    function initPhilosophyIndicators() {
+        setupSectionDots('#about .cards-grid', '.philosophy-indicators .indicator');
+    }
 
-function initHighlightsIndicators() {
-    setupSectionDots('.stats-section .stats-grid', '.highlights-indicators .indicator');
-}
+    function initHighlightsIndicators() {
+        setupSectionDots('.stats-section .stats-grid', '.highlights-indicators .indicator');
+    }
 
-// Initialize components
-document.addEventListener('DOMContentLoaded', () => {
+    // Final Initialization
     initPhilosophyIndicators();
     initHighlightsIndicators();
 });
+
+
+

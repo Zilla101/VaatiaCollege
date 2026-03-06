@@ -3571,3 +3571,337 @@ footer {
 .student-slideshow {
     width: 100% !important;
 }
+
+/* ===================================================
+   RESPONSIVE ENHANCEMENTS — Pure Additive Media Rules
+   No existing styles are changed below this line.
+   =================================================== */
+
+/* ── TABLET (769px – 1024px) ─────────────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+    section {
+        padding: 4rem 0;
+    }
+
+    .section-title {
+        font-size: 2.4rem;
+        margin-bottom: 3rem;
+    }
+
+    /* Secondary + slideshow heroes are overly tall on tablets */
+    .secondary-hero {
+        min-height: 45vh !important;
+    }
+
+    .slideshow-hero {
+        min-height: 60vh !important;
+    }
+
+    /* Stats circular row — shrink circles a touch on narrow tablets */
+    .stat-circle {
+        width: 170px;
+        height: 170px;
+    }
+
+    /* House gallery gets breathing room */
+    .house-gallery-container {
+        padding: 0 1.5rem;
+    }
+
+    /* Boarding / community rules grid: 2-col on tablet */
+    .boarding-grid,
+    .community-rules-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Requirements grid: 2-col on tablet */
+    .requirements-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* Testimonials: 2-col on tablet */
+    .testimonials-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ── MOBILE (≤768px) — supplementary fixes ──────── */
+@media (max-width: 768px) {
+
+    /* Section vertical breathing room */
+    section {
+        padding: 3.5rem 0;
+    }
+
+    /* Section title scale */
+    .section-title {
+        font-size: 1.9rem;
+        margin-bottom: 2.5rem;
+    }
+
+    /* Subtitle */
+    .section-subtitle {
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Stats dashboard overall padding */
+    #global-stats-dashboard {
+        padding: 4rem 0;
+    }
+
+    .stats-group {
+        margin-bottom: 3rem;
+    }
+
+    /* Stat items (square highlights) — avoid wide overflow */
+    .stat-item {
+        padding: 2rem 1rem;
+    }
+
+    .stat-item h2 {
+        font-size: 2.5rem;
+    }
+
+    /* Split layout: always single column on mobile */
+    .split-layout,
+    .split-layout.reverse {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    /* House gallery side padding so it doesn't bleed edge-to-edge */
+    .house-gallery-container {
+        padding: 0 1rem;
+        margin-top: 2rem;
+    }
+
+    /* Boarding / community grids stack to single column */
+    .boarding-grid,
+    .community-rules-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* liquid list — tighten left-pad on mobile */
+    .liquid-list li {
+        padding-left: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    /* Marquee vertical height — too tall on phones */
+    .marquee-content {
+        height: 320px;
+    }
+
+    /* Footer — 2-col between 481px and 768px */
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+}
+
+/* footer: restore single column below 480px */
+@media (max-width: 480px) {
+    .footer-grid {
+        grid-template-columns: 1fr !important;
+        text-align: center;
+        gap: 2.5rem !important;
+    }
+
+    .footer-brand p {
+        margin: 0 auto;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+}
+
+/* ── SMALL PHONES (≤480px) ───────────────────────── */
+@media (max-width: 480px) {
+
+    section {
+        padding: 3rem 0;
+    }
+
+    .section-title {
+        font-size: 1.7rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.95rem;
+    }
+
+    /* Glass cards — tighten padding so content breathes */
+    .glass-card {
+        padding: 1.8rem;
+        border-radius: 22px;
+    }
+
+    .glass-card h3 {
+        font-size: 1.25rem;
+    }
+
+    .glass-card p {
+        font-size: 1rem;
+    }
+
+    /* Stats items — keep readable minimum */
+    .stat-item {
+        padding: 1.8rem 1rem;
+        min-width: 140px;
+    }
+
+    .stat-item h2 {
+        font-size: 2.2rem;
+    }
+
+    .stat-item p {
+        font-size: 0.8rem;
+    }
+
+    /* Requirements grid — collapse min-width */
+    .requirements-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .requirements-grid.compact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Boarding / community rules — shrink minmax */
+    .boarding-grid,
+    .community-rules-grid {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    /* Testimonial cards — reduce padding */
+    .testimonial-card {
+        padding: 1.8rem;
+        border-radius: 25px;
+    }
+
+    .testimonial-text {
+        font-size: 1rem;
+    }
+
+    /* Marquee is much too tall on small phones */
+    .marquee-content {
+        height: 260px;
+    }
+
+    /* Liquid list */
+    .liquid-list li {
+        padding-left: 1.2rem;
+        font-size: 0.9rem;
+        margin-bottom: 0.9rem;
+    }
+
+    /* Stats group spacing */
+    #global-stats-dashboard {
+        padding: 3rem 0;
+    }
+
+    .stats-group {
+        margin-bottom: 2rem;
+    }
+}
+
+/* ── MICRO SCREENS (≤360px) ─────────────────────── */
+@media (max-width: 360px) {
+
+    /* Collapse any 2-col grids that are still too wide */
+    .boarding-grid,
+    .community-rules-grid,
+    .requirements-grid,
+    .testimonials-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .glass-card {
+        padding: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .stat-item {
+        min-width: 130px;
+    }
+
+    /* House cards on micro screens */
+    .house-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ===================================================
+   MOBILE IMAGE QUALITY & LOAD SPEED FIXES
+   Removes CSS-blur sources that make photos look soft
+   on mobile. Purely additive — no existing rules changed.
+   =================================================== */
+
+@media (max-width: 768px) {
+
+    /* 1. Hero overlay: remove the 2px backdrop blur that softens the hero photo */
+    .hero-overlay {
+        backdrop-filter: brightness(0.8) !important;
+        -webkit-backdrop-filter: brightness(0.8) !important;
+    }
+
+    /* 2. Bento slideshow non-active images: drop the blur(2px) filter —
+          images are already dimmed by brightness; the blur is purely cosmetic
+          but looks bad on low-DPI mobile screens */
+    .bento-slideshow .slideshow-inner img {
+        filter: brightness(0.65) !important;
+    }
+
+    .bento-slideshow .slideshow-inner img.active {
+        filter: brightness(0.7) !important;
+        transform: scale(1.05);
+    }
+
+    /* 3. Glass cards: keep the glass effect but remove the blur from
+          backdrop-filter so the actual image content inside stays crisp.
+          The glass border + background colour is enough on mobile. */
+    .glass-card {
+        backdrop-filter: saturate(180%) !important;
+        -webkit-backdrop-filter: saturate(180%) !important;
+    }
+
+    /* 4. Slideshow side-cards (prev/next) — drop their blur filter;
+          they look fine with just the opacity + brightness reduction */
+    .slideshow-hero .slide.prev,
+    .slideshow-hero .slide.next,
+    .house-gallery .slide.prev,
+    .house-gallery .slide.next {
+        filter: brightness(0.8) !important;
+    }
+
+    /* 5. Force GPU compositing on all content images for crisp rendering */
+    img {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        image-rendering: -webkit-optimize-contrast;
+    }
+}
+
+/* Extra sharpness on very small screens */
+@media (max-width: 480px) {
+
+    /* Completely strip backdrop-filter blur from hero overlay on small phones */
+    .hero-overlay {
+        backdrop-filter: brightness(0.75) !important;
+        -webkit-backdrop-filter: brightness(0.75) !important;
+    }
+
+    /* Remove any remaining blur filters on carousel slides */
+    .slide.prev,
+    .slide.next {
+        filter: brightness(0.6) !important;
+    }
+}

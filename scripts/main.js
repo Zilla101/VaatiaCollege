@@ -61,7 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Trigger radial fill (Performance loading: Precise percentage sync)
                 if (circle) {
-                    const circumference = 2 * Math.PI * 95;
+                    const radius = 90; // Standardized radius
+                    const circumference = 2 * Math.PI * radius;
                     circle.style.strokeDasharray = `${circumference} ${circumference}`;
                     circle.style.strokeDashoffset = circumference;
 
@@ -102,7 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 statsObserver.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.3 });
+    }, { threshold: 0.1 });
+
 
     stats.forEach(stat => statsObserver.observe(stat));
 

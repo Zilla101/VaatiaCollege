@@ -1227,19 +1227,22 @@ section {
 
 .stat-circle {
     position: relative;
-    width: 210px;
-    height: 210px;
+    width: 220px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(15px) saturate(180%);
-    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5),
-        inset 0 0 20px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-right-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6),
+        inset 0 0 40px rgba(255, 255, 255, 0.05);
     transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    overflow: visible;
 }
 
 .stat-circle:hover {
@@ -1329,9 +1332,9 @@ section {
 
 .progress-ring__circle {
     transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);
-    stroke-dasharray: 597;
-    /* 2 * PI * 95 */
-    stroke-dashoffset: 597;
+    stroke-dasharray: 565.48;
+    /* 2 * PI * 90 */
+    stroke-dashoffset: 565.48;
 }
 
 .stat-circle-content {
@@ -1345,25 +1348,7 @@ section {
 /* Desktop Defaults for Circular Stats */
 /* Consolidated with above */
 
-.stat-circle {
-    position: relative;
-    width: 220px;
-    height: 220px;
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.01) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-    border-right-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6),
-        inset 0 0 40px rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: visible;
-    /* Allow glow to bleed out slightly */
-}
+/* Consolidated with above */
 
 /* Reduced Desktop Font Size to Prevent Obstruction */
 .stat-circle-content .stat-number {
@@ -1385,22 +1370,18 @@ section {
     }
 
     .stats-grid-circular {
-        /* Perfect Horizontal Alignment: Single Row, No Wrapping, Even Spacing */
+        /* Perfect Horizontal Alignment: Single Row when space allows, wrap on mobile */
         display: flex;
         flex-direction: row;
-        flex-wrap: nowrap;
-        /* CRITICAL: Force strictly one row */
-        justify-content: space-between;
+        flex-wrap: wrap;
+        /* Changed from nowrap to allow 2-1 or 1-1-1 on very small screens */
+        justify-content: center;
         align-items: center;
-        gap: 8px;
-        /* Consistent small gap */
-        padding: 0 5px;
-        /* Minimal padding */
+        gap: 1.5rem;
+        /* Increased for clarity */
+        padding: 20px 5px;
         width: 100%;
         overflow: visible;
-        /* Allow glow/transform to bleed out */
-        padding: 20px 5px;
-        /* Add vertical padding to prevent top clipping on hover */
     }
 
     .stats-grid-circular::-webkit-scrollbar {
@@ -1408,28 +1389,33 @@ section {
     }
 
     .stat-circle {
-        /* Flexible Sizing: Grow/Shrink to fit perfectly in 3-col layout */
-        flex: 1 1 0;
-        /* Grow/Shrink equally from 0 basis */
-        width: auto;
-        max-width: 110px;
-        /* Cap size so they don't look weird on tablets */
+        flex: 0 0 calc(33.33% - 1.5rem);
+        /* 3 per row on tablet/large mobile */
+        min-width: 100px;
         aspect-ratio: 1 / 1;
-        /* Force perfect circle shape */
         height: auto;
-
-        /* Enhanced Liquid Glass Display */
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
+    }
+
+    @media (max-width: 480px) {
+        .stat-circle {
+            flex: 0 0 calc(50% - 1.5rem); /* 2 per row on small phones */
+        }
+    }
+
+    @media (max-width: 320px) {
+        .stat-circle {
+            flex: 0 0 100%; /* 1 per row on micro screens */
+        }
     }
 
     /* Responsive SVG sizing */
@@ -1451,17 +1437,17 @@ section {
 
     /* Calculation Circle (Progress): Outer Ring */
     .stat-circle svg .progress-ring__circle {
-        r: 100;
-        /* External orbit (close to 105 max) */
+        r: 90;
+        /* Unified Radius */
         stroke-width: 8;
     }
 
     /* Main Circle (Start/Track): Inner Ring */
     .stat-circle svg .progress-ring__background {
         r: 90;
-        /* Inner orbit */
-        stroke-width: 0;
-        stroke: transparent;
+        /* Unified Radius */
+        stroke-width: 8;
+        stroke: rgba(255,255,255,0.05);
         fill: transparent;
     }
 
@@ -3043,7 +3029,7 @@ footer {
 
 @media (max-width: 480px) {
     .carousel-viewport {
-        height: 400px;
+        height: 480px; /* Increased to accommodate 420px slide + padding/shadows */
     }
 
     .slide.prev,
@@ -3890,7 +3876,28 @@ footer {
     }
 }
 
-/* Extra sharpness on very small screens */
+/* ===================================================
+   UTILITY CLASSES (Missing previously)
+   =================================================== */
+.mt-1 { margin-top: 0.5rem !important; }
+.mt-2 { margin-top: 1rem !important; }
+.mt-3 { margin-top: 1.5rem !important; }
+.mt-4 { margin-top: 2rem !important; }
+.mt-5 { margin-top: 3rem !important; }
+
+.mb-1 { margin-bottom: 0.5rem !important; }
+.mb-2 { margin-bottom: 1rem !important; }
+.mb-3 { margin-bottom: 1.5rem !important; }
+.mb-4 { margin-bottom: 2rem !important; }
+.mb-5 { margin-bottom: 3rem !important; }
+
+.p-1 { padding: 0.5rem !important; }
+.p-2 { padding: 1rem !important; }
+.p-3 { padding: 1.5rem !important; }
+.p-4 { padding: 2.0rem !important; }
+.p-5 { padding: 3.0rem !important; }
+
+.text-center { text-align: center !important; }
 @media (max-width: 480px) {
 
     /* Completely strip backdrop-filter blur from hero overlay on small phones */

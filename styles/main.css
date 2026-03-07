@@ -1408,13 +1408,15 @@ section {
 
     @media (max-width: 480px) {
         .stat-circle {
-            flex: 0 0 calc(50% - 1.5rem); /* 2 per row on small phones */
+            flex: 0 0 calc(50% - 1.5rem);
+            /* 2 per row on small phones */
         }
     }
 
     @media (max-width: 320px) {
         .stat-circle {
-            flex: 0 0 100%; /* 1 per row on micro screens */
+            flex: 0 0 100%;
+            /* 1 per row on micro screens */
         }
     }
 
@@ -1447,7 +1449,7 @@ section {
         r: 90;
         /* Unified Radius */
         stroke-width: 8;
-        stroke: rgba(255,255,255,0.05);
+        stroke: rgba(255, 255, 255, 0.05);
         fill: transparent;
     }
 
@@ -2072,10 +2074,12 @@ section {
     }
 
     .slideshow-hero .slide {
-        width: 392px;
-        /* 280 * 1.4 */
-        height: 560px;
-        /* 400 * 1.4 */
+        width: 314px;
+        /* 392 * 0.8 */
+        height: 448px;
+        /* 560 * 0.8 */
+        top: 60%;
+        /* Pushed down from 50% by 10% */
     }
 
     .slideshow-hero .slide.prev {
@@ -2338,7 +2342,8 @@ section {
     position: relative;
     border-radius: 32px;
     overflow: hidden;
-    background-color: #1a1a1a; /* Neutral dark placeholder */
+    background-color: #1a1a1a;
+    /* Neutral dark placeholder */
     border: 1px solid rgba(255, 255, 255, 0.15);
     display: flex;
     backdrop-filter: none;
@@ -2353,7 +2358,8 @@ section {
     width: 100%;
     height: 100%;
     z-index: 0;
-    background-color: #0c0c0c; /* Deep dark placeholder */
+    background-color: #0c0c0c;
+    /* Deep dark placeholder */
 }
 
 .bento-slideshow .slideshow-inner img {
@@ -3030,7 +3036,8 @@ footer {
 
 @media (max-width: 480px) {
     .carousel-viewport {
-        height: 480px; /* Increased to accommodate 420px slide + padding/shadows */
+        height: 480px;
+        /* Increased to accommodate 420px slide + padding/shadows */
     }
 
     .slide.prev,
@@ -3880,25 +3887,70 @@ footer {
 /* ===================================================
    UTILITY CLASSES (Missing previously)
    =================================================== */
-.mt-1 { margin-top: 0.5rem !important; }
-.mt-2 { margin-top: 1rem !important; }
-.mt-3 { margin-top: 1.5rem !important; }
-.mt-4 { margin-top: 2rem !important; }
-.mt-5 { margin-top: 3rem !important; }
+.mt-1 {
+    margin-top: 0.5rem !important;
+}
 
-.mb-1 { margin-bottom: 0.5rem !important; }
-.mb-2 { margin-bottom: 1rem !important; }
-.mb-3 { margin-bottom: 1.5rem !important; }
-.mb-4 { margin-bottom: 2rem !important; }
-.mb-5 { margin-bottom: 3rem !important; }
+.mt-2 {
+    margin-top: 1rem !important;
+}
 
-.p-1 { padding: 0.5rem !important; }
-.p-2 { padding: 1rem !important; }
-.p-3 { padding: 1.5rem !important; }
-.p-4 { padding: 2.0rem !important; }
-.p-5 { padding: 3.0rem !important; }
+.mt-3 {
+    margin-top: 1.5rem !important;
+}
 
-.text-center { text-align: center !important; }
+.mt-4 {
+    margin-top: 2rem !important;
+}
+
+.mt-5 {
+    margin-top: 3rem !important;
+}
+
+.mb-1 {
+    margin-bottom: 0.5rem !important;
+}
+
+.mb-2 {
+    margin-bottom: 1rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 1.5rem !important;
+}
+
+.mb-4 {
+    margin-bottom: 2rem !important;
+}
+
+.mb-5 {
+    margin-bottom: 3rem !important;
+}
+
+.p-1 {
+    padding: 0.5rem !important;
+}
+
+.p-2 {
+    padding: 1rem !important;
+}
+
+.p-3 {
+    padding: 1.5rem !important;
+}
+
+.p-4 {
+    padding: 2.0rem !important;
+}
+
+.p-5 {
+    padding: 3.0rem !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
 @media (max-width: 480px) {
 
     /* Completely strip backdrop-filter blur from hero overlay on small phones */

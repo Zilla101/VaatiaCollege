@@ -1464,35 +1464,71 @@ window.setupGlobalCommand = () => {
     const body = document.getElementById('modal-body');
 
     if (title && body) {
-        title.innerText = 'GitHub Settings';
+        title.innerText = 'System Connections';
         body.innerHTML = `
-            <div style="text-align: center;">
-                <i data-feather="github" style="width: 48px; height: 48px; color: var(--accent-blue); margin-bottom: 20px;"></i>
-                <p style="color: var(--text-secondary); margin-bottom: 30px;">
-                    Link your GitHub account to enable direct site-wide updates.
+            <div style="text-align: center; max-height: 70vh; overflow-y: auto; padding-right: 10px;">
+                <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 0.8rem; letter-spacing: 0.1em;">
+                    MANAGE CLOUD PROTOCOLS AND EXTERNAL API INTEGRATIONS
                 </p>
                 
-                <div style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px;">
-                    <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: var(--accent-blue);">GitHub Authentication</h3>
-                    <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 15px;">Enter your Personal Access Token to edit files directly on GitHub.</p>
+                <!-- GitHub Section -->
+                <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: var(--accent-blue);">
+                        <i data-feather="github" style="width: 20px; height: 20px;"></i>
+                        <h3 style="margin: 0; font-size: 1rem; font-weight: 800; text-transform: uppercase;">GitHub Sync</h3>
+                    </div>
+                    <p style="font-size: 0.7rem; color: #888; margin-bottom: 15px;">Enables direct site-wide updates via GitHub API.</p>
+                    <input type="password" id="gh-token-input" placeholder="GitHub Personal Access Token" value="${localStorage.getItem('VAATIA_GH_TOKEN') || ''}" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 10px; font-size: 0.8rem;">
+                    <button class="btn-edit" onclick="saveGitHubToken()" style="width: 100%; justify-content: center; font-size: 0.65rem;">SAVE GITHUB TOKEN</button>
                     
-                    <input type="password" id="gh-token-input" placeholder="Paste GitHub Token" value="${localStorage.getItem('VAATIA_GH_TOKEN') || ''}" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; margin-bottom: 15px;">
-                    
-                    <button class="btn-edit" onclick="saveGitHubToken()" style="width: 100%; justify-content: center; background: rgba(0, 242, 254, 0.1); border-color: var(--accent-blue); color: var(--accent-blue); margin-bottom: 20px;">
-                        <i data-feather="link" style="width: 14px; height: 14px; margin-right: 8px;"></i> SAVE GITHUB TOKEN
-                    </button>
-
-                    <div style="display: flex; gap: 10px; flex-direction: column;">
-                         <button onclick="window.setAdminMode('github')" class="tactical-btn" style="width: 100%; background: ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)'}; color: ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? '#0c0c0c' : 'white'}; padding: 12px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; cursor: pointer;">USE DIRECT GITHUB MODE (EASY)</button>
-                         <button onclick="window.setAdminMode('local')" class="tactical-btn" style="width: 100%; background: ${localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true' && localStorage.getItem('VAATIA_FORCE_GH_MODE') !== 'true' ? '#f87171' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true' && localStorage.getItem('VAATIA_FORCE_GH_MODE') !== 'true' ? '#f87171' : 'rgba(255,255,255,0.1)'}; color: white; padding: 12px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; cursor: pointer;">USE LOCAL SERVER MODE (ADVANCED)</button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                         <button onclick="window.setAdminMode('github')" class="tactical-btn" style="background: ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? 'var(--accent-blue)' : 'rgba(255,255,255,0.1)'}; color: ${localStorage.getItem('VAATIA_FORCE_GH_MODE') === 'true' ? '#0c0c0c' : 'white'}; padding: 10px; border-radius: 8px; font-size: 0.6rem; font-weight: 800; cursor: pointer;">GITHUB MODE</button>
+                         <button onclick="window.setAdminMode('local')" class="tactical-btn" style="background: ${localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true' && localStorage.getItem('VAATIA_FORCE_GH_MODE') !== 'true' ? '#f87171' : 'rgba(255,255,255,0.05)'}; border: 1px solid ${localStorage.getItem('VAATIA_FORCE_LOCAL') === 'true' && localStorage.getItem('VAATIA_FORCE_GH_MODE') !== 'true' ? '#f87171' : 'rgba(255,255,255,0.1)'}; color: white; padding: 10px; border-radius: 8px; font-size: 0.6rem; font-weight: 800; cursor: pointer;">LOCAL MODE</button>
                     </div>
                 </div>
 
-                <div style="text-align: right;">
+                <!-- Google Drive Section -->
+                <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #ea4335;">
+                        <i data-feather="cloud" style="width: 20px; height: 20px;"></i>
+                        <h3 style="margin: 0; font-size: 1rem; font-weight: 800; text-transform: uppercase;">Google Drive Picker</h3>
+                    </div>
+                    <p style="font-size: 0.7rem; color: #888; margin-bottom: 15px;">Allows importing assets directly from Google Drive.</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div>
+                            <label style="font-size: 0.5rem; color: #666; text-transform: uppercase; font-weight: 900; margin-left: 5px;">Client ID</label>
+                            <input type="text" id="google-client-id" placeholder="Enter Google Client ID" value="${localStorage.getItem('VAATIA_GOOGLE_CLIENT_ID') || ''}" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; font-size: 0.75rem;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.5rem; color: #666; text-transform: uppercase; font-weight: 900; margin-left: 5px;">API Key</label>
+                            <input type="password" id="google-api-key" placeholder="Enter Google API Key" value="${localStorage.getItem('VAATIA_GOOGLE_API_KEY') || ''}" style="width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 8px; font-size: 0.75rem;">
+                        </div>
+                        <button class="btn-edit" onclick="saveGoogleCredentials()" style="width: 100%; justify-content: center; font-size: 0.65rem; border-color: #ea4335; color: #ea4335; background: rgba(234, 67, 53, 0.05); margin-top: 5px;">SAVE GOOGLE CREDENTIALS</button>
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-top: 10px;">
                     <button class="btn-premium" onclick="closeModal()">DONE</button>
                 </div>
             </div>
         `;
+
+        window.saveGoogleCredentials = () => {
+            const clientId = document.getElementById('google-client-id').value.trim();
+            const apiKey = document.getElementById('google-api-key').value.trim();
+
+            if (clientId && apiKey) {
+                localStorage.setItem('VAATIA_GOOGLE_CLIENT_ID', clientId);
+                localStorage.setItem('VAATIA_GOOGLE_API_KEY', apiKey);
+                showCustomAlert('Google credentials synchronized!', 'Cloud Success');
+                if (typeof initGoogleDrive === 'function') initGoogleDrive();
+            } else {
+                localStorage.removeItem('VAATIA_GOOGLE_CLIENT_ID');
+                localStorage.removeItem('VAATIA_GOOGLE_API_KEY');
+                showCustomAlert('Google credentials purged.', 'Info', true);
+            }
+        };
 
         window.setAdminMode = (mode) => {
             if (mode === 'github') {
@@ -1508,7 +1544,6 @@ window.setupGlobalCommand = () => {
             location.reload();
         };
 
-        // Helper to save token
         window.saveGitHubToken = () => {
             const token = document.getElementById('gh-token-input').value.trim();
             if (token) {
@@ -1526,6 +1561,7 @@ window.setupGlobalCommand = () => {
         }
     }
 };
+
 
 // --- Custom Dialog System (Replaces Native Alerts) ---
 window.showCustomAlert = (message, title = 'Notification', isError = false) => {
@@ -1623,6 +1659,56 @@ window.addEventListener('keydown', (e) => {
 
     // Shift + H: Command Help
     if (e.shiftKey && (e.key === 'H' || e.key === 'h')) {
-        alert("COMMAND RADAR HOTKEYS:\n\nShift + C: Setup Repository & Token\nShift + P: Pause/Resume Worldwide Sync\nShift + H: Display This Help Deck");
+        alert("COMMAND RADAR HOTKEYS:\n\nShift + C: System Connections\nShift + P: Pause/Resume Worldwide Sync\nShift + H: Display This Help Deck");
     }
 });
+
+// --- Direct Link Import feature ---
+window.importFromLink = async () => {
+    const url = prompt("Paste the public link to import (e.g., Google Drive link):\nMake sure permissions are set to 'Anyone with the link can view'.");
+
+    if (!url) return;
+
+    try {
+        // Pulse the UI to show importing status
+        const mediaHeader = document.querySelector('#media .section-header');
+        let originalHTML = '';
+        if (mediaHeader) {
+            originalHTML = mediaHeader.innerHTML;
+            mediaHeader.innerHTML = `
+                <div>
+                    <h1 class="text-gradient">Importing...</h1>
+                    <p style="color: var(--accent-blue); letter-spacing: 0.2em; font-size: 0.7rem; font-weight: 800; animation: pulse 1.5s infinite;">
+                        DOWNLOADING REMOTE DIRECTORY LINK
+                    </p>
+                </div>
+                <div class="loader-circle" style="width: 30px; height: 30px; border: 2px solid var(--accent-blue); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            `;
+        } else {
+            showCustomAlert('Importing... Please wait.', 'Downloading Asset');
+        }
+
+        const response = await fetch(`${window.API_BASE || ''}/api/import-link`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+
+        const result = await response.json();
+
+        if (mediaHeader) {
+            mediaHeader.innerHTML = originalHTML;
+        }
+
+        if (result.success) {
+            showCustomAlert(`Asset imported successfully: ${result.fileName}`, 'Import Complete');
+            if (typeof loadMedia === 'function') loadMedia();
+            if (typeof updateStats === 'function') updateStats();
+        } else {
+            showCustomAlert('Failed to import: ' + (result.error || 'Unknown error'), 'Import Failed', true);
+        }
+    } catch (err) {
+        console.error('Import failed', err);
+        showCustomAlert('Connection error while importing.', 'Import Failed', true);
+    }
+};

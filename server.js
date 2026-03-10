@@ -365,6 +365,73 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     }
 });
 
+// Endpoint to import media from a public link (e.g., Google Drive)
+app.post('/api/import-link', async (req, res) => {
+    try {
+        const { url } = req.body;
+        if (!url) {
+            return res.status(400).json({ success: false, error: 'Missing url' });
+        }
+
+        console.log(`\n📥 Link Import Protocol Initiated: ${url}`);
+
+        // Extract Google Drive File ID if present
+        let exportUrl = url;
+        let fileId = null;
+
+        const gdriveRegex = /(?:id=|\/d\/)([\w-]{25,})/;
+        const match = url.match(gdriveRegex);
+
+        if (match && match[1]) {
+            fileId = match[1];
+            // Use Google's public download endpoint
+            exportUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+            console.log(`Detected Google Drive Link. File ID: ${fileId}`);
+        }
+
+        // Fetch the file
+        const response = await fetch(exportUrl);
+
+        if (!response.ok) {
+            throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
+        }
+
+        const buffer = await response.arrayBuffer();
+
+        // Determine filename (fallback to timestamp if unknown)
+        let fileName = `imported-${Date.now()}.jpg`; // Default extension
+
+        // Try to get filename from Content-Disposition header
+        const contentDisposition = response.headers.get('content-disposition');
+        if (contentDisposition && contentDisposition.includes('filename=')) {
+            const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+            if (matches != null && matches[1]) {
+                fileName = matches[1].replace(/['"]/g, '');
+            }
+        } else if (fileId) {
+            fileName = `gdrive-${fileId}.jpg`;
+        }
+
+        // Clean filename
+        const safeName = fileName.replace(/[^a-z0-9.-]/gi, '_').toLowerCase();
+        const finalName = Date.now() + '-' + safeName;
+        const filePath = path.join(__dirname, 'Media Content', finalName);
+
+        await fs.writeFile(filePath, Buffer.from(buffer));
+
+        console.log(`✅ Asset Synchronized: ${finalName}`);
+
+        res.json({
+            success: true,
+            filePath: 'Media Content/' + finalName,
+            fileName: finalName
+        });
+    } catch (error) {
+        console.error('❌ Import Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

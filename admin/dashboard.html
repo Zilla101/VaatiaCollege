@@ -140,7 +140,17 @@
                             style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.8rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; margin-top: 10px;">
                             Global College Assets</p>
                     </div>
-                    <button class="btn-premium btn-compact">+ UPLOAD ASSET</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-edit" onclick="importFromLink()"
+                            style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 8px 15px; border-radius: 12px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.1em; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <i data-feather="link" style="width: 12px; height: 12px;"></i> IMPORT LINK
+                        </button>
+                        <button class="btn-edit" id="gdrive-picker-btn" onclick="openGoogleDrivePicker()"
+                            style="display: none; background: rgba(234, 67, 53, 0.1); border: 1px solid #ea4335; color: #ea4335; padding: 8px 15px; border-radius: 12px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.1em; cursor: pointer; align-items: center; gap: 5px;">
+                            <i data-feather="cloud" style="width: 12px; height: 12px;"></i> FROM DRIVE
+                        </button>
+                        <button class="btn-premium btn-compact">+ UPLOAD ASSET</button>
+                    </div>
                 </header>
                 <div class="image-grid" id="main-media-grid">
                     <!-- Dynamic Alignment -->
@@ -238,6 +248,7 @@
     </div>
 
     <script src="scripts/admin.js?v=2.1"></script>
+    <script src="scripts/gdrive-picker.js?v=2.1"></script>
     <script src="scripts/section-editor.js?v=2.1"></script>
     <script>
         feather.replace();

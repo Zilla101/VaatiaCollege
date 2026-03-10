@@ -1764,13 +1764,34 @@ section {
 }
 
 .alert.liquid-glass {
-    background: rgba(255, 50, 50, 0.05);
-    border: 1px solid rgba(255, 50, 50, 0.2);
-    padding: 1.5rem;
-    border-radius: 15px;
-    backdrop-filter: blur(20px) saturate(200%);
-    color: #ff9999;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 50, 50, 0.08);
+    border: 2px solid rgba(255, 50, 50, 0.3);
+    padding: 1rem 2rem;
+    border-radius: 24px;
+    backdrop-filter: blur(25px) saturate(220%);
+    -webkit-backdrop-filter: blur(25px) saturate(220%);
+    color: #ff6b6b;
+    box-shadow: 0 15px 35px rgba(255, 50, 50, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.05);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    animation: liquid-pulse 4s infinite ease-in-out;
+    border-bottom: 3px solid rgba(255, 50, 50, 0.4);
+    font-weight: 700;
+}
+
+@keyframes liquid-pulse {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 15px 35px rgba(255, 50, 50, 0.15);
+    }
+
+    50% {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 20px 45px rgba(255, 50, 50, 0.25);
+    }
 }
 
 .glass-frame {
@@ -1852,7 +1873,7 @@ section {
     transform: translateX(-50%) translateY(-50%) translate3d(0, 0, -300px);
     opacity: 0;
     z-index: 0;
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease, filter 0.6s ease;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease, filter 0.8s ease;
     border-radius: 30px;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.03);
@@ -1864,6 +1885,9 @@ section {
     pointer-events: none;
     display: flex;
     flex-direction: column;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .slideshow-hero .slide::after {
@@ -1924,7 +1948,7 @@ section {
     object-fit: cover;
     object-position: center top;
     opacity: 0.9;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.8s ease;
 }
 
 /* Active slide — centered, popped forward with glass glow */

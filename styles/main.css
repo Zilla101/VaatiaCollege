@@ -1843,7 +1843,7 @@ section {
 
 .slideshow-hero .slide {
     position: absolute;
-    top: 50%;
+    /* top: 50% inherited from .slide base class */
     left: 50%;
     width: 448px;
     /* 320 * 1.4 */
@@ -2056,7 +2056,7 @@ section {
 
 .slideshow-hero .carousel-indicators {
     position: absolute;
-    bottom: -40px;
+    bottom: -15%;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -2081,8 +2081,7 @@ section {
         /* 392 * 0.8 */
         height: 448px;
         /* 560 * 0.8 */
-        top: 60%;
-        /* Pushed down from 50% by 10% */
+        /* top inherited from .slide mobile query */
     }
 
     .slideshow-hero .slide.prev {
@@ -2703,23 +2702,35 @@ footer {
 /* Slide Show / Carousel (Sliding) */
 .carousel-section {
     position: relative;
-    padding: 6rem 0;
-    overflow: visible;
+    padding: 6rem 0 8rem;
+    overflow: hidden;           /* clip cards from bleeding into prev section */
     background: transparent;
+}
+
+/* Desktop: generous heading gap + taller viewport */
+@media (min-width: 1025px) {
+    .carousel-section {
+        padding-top: 6rem;
+        /* section clips vertical overflow — safe now cards center at 50% */
+    }
+    .carousel-viewport {
+        margin-top: 2rem;
+        overflow: visible;      /* allow side 3D cards to bleed horizontally */
+    }
 }
 
 .carousel-viewport {
     overflow: visible;
     /* Allow "hover out" cards to exceed boundaries */
     position: relative;
-    height: 800px;
-    /* Greatly Increased for 50% bigger cards */
+    height: 900px;
+    /* Increased from 800px to accommodate scale(1.1) expanded cards */
     perspective: 2000px;
     /* Stronger 3D perspective */
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 2rem;
+    margin-top: 4rem;
     /* Spacing from title */
 }
 
@@ -2750,8 +2761,7 @@ footer {
 
 .slide {
     position: absolute;
-    top: 50%;
-    /* Center vertically */
+    top: 50%;           /* Always anchored to viewport center — never bleeds above */
     left: 50%;
     width: 450px;
     /* 50% larger than 300px */
@@ -2968,18 +2978,19 @@ footer {
         width: 380px;
         height: 550px;
         left: 50%;
-        top: 50%;
+        top: 50%; /* Uniform true center positioning */
     }
 }
 
 @media (max-width: 768px) {
     .carousel-section {
-        padding: 4rem 1rem;
+        padding: 4rem 1rem 6rem; /* Restored bottom padding for mobile */
     }
 
     .carousel-viewport {
-        height: 500px;
-        /* Dynamic responsive height */
+        height: 520px;
+        /* Dynamic responsive height, increased slightly for spacing */
+        margin-top: 3rem; /* Push cards down beneath the title */
         perspective: 1000px;
         overflow: hidden;
         /* Clip overflow on mobile */
@@ -2990,7 +3001,7 @@ footer {
         /* Smaller mobile card */
         height: 420px;
         left: 50%;
-        top: 50%;
+        top: 50%; /* Uniform true center positioning */
         border-radius: 25px;
         box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
     }

@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Local Fallback logic (Explicitly for developers)
         if (forceLocal) {
             if (isLocalHost) {
-                if (port === '3000' || port === '8080') return '';
+                if (port === '3000' || port === '8080'  ) return '';
                 return `http://${hostname}:3000`;
             }
         }

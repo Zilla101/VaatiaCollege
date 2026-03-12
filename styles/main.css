@@ -2741,14 +2741,23 @@ footer {
     left: 0;
     width: 100%;
     transform: translateY(-50%);
-    display: none;
-    /* User requested removal */
+    display: flex; /* Restored visibility */
+    justify-content: space-between;
+    padding: 0 1rem;
+    z-index: 20;
+    pointer-events: none; /* Let clicks pass through empty space */
 }
 
 @media (max-width: 768px) {
     .carousel-controls {
-        display: none;
-        /* Hide buttons on mobile in favor of swipe */
+        padding: 0 0.5rem; /* Tighter padding on mobile edges */
+    }
+    .carousel-controls .control-btn {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.15); /* Slightly more visible glass on mobile */
+        backdrop-filter: blur(12px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 }
 

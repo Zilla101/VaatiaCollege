@@ -266,21 +266,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Touch Logic
             let touchStartX = 0;
+            const swipeTarget = carousel.querySelector('.carousel-container') || viewport;
 
-            if (viewport) {
-                viewport.addEventListener('touchstart', e => {
+            if (swipeTarget) {
+                swipeTarget.addEventListener('touchstart', e => {
                     touchStartX = e.changedTouches[0].screenX;
                     stopInterval();
                 }, { passive: true });
 
-                viewport.addEventListener('touchend', e => {
+                swipeTarget.addEventListener('touchend', e => {
                     const touchEndX = e.changedTouches[0].screenX;
-                    const threshold = 50;
+                    const threshold = 40; // Reduced threshold for easier mobile swiping
                     if (!isAnimating) {
-                        if (touchEndX < touchStartX - threshold) nextSlide();
-                        else if (touchEndX > touchStartX + threshold) {
+                        if (touchStartX - touchEndX > threshold) {
+                            nextSlide(); // Swiped left -> next
+                        } else if (touchEndX - touchStartX > threshold) {
                             let prev = (currentSlide - 1 + slides.length) % slides.length;
-                            updateCarousel(prev);
+                            updateCarousel(prev); // Swiped right -> prev
                         }
                     }
                     startInterval();

@@ -1,104 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vaatia Admin | Secure Portal</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Admin Login - Vaatia College</title>
     <link rel="stylesheet" href="styles/admin.css">
-    <!-- Feather Icons for professional SVGs -->
-    <script src="https://unpkg.com/feather-icons"></script>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../Media Content/Favicon.png">
+    <style>
+        body{display:flex;align-items:center;justify-content:center;height:100vh;background:#f5f7fb;font-family:system-ui,Segoe UI,Roboto,Arial}
+        .card{background:#fff;padding:2rem;border-radius:12px;box-shadow:0 8px 30px rgba(20,20,40,0.06);max-width:420px;width:100%}
+        input{width:100%;padding:0.7rem;margin-top:0.6rem;border:1px solid #ddd;border-radius:8px}
+        button{margin-top:1rem;padding:0.7rem 1rem;border:0;border-radius:8px;background:#2b6cb0;color:#fff}
+        .muted{color:#666;font-size:0.9rem;margin-top:0.6rem}
+    </style>
 </head>
-
 <body>
-
-    <div class="liquid-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
-
-    <div class="premium-login-container">
-        <div class="premium-card">
-            <div class="card-shine"></div>
-
-            <div class="login-header" style="text-align: center; margin-bottom: 20px;">
-                <img src="../Media Content/vcm-logo.png" alt="Vaatia Logo"
-                    style="height: 60px; margin-bottom: 15px; filter: brightness(0) invert(1) drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));">
-                <h1 class="text-gradient"
-                    style="font-size: 2.2rem; margin-bottom: 5px; font-weight: 900; letter-spacing: -0.05em;">Admin
-                    Portal</h1>
-                <p
-                    style="color: var(--text-secondary); letter-spacing: 0.4em; font-size: 0.75rem; font-weight: 800; opacity: 0.8;">
-                    COMMAND CENTRE</p>
-            </div>
-
-            <div id="auth-error"
-                style="display: none; margin-bottom: 25px; padding: 15px 20px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #f87171; font-size: 0.9rem; text-align: center; animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;">
-                <i data-feather="alert-octagon"
-                    style="width: 18px; height: 18px; vertical-align: middle; margin-right: 8px;"></i>
-                Invalid Access Credentials
-            </div>
-
-            <form id="login-form">
-                <!-- Username Input -->
-                <div class="premium-input-group">
-                    <div class="premium-input-wrapper">
-                        <div class="premium-input-inner">
-                            <i data-feather="terminal" class="premium-icon"></i>
-                            <input type="text" id="user-id" class="premium-input-field" placeholder=" " required
-                                autofocus>
-                            <label for="user-id" class="premium-label">Access Identity</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Password Input -->
-                <div class="premium-input-group" style="margin-bottom: 25px;">
-                    <div class="premium-input-wrapper">
-                        <div class="premium-input-inner">
-                            <i data-feather="shield" class="premium-icon"></i>
-                            <input type="password" id="pass-key" class="premium-input-field" placeholder=" " required>
-                            <label for="pass-key" class="premium-label">Encryption Key</label>
-                            <button type="button" id="toggle-password" class="peek-btn">
-                                <i data-feather="eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-billion">
-                    LOGIN
-                </button>
-            </form>
-
-            <div class="login-footer" style="margin-top: 25px; text-align: center;">
-                <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; opacity: 0.5;">
-                    <div style="width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--accent-blue);">
-                    </div>
-                    <div style="width: 5px; height: 5px; border-radius: 50%; background: var(--accent-purple);"></div>
-                    <div style="width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--accent-blue);">
-                    </div>
-                </div>
-                <p
-                    style="color: var(--text-secondary); font-size: 0.65rem; opacity: 0.4; letter-spacing: 0.2em; font-weight: 700;">
-                    SECURE PROTOCOL VERSION 2.0.4</p>
-                <div class="admin-footer" style="margin-top: 10px; margin-bottom: 0;">
-                    &copy; 2026 Darellmax Adima . All rights reserved.
-                </div>
-            </div>
+    <div class="card" role="main">
+        <h2>Admin Panel Access</h2>
+        <p class="muted">This page notifies site owners when the admin panel is accessed.</p>
+        <label for="user">Your name or email</label>
+        <input id="user" placeholder="admin@company.com" autocomplete="username">
+        <div style="display:flex;gap:0.5rem;align-items:center">
+            <button id="notify">Notify & Continue</button>
+            <a href="/" style="margin-left:auto;align-self:center;color:#2b6cb0;text-decoration:none">Return</a>
         </div>
+        <p id="status" class="muted"></p>
     </div>
 
     <script>
-        // Use defer or load event for Feather
-        window.addEventListener('load', () => {
-            feather.replace();
+        async function sendAlert(user) {
+            const payload = {
+                user: user || 'anonymous',
+                device: navigator.userAgent || 'unknown',
+                resolution: `${screen.width}x${screen.height}`,
+                time: new Date().toISOString(),
+                url: window.location.href
+            };
+
+            try {
+                const res = await fetch('/api/admin-login', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                return res.ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        document.getElementById('notify').addEventListener('click', async function () {
+            const user = document.getElementById('user').value.trim();
+            document.getElementById('status').textContent = 'Sending notification...';
+            const ok = await sendAlert(user);
+            document.getElementById('status').textContent = ok ? 'Notification sent. Redirecting…' : 'Notification failed (offline).';
+            if (ok) setTimeout(() => { window.location.href = '/admin/'; }, 900);
         });
     </script>
-    <script src="scripts/admin.js"></script>
 </body>
-
 </html>
